@@ -1,5 +1,9 @@
 package types
 
+import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
+
 // GenesisState - all asset state that must be provided at genesis
 type GenesisState struct {
 	Params Params `json:"params"` // asset params
@@ -14,11 +18,27 @@ func NewGenesisState(params Params, tokens Tokens) GenesisState {
 	}
 }
 
-var DefaultToken = FungibleToken{
-	Symbol:        "iris",
-	Name:          "IRIS Network",
-	Scale:         18,
-	MinUnit:       "atto",
+//SetNativeToken reset the system's default native token
+func SetNativeToken(symbol,
+	name,
+	minUnit string,
+	decimal uint8,
+	initialSupply,
+	maxSupply uint64,
+	mintable bool,
+	owner sdk.AccAddress) {
+	nativeToken = NewFungibleToken(symbol, name, minUnit, decimal, initialSupply, maxSupply, mintable, owner)
+}
+
+func GetNativeToken() FungibleToken {
+	return nativeToken
+}
+
+var nativeToken = FungibleToken{
+	Symbol:        sdk.DefaultBondDenom,
+	Name:          "Network staking token ",
+	Scale:         0,
+	MinUnit:       sdk.DefaultBondDenom,
 	InitialSupply: 2000000000,
 	MaxSupply:     10000000000,
 	Mintable:      true,

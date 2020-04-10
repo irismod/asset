@@ -21,7 +21,7 @@ const (
 )
 
 var (
-	denom    = types.DefaultToken.Symbol
+	denom    = types.GetNativeToken().Symbol
 	owner    = sdk.AccAddress([]byte("tokenTest"))
 	initAmt  = sdk.NewIntWithDecimal(100000000, int(6))
 	initCoin = sdk.Coins{sdk.NewCoin(denom, initAmt)}

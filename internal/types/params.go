@@ -49,11 +49,10 @@ func ParamKeyTable() paramtypes.KeyTable {
 
 // default asset module params
 func DefaultParams() Params {
-	initialSupply := int64(DefaultToken.InitialSupply)
-	scale := int(DefaultToken.Scale)
+	defaultToken := GetNativeToken()
 	return Params{
 		AssetTaxRate:      sdk.NewDecWithPrec(4, 1), // 0.4 (40%)
-		IssueTokenBaseFee: sdk.NewCoin(DefaultToken.Symbol, sdk.NewIntWithDecimal(initialSupply, scale)),
+		IssueTokenBaseFee: sdk.NewCoin(defaultToken.Symbol, sdk.NewIntWithDecimal(60000, int(defaultToken.Scale))),
 		MintTokenFeeRatio: sdk.NewDecWithPrec(1, 1), // 0.1 (10%)
 	}
 }

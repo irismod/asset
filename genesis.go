@@ -2,18 +2,18 @@ package asset
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github/irismod/asset/internal/types"
 )
 
 // InitGenesis - store genesis parameters
 func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
-	if err := ValidateGenesis(data); err != nil {
+	if err := ValidateGenesis(data); err != nil && err != types.ErrNilAssetOwner {
 		panic(err.Error())
 	}
 
 	k.SetParamSet(ctx, data.Params)
 
 	//init tokens
-	// TODO
 	for _, token := range data.Tokens {
 		if err := k.AddToken(ctx, token); err != nil {
 			panic(err.Error())
@@ -23,15 +23,9 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 
 // ExportGenesis - output genesis parameters
 func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
-	// export created token
-	var tokens Tokens
-	k.IterateTokens(ctx, func(token FungibleToken) (stop bool) {
-		tokens = append(tokens, token)
-		return false
-	})
 	return GenesisState{
 		Params: k.GetParamSet(ctx),
-		Tokens: tokens,
+		Tokens: k.GetTokens(ctx, nil),
 	}
 }
 
@@ -39,7 +33,7 @@ func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
 func DefaultGenesisState() GenesisState {
 	return GenesisState{
 		Params: DefaultParams(),
-		Tokens: []FungibleToken{},
+		Tokens: []FungibleToken{types.GetNativeToken()},
 	}
 }
 

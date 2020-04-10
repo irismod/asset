@@ -9,6 +9,7 @@ import (
 )
 
 func TestValidateParams(t *testing.T) {
+	defaultToken := GetNativeToken()
 	tests := []struct {
 		testCase string
 		Params
@@ -18,7 +19,7 @@ func TestValidateParams(t *testing.T) {
 			Params{
 				AssetTaxRate:      sdk.ZeroDec(),
 				MintTokenFeeRatio: sdk.ZeroDec(),
-				IssueTokenBaseFee: sdk.NewCoin(DefaultToken.Symbol, sdk.ZeroInt()),
+				IssueTokenBaseFee: sdk.NewCoin(defaultToken.Symbol, sdk.ZeroInt()),
 			},
 			true,
 		},
@@ -26,7 +27,7 @@ func TestValidateParams(t *testing.T) {
 			Params{
 				AssetTaxRate:      sdk.NewDec(1),
 				MintTokenFeeRatio: sdk.NewDec(1),
-				IssueTokenBaseFee: sdk.NewCoin(DefaultToken.Symbol, sdk.NewInt(math.MaxInt64)),
+				IssueTokenBaseFee: sdk.NewCoin(defaultToken.Symbol, sdk.NewInt(math.MaxInt64)),
 			},
 			true,
 		},
@@ -34,7 +35,7 @@ func TestValidateParams(t *testing.T) {
 			Params{
 				AssetTaxRate:      sdk.NewDecWithPrec(-1, 1),
 				MintTokenFeeRatio: sdk.NewDec(0),
-				IssueTokenBaseFee: sdk.NewCoin(DefaultToken.Symbol, sdk.NewInt(1)),
+				IssueTokenBaseFee: sdk.NewCoin(defaultToken.Symbol, sdk.NewInt(1)),
 			},
 			false,
 		},
@@ -42,7 +43,7 @@ func TestValidateParams(t *testing.T) {
 			Params{
 				AssetTaxRate:      sdk.NewDec(0),
 				MintTokenFeeRatio: sdk.NewDecWithPrec(-1, 1),
-				IssueTokenBaseFee: sdk.NewCoin(DefaultToken.Symbol, sdk.NewInt(1)),
+				IssueTokenBaseFee: sdk.NewCoin(defaultToken.Symbol, sdk.NewInt(1)),
 			},
 			false,
 		},
@@ -50,7 +51,7 @@ func TestValidateParams(t *testing.T) {
 			Params{
 				AssetTaxRate:      sdk.NewDecWithPrec(11, 1),
 				MintTokenFeeRatio: sdk.NewDec(1),
-				IssueTokenBaseFee: sdk.NewCoin(DefaultToken.Symbol, sdk.NewInt(1)),
+				IssueTokenBaseFee: sdk.NewCoin(defaultToken.Symbol, sdk.NewInt(1)),
 			},
 			false,
 		},
@@ -58,7 +59,7 @@ func TestValidateParams(t *testing.T) {
 			Params{
 				AssetTaxRate:      sdk.NewDec(1),
 				MintTokenFeeRatio: sdk.NewDecWithPrec(11, 1),
-				IssueTokenBaseFee: sdk.NewCoin(DefaultToken.Symbol, sdk.NewInt(1)),
+				IssueTokenBaseFee: sdk.NewCoin(defaultToken.Symbol, sdk.NewInt(1)),
 			},
 			false,
 		},
@@ -66,7 +67,7 @@ func TestValidateParams(t *testing.T) {
 			Params{
 				AssetTaxRate:      sdk.NewDec(1),
 				MintTokenFeeRatio: sdk.NewDec(1),
-				IssueTokenBaseFee: sdk.Coin{Denom: DefaultToken.Symbol, Amount: sdk.NewInt(-1)},
+				IssueTokenBaseFee: sdk.Coin{Denom: defaultToken.Symbol, Amount: sdk.NewInt(-1)},
 			},
 			false,
 		},

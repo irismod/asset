@@ -15,7 +15,7 @@ import (
 // DecodeStore unmarshals the KVPair's Value to the corresponding asset type
 func DecodeStore(cdc *codec.Codec, kvA, kvB kv.Pair) string {
 	switch {
-	case bytes.Equal(kvA.Key[:1], types.PrefixToken):
+	case bytes.Equal(kvA.Key[:1], types.PrefixTokenForSymbol):
 		var tokenA, tokenB types.FungibleToken
 		cdc.MustUnmarshalBinaryLengthPrefixed(kvA.Value, &tokenA)
 		cdc.MustUnmarshalBinaryLengthPrefixed(kvB.Value, &tokenB)

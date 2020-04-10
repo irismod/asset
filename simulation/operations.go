@@ -41,19 +41,19 @@ func WeightedOperations(
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgEditToken, &weightEdit, nil,
 		func(_ *rand.Rand) {
-			weightEdit = 50
+			weightEdit = 10
 		},
 	)
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgMintToken, &weightMint, nil,
 		func(_ *rand.Rand) {
-			weightMint = 50
+			weightMint = 10
 		},
 	)
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgTransferTokenOwner, &weightTransfer, nil,
 		func(_ *rand.Rand) {
-			weightTransfer = 50
+			weightTransfer = 10
 		},
 	)
 
@@ -127,7 +127,7 @@ func SimulateEditToken(k keeper.Keeper, ak auth.AccountKeeper) simulation.Operat
 			return simulation.NoOpMsg(types.ModuleName), nil, err
 		}
 
-		token := randToken(ctx, k, false)
+		token := selectOneToken(ctx, k, false)
 		simAccount, found := simulation.FindAccount(accs, token.Owner)
 		if !found {
 			return simulation.NoOpMsg(types.ModuleName), nil, fmt.Errorf("account %s not found", token.Owner)
@@ -171,7 +171,7 @@ func SimulateMintToken(k keeper.Keeper, ak auth.AccountKeeper) simulation.Operat
 			return simulation.NoOpMsg(types.ModuleName), nil, err
 		}
 
-		token := randToken(ctx, k, true)
+		token := selectOneToken(ctx, k, true)
 		ownerAccount, found := simulation.FindAccount(accs, token.Owner)
 		if !found {
 			return simulation.NoOpMsg(types.ModuleName), nil, fmt.Errorf("account %s not found", token.Owner)
@@ -219,7 +219,7 @@ func SimulateTransferTokenOwner(k keeper.Keeper, ak auth.AccountKeeper) simulati
 			return simulation.NoOpMsg(types.ModuleName), nil, err
 		}
 
-		token := randToken(ctx, k, false)
+		token := selectOneToken(ctx, k, false)
 		simAccount, found := simulation.FindAccount(accs, token.Owner)
 		if !found {
 			return simulation.NoOpMsg(types.ModuleName), nil, fmt.Errorf("account %s not found", token.Owner)
@@ -252,15 +252,20 @@ func SimulateTransferTokenOwner(k keeper.Keeper, ak auth.AccountKeeper) simulati
 	}
 }
 
-func randToken(ctx sdk.Context, k keeper.Keeper, mintable bool) types.FungibleToken {
-	tokens := k.GetAllTokens(ctx)
+func selectOneToken(ctx sdk.Context, k keeper.Keeper, mintable bool) types.FungibleToken {
+	tokens := k.GetTokens(ctx, nil)
 	if len(tokens) == 0 {
 		panic("No token available")
 	}
 
 	if !mintable {
+	loop:
 		idx := rand.Intn(len(tokens))
-		return tokens[idx]
+		token := tokens[idx]
+		if token.Symbol == types.GetNativeToken().Symbol {
+			goto loop
+		}
+		return token
 	}
 
 	for _, token := range tokens {

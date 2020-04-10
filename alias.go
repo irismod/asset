@@ -43,6 +43,8 @@ var (
 	NewMsgMintToken              = types.NewMsgMintToken
 	NewMsgTransferTokenOwner     = types.NewMsgTransferTokenOwner
 	DefaultParams                = types.DefaultParams
+	SetNativeToken               = types.SetNativeToken
+	GetNativeToken               = types.GetNativeToken
 	ValidateParams               = types.ValidateParams
 	NewGenesisState              = types.NewGenesisState
 	NewParams                    = types.NewParams

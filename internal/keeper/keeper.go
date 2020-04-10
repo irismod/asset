@@ -88,7 +88,7 @@ func (k Keeper) IssueToken(ctx sdk.Context, msg types.MsgIssueToken) error {
 // EditToken edits the specified token
 func (k Keeper) EditToken(ctx sdk.Context, msg types.MsgEditToken) error {
 	// get the destination token
-	token, err := k.getToken(ctx, msg.Symbol)
+	token, err := k.GetToken(ctx, msg.Symbol)
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func (k Keeper) EditToken(ctx sdk.Context, msg types.MsgEditToken) error {
 // TransferTokenOwner transfers the owner of the specified token to a new one
 func (k Keeper) TransferTokenOwner(ctx sdk.Context, msg types.MsgTransferTokenOwner) error {
 	// get the destination token
-	token, err := k.getToken(ctx, msg.Symbol)
+	token, err := k.GetToken(ctx, msg.Symbol)
 	if err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func (k Keeper) TransferTokenOwner(ctx sdk.Context, msg types.MsgTransferTokenOw
 
 // MintToken mints specified amount token to a specified owner
 func (k Keeper) MintToken(ctx sdk.Context, msg types.MsgMintToken) error {
-	token, err := k.getToken(ctx, msg.Symbol)
+	token, err := k.GetToken(ctx, msg.Symbol)
 	if err != nil {
 		return err
 	}
@@ -192,31 +192,53 @@ func (k Keeper) MintToken(ctx sdk.Context, msg types.MsgMintToken) error {
 	return nil
 }
 
-// IterateTokens iterates through all existing tokens
-func (k Keeper) IterateTokens(ctx sdk.Context, op func(token types.FungibleToken) (stop bool)) {
+// GetTokens returns all existing tokens
+func (k Keeper) GetTokens(ctx sdk.Context, owner sdk.AccAddress) (tokens types.Tokens) {
 	store := ctx.KVStore(k.storeKey)
 
-	iterator := sdk.KVStorePrefixIterator(store, types.PrefixToken)
-	defer iterator.Close()
+	var it sdk.Iterator
+	if owner == nil {
+		it = sdk.KVStorePrefixIterator(store, types.PrefixTokenForSymbol)
+		defer it.Close()
 
-	for ; iterator.Valid(); iterator.Next() {
-		var token types.FungibleToken
-		k.cdc.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &token)
+		for ; it.Valid(); it.Next() {
+			var token types.FungibleToken
+			k.cdc.MustUnmarshalBinaryLengthPrefixed(it.Value(), &token)
 
-		if stop := op(token); stop {
-			break
+			tokens = append(tokens, token)
 		}
+		return
 	}
+
+	it = sdk.KVStorePrefixIterator(store, types.KeyTokens(owner, ""))
+	defer it.Close()
+
+	for ; it.Valid(); it.Next() {
+		var symbol string
+		k.cdc.MustUnmarshalBinaryLengthPrefixed(it.Value(), &symbol)
+
+		token, err := k.GetToken(ctx, symbol)
+		if err != nil {
+			continue
+		}
+		tokens = append(tokens, token)
+	}
+	return
 }
 
-// GetAllTokens returns all existing tokens
-func (k Keeper) GetAllTokens(ctx sdk.Context) (tokens []types.FungibleToken) {
-	k.IterateTokens(ctx, func(token types.FungibleToken) (stop bool) {
-		tokens = append(tokens, token)
-		return false
-	})
+// GetToken returns the token of the specified symbol or minUint
+func (k Keeper) GetToken(ctx sdk.Context, param string) (token types.FungibleToken, err error) {
+	store := ctx.KVStore(k.storeKey)
 
-	return
+	if token, err := k.getToken(ctx, param); err == nil {
+		return token, nil
+	}
+
+	bz := store.Get(types.KeyMinUint(param))
+
+	var symbol string
+	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &symbol)
+	return k.getToken(ctx, symbol)
 }
 
 // AddToken saves a new token
@@ -231,7 +253,12 @@ func (k Keeper) AddToken(ctx sdk.Context, token types.FungibleToken) error {
 	}
 
 	// Set token to be prefixed with owner
-	if err := k.setOwnerToken(ctx, token.Owner, token); err != nil {
+	if err := k.setWithSymbol(ctx, token.Owner, token.Symbol); err != nil {
+		return err
+	}
+
+	// Set token to be prefixed with min_unit
+	if err := k.setWithMinUnit(ctx, token.Symbol, token.MinUnit); err != nil {
 		return err
 	}
 
@@ -239,9 +266,14 @@ func (k Keeper) AddToken(ctx sdk.Context, token types.FungibleToken) error {
 }
 
 // HasToken asserts a token exists
-func (k Keeper) HasToken(ctx sdk.Context, symbol string) bool {
+func (k Keeper) HasToken(ctx sdk.Context, param string) bool {
 	store := ctx.KVStore(k.storeKey)
-	return store.Has(types.KeyToken(symbol))
+	existed := store.Has(types.KeySymbol(param))
+	if existed {
+		return existed
+	}
+
+	return store.Has(types.KeyMinUint(param))
 }
 
 // GetParamSet returns asset params from the global param store
@@ -256,33 +288,21 @@ func (k Keeper) SetParamSet(ctx sdk.Context, params types.Params) {
 	k.paramSpace.SetParamSet(ctx, &params)
 }
 
-func (k Keeper) iterateTokensWithOwner(ctx sdk.Context, owner sdk.AccAddress, op func(token types.FungibleToken) (stop bool)) {
+func (k Keeper) setWithSymbol(ctx sdk.Context, owner sdk.AccAddress, symbol string) error {
 	store := ctx.KVStore(k.storeKey)
 
-	iterator := sdk.KVStorePrefixIterator(store, types.KeyTokens(owner, ""))
-	defer iterator.Close()
+	bz := k.cdc.MustMarshalBinaryLengthPrefixed(symbol)
 
-	for ; iterator.Valid(); iterator.Next() {
-		var symbol string
-		k.cdc.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &symbol)
-
-		token, err := k.getToken(ctx, symbol)
-		if err != nil {
-			continue
-		}
-
-		if stop := op(token); stop {
-			break
-		}
-	}
+	store.Set(types.KeyTokens(owner, symbol), bz)
+	return nil
 }
 
-func (k Keeper) setOwnerToken(ctx sdk.Context, owner sdk.AccAddress, token types.FungibleToken) error {
+func (k Keeper) setWithMinUnit(ctx sdk.Context, symbol, minUnit string) error {
 	store := ctx.KVStore(k.storeKey)
 
-	bz := k.cdc.MustMarshalBinaryLengthPrefixed(token.Symbol)
+	bz := k.cdc.MustMarshalBinaryLengthPrefixed(symbol)
 
-	store.Set(types.KeyTokens(owner, token.Symbol), bz)
+	store.Set(types.KeyMinUint(minUnit), bz)
 	return nil
 }
 
@@ -290,8 +310,19 @@ func (k Keeper) setToken(ctx sdk.Context, token types.FungibleToken) error {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(token)
 
-	store.Set(types.KeyToken(token.Symbol), bz)
+	store.Set(types.KeySymbol(token.Symbol), bz)
 	return nil
+}
+
+func (k Keeper) getToken(ctx sdk.Context, symbol string) (token types.FungibleToken, err error) {
+	store := ctx.KVStore(k.storeKey)
+
+	bz := store.Get(types.KeySymbol(symbol))
+	if bz == nil {
+		return token, sdkerrors.Wrap(types.ErrAssetNotExists, fmt.Sprintf("token %s does not exist", symbol))
+	}
+	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &token)
+	return token, nil
 }
 
 // reset all index by DstOwner of token for query-token command
@@ -302,24 +333,7 @@ func (k Keeper) resetStoreKeyForQueryToken(ctx sdk.Context, msg types.MsgTransfe
 	store.Delete(types.KeyTokens(msg.SrcOwner, token.Symbol))
 
 	// add the new key
-	return k.setOwnerToken(ctx, msg.DstOwner, token)
-}
-
-func (k Keeper) getToken(ctx sdk.Context, symbol string) (token types.FungibleToken, err error) {
-	store := ctx.KVStore(k.storeKey)
-
-	bz := store.Get(types.KeyToken(symbol))
-	if bz == nil {
-		return token, sdkerrors.Wrap(types.ErrAssetNotExists, fmt.Sprintf("token %s does not exist", symbol))
-	}
-
-	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &token)
-	return token, nil
-}
-
-// GetToken wraps getToken for export
-func (k Keeper) GetToken(ctx sdk.Context, symbol string) (types.FungibleToken, error) {
-	return k.getToken(ctx, symbol)
+	return k.setWithSymbol(ctx, msg.DstOwner, token.Symbol)
 }
 
 // getTokenSupply query issued tokens supply from the total supply

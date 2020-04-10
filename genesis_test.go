@@ -18,6 +18,20 @@ func TestExportGenesis(t *testing.T) {
 
 	ctx := app.BaseApp.NewContext(false, abci.Header{})
 
+	// export genesis
+	genesisState := asset.ExportGenesis(ctx, app.AssetKeeper)
+
+	require.Equal(t, types.DefaultParams(), genesisState.Params)
+	for _, token := range genesisState.Tokens {
+		require.Equal(t, token, types.GetNativeToken())
+	}
+}
+
+func TestInitGenesis(t *testing.T) {
+	app := simapp.Setup(false)
+
+	ctx := app.BaseApp.NewContext(false, abci.Header{})
+
 	// add token
 	addr := sdk.AccAddress([]byte("addr1"))
 	ft := types.NewFungibleToken("btc", "Bitcoin Network", "satoshi", 1, 1, 1, true, addr)
@@ -31,19 +45,7 @@ func TestExportGenesis(t *testing.T) {
 	asset.InitGenesis(ctx, app.AssetKeeper, genesis)
 
 	// query all tokens
-	var tokens types.Tokens
-	app.AssetKeeper.IterateTokens(ctx, func(token types.FungibleToken) (stop bool) {
-		tokens = append(tokens, token)
-		return false
-	})
-
-	require.Equal(t, len(tokens), 1)
-
-	// export genesis
-	genesisState := asset.ExportGenesis(ctx, app.AssetKeeper)
-
-	require.Equal(t, types.DefaultParams(), genesisState.Params)
-	for _, token := range genesisState.Tokens {
-		require.Equal(t, token, ft)
-	}
+	var tokens = app.AssetKeeper.GetTokens(ctx, nil)
+	require.Equal(t, len(tokens), 2)
+	require.Equal(t, tokens[0], ft)
 }

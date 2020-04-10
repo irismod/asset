@@ -56,7 +56,7 @@ func RandomizedGenState(simState *module.SimulationState) {
 
 	assetGenesis := types.NewGenesisState(
 		types.NewParams(assetTaxRate, sdk.NewCoin(sdk.DefaultBondDenom, issueTokenBaseFee), mintTokenFeeRatio),
-		types.Tokens{},
+		types.Tokens{types.GetNativeToken()},
 	)
 	simState.GenState[types.ModuleName] = simState.Cdc.MustMarshalJSON(assetGenesis)
 

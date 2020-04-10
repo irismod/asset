@@ -5,13 +5,19 @@ import (
 )
 
 var (
-	PrefixToken  = []byte("token:")       // prefix for the token store
-	PrefixTokens = []byte("ownerTokens:") // prefix for the tokens store
+	PrefixTokenForSymbol  = []byte{0x1} // symbol prefix for the token
+	PrefixTokenForMinUint = []byte{0x2} // min_unit prefix for the token
+	PrefixTokens          = []byte{0x3} // prefix for the tokens
 )
 
-// KeyToken returns the key of the token with the specified symbol
-func KeyToken(symbol string) []byte {
-	return append(PrefixToken, []byte(symbol)...)
+// KeySymbol returns the key of the token with the specified symbol
+func KeySymbol(symbol string) []byte {
+	return append(PrefixTokenForSymbol, []byte(symbol)...)
+}
+
+// KeyMinUint returns the key of the token with the specified min_unit
+func KeyMinUint(minUnit string) []byte {
+	return append(PrefixTokenForMinUint, []byte(minUnit)...)
 }
 
 // KeyTokens returns the key of the specified owner and symbol. Intended for querying all tokens of an owner

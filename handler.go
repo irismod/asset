@@ -67,7 +67,6 @@ func handleMsgEditToken(ctx sdk.Context, k Keeper, msg MsgEditToken) (*sdk.Resul
 
 // handleMsgTransferTokenOwner handles MsgTransferTokenOwner
 func handleMsgTransferTokenOwner(ctx sdk.Context, k Keeper, msg MsgTransferTokenOwner) (*sdk.Result, error) {
-
 	if err := k.TransferTokenOwner(ctx, msg); err != nil {
 		return nil, err
 	}

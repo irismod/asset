@@ -39,7 +39,7 @@ func (k Keeper) GetTokenIssueFee(ctx sdk.Context, symbol string) sdk.Coin {
 	// compute the fee
 	fee := calcFeeByBase(symbol, issueTokenBaseFee.Amount)
 
-	return sdk.NewCoin(sdk.DefaultBondDenom, convertFeeToInt(fee))
+	return k.truncateFee(ctx, issueTokenBaseFee.Denom, fee)
 }
 
 // GetTokenMintFee returns the token minting fee
@@ -48,11 +48,25 @@ func (k Keeper) GetTokenMintFee(ctx sdk.Context, symbol string) sdk.Coin {
 	params := k.GetParamSet(ctx)
 	mintTokenFeeRatio := params.MintTokenFeeRatio
 
-	// compute the issurance and minting fees
+	// compute the insurance and minting fees
 	issueFee := k.GetTokenIssueFee(ctx, symbol)
 	mintFee := sdk.NewDecFromInt(issueFee.Amount).Mul(mintTokenFeeRatio)
 
-	return sdk.NewCoin(sdk.DefaultBondDenom, convertFeeToInt(mintFee))
+	return k.truncateFee(ctx, issueFee.Denom, mintFee)
+}
+
+func (k Keeper) truncateFee(ctx sdk.Context, minUnit string, feeAmt sdk.Dec) sdk.Coin {
+	token, _ := k.GetToken(ctx, minUnit)
+	precision := sdk.NewIntWithDecimal(1, int(token.Scale))
+	feeNativeToken := feeAmt.Quo(sdk.NewDecFromInt(precision))
+
+	var amount sdk.Int
+	if feeNativeToken.GT(sdk.NewDec(1)) {
+		amount = feeNativeToken.TruncateInt().Mul(precision)
+	} else {
+		amount = sdk.NewInt(1).Mul(precision)
+	}
+	return sdk.NewCoin(token.MinUnit, amount)
 }
 
 // feeHandler handles the fee of asset
@@ -106,15 +120,4 @@ func calcFeeFactor(name string) sdk.Dec {
 	}
 
 	return feeFactorDec
-}
-
-// convertFeeToInt converts the given fee to Int.
-// if greater than 1, rounds it; returns 1 otherwise
-func convertFeeToInt(fee sdk.Dec) sdk.Int {
-	power := sdk.TokensToConsensusPower(fee.TruncateInt())
-	if power > 1 {
-		return sdk.TokensFromConsensusPower(power)
-	} else {
-		return sdk.TokensFromConsensusPower(1)
-	}
 }
