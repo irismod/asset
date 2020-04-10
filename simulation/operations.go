@@ -5,14 +5,15 @@ import (
 	"math/rand"
 	"time"
 
+	"github/irismod/asset/internal/keeper"
+	"github/irismod/asset/internal/types"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/simapp/helpers"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
-	"github/irismod/asset/internal/keeper"
-	"github/irismod/asset/internal/types"
 )
 
 // Simulation operation weights constants
@@ -21,8 +22,10 @@ const (
 	OpWeightMsgEditToken          = "op_weight_msg_edit_token"
 	OpWeightMsgMintToken          = "op_weight_msg_mint_token"
 	OpWeightMsgTransferTokenOwner = "op_weight_msg_transfer_token_owner"
+)
 
-	DefaultGenTxGas = 1000000
+var (
+	nativeToken = types.GetNativeToken()
 )
 
 // WeightedOperations returns all the operations from the module with their respective weights
@@ -41,27 +44,27 @@ func WeightedOperations(
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgEditToken, &weightEdit, nil,
 		func(_ *rand.Rand) {
-			weightEdit = 10
+			weightEdit = 50
 		},
 	)
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgMintToken, &weightMint, nil,
 		func(_ *rand.Rand) {
-			weightMint = 10
+			weightMint = 50
 		},
 	)
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgTransferTokenOwner, &weightTransfer, nil,
 		func(_ *rand.Rand) {
-			weightTransfer = 10
+			weightTransfer = 50
 		},
 	)
 
 	return simulation.WeightedOperations{
-		//simulation.NewWeightedOperation(
-		//	weightIssue,
-		//	SimulateIssueToken(k, ak),
-		//),
+		simulation.NewWeightedOperation(
+			weightIssue,
+			SimulateIssueToken(k, ak),
+		),
 		simulation.NewWeightedOperation(
 			weightEdit,
 			SimulateEditToken(k, ak),
@@ -100,7 +103,7 @@ func SimulateIssueToken(k keeper.Keeper, ak auth.AccountKeeper) simulation.Opera
 		tx := helpers.GenTx(
 			[]sdk.Msg{msg},
 			fees,
-			DefaultGenTxGas,
+			helpers.DefaultGenTxGas,
 			chainID,
 			[]uint64{account.GetAccountNumber()},
 			[]uint64{account.GetSequence()},
@@ -144,7 +147,7 @@ func SimulateEditToken(k keeper.Keeper, ak auth.AccountKeeper) simulation.Operat
 		tx := helpers.GenTx(
 			[]sdk.Msg{msg},
 			fees,
-			DefaultGenTxGas,
+			helpers.DefaultGenTxGas,
 			chainID,
 			[]uint64{account.GetAccountNumber()},
 			[]uint64{account.GetSequence()},
@@ -192,7 +195,7 @@ func SimulateMintToken(k keeper.Keeper, ak auth.AccountKeeper) simulation.Operat
 		tx := helpers.GenTx(
 			[]sdk.Msg{msg},
 			fees,
-			DefaultGenTxGas,
+			helpers.DefaultGenTxGas,
 			chainID,
 			[]uint64{account.GetAccountNumber()},
 			[]uint64{account.GetSequence()},
@@ -237,7 +240,7 @@ func SimulateTransferTokenOwner(k keeper.Keeper, ak auth.AccountKeeper) simulati
 		tx := helpers.GenTx(
 			[]sdk.Msg{msg},
 			fees,
-			DefaultGenTxGas,
+			helpers.DefaultGenTxGas,
 			chainID,
 			[]uint64{account.GetAccountNumber()},
 			[]uint64{account.GetSequence()},
@@ -269,6 +272,18 @@ func selectOneToken(ctx sdk.Context, k keeper.Keeper, mintable bool) types.Fungi
 	}
 
 	for _, token := range tokens {
+		if token.Mintable {
+			return token
+		}
+	}
+
+	for _, token := range tokens {
+		if token.Symbol == types.GetNativeToken().Symbol {
+			continue
+		}
+		if !mintable {
+			return token
+		}
 		if token.Mintable {
 			return token
 		}
@@ -307,12 +322,12 @@ func randomToken(ctx sdk.Context,
 		simAccount, _ := simulation.RandomAcc(r, accs)
 		account := ak.GetAccount(ctx, simAccount.Address)
 		spendable := account.SpendableCoins(ctx.BlockTime())
-		spendableStake := spendable.AmountOf(sdk.DefaultBondDenom)
+		spendableStake := spendable.AmountOf(nativeToken.MinUnit)
 		if spendableStake.IsZero() || spendableStake.LT(issueFee.Amount) {
 			goto loop
 		}
 		owner = account.GetAddress()
-		maxFees = sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, spendableStake).Sub(issueFee))
+		maxFees = sdk.NewCoins(sdk.NewCoin(nativeToken.MinUnit, spendableStake).Sub(issueFee))
 		exit <- 1
 	}()
 
