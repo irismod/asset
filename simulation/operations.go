@@ -2,11 +2,11 @@ package simulation
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
-
+	"github/irismod/asset/exported"
 	"github/irismod/asset/internal/keeper"
 	"github/irismod/asset/internal/types"
+	"math/rand"
+	"strings"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -61,10 +61,10 @@ func WeightedOperations(
 	)
 
 	return simulation.WeightedOperations{
-		simulation.NewWeightedOperation(
-			weightIssue,
-			SimulateIssueToken(k, ak),
-		),
+		//simulation.NewWeightedOperation(
+		//	weightIssue,
+		//	SimulateIssueToken(k, ak),
+		//),
 		simulation.NewWeightedOperation(
 			weightEdit,
 			SimulateEditToken(k, ak),
@@ -87,7 +87,7 @@ func SimulateIssueToken(k keeper.Keeper, ak auth.AccountKeeper) simulation.Opera
 		accs []simulation.Account, chainID string,
 	) (simulation.OperationMsg, []simulation.FutureOperation, error) {
 
-		token, maxFees := randomToken(ctx, r, ak, k, accs)
+		token, maxFees := genToken(ctx, r, ak, k, accs)
 		msg := types.NewMsgIssueToken(token.Symbol, token.MinUnit, token.Name, token.Scale, token.InitialSupply, token.MaxSupply, token.Mintable, token.Owner)
 
 		simAccount, found := simulation.FindAccount(accs, token.Owner)
@@ -125,18 +125,13 @@ func SimulateEditToken(k keeper.Keeper, ak auth.AccountKeeper) simulation.Operat
 		accs []simulation.Account, chainID string,
 	) (simulation.OperationMsg, []simulation.FutureOperation, error) {
 
-		_, _, err := SimulateIssueToken(k, ak)(r, app, ctx, accs, chainID)
-		if err != nil {
-			return simulation.NoOpMsg(types.ModuleName), nil, err
-		}
-
-		token := selectOneToken(ctx, k, false)
-		simAccount, found := simulation.FindAccount(accs, token.Owner)
+		token, _ := selectOneToken(ctx, k, ak, false)
+		simAccount, found := simulation.FindAccount(accs, token.GetOwner())
 		if !found {
-			return simulation.NoOpMsg(types.ModuleName), nil, fmt.Errorf("account %s not found", token.Owner)
+			return simulation.NoOpMsg(types.ModuleName), nil, fmt.Errorf("account %s not found", token.GetOwner())
 		}
 
-		msg := types.NewMsgEditToken(token.Name, token.Symbol, token.MaxSupply, types.True, token.Owner)
+		msg := types.NewMsgEditToken(token.GetName(), token.GetSymbol(), token.GetMaxSupply(), types.True, token.GetOwner())
 
 		account := ak.GetAccount(ctx, msg.Owner)
 		fees, err := simulation.RandomFees(r, ctx, account.SpendableCoins(ctx.BlockTime()))
@@ -169,25 +164,18 @@ func SimulateMintToken(k keeper.Keeper, ak auth.AccountKeeper) simulation.Operat
 		accs []simulation.Account, chainID string,
 	) (simulation.OperationMsg, []simulation.FutureOperation, error) {
 
-		_, _, err := SimulateIssueToken(k, ak)(r, app, ctx, accs, chainID)
-		if err != nil {
-			return simulation.NoOpMsg(types.ModuleName), nil, err
-		}
-
-		token := selectOneToken(ctx, k, true)
-		ownerAccount, found := simulation.FindAccount(accs, token.Owner)
+		token, maxFee := selectOneToken(ctx, k, ak, true)
+		ownerAccount, found := simulation.FindAccount(accs, token.GetOwner())
 		if !found {
-			return simulation.NoOpMsg(types.ModuleName), nil, fmt.Errorf("account %s not found", token.Owner)
+			return simulation.NoOpMsg(types.ModuleName), nil, fmt.Errorf("account %s not found", token.GetOwner())
 		}
 
 		simToAccount, _ := simulation.RandomAcc(r, accs)
 
-		msg := types.NewMsgMintToken(token.Symbol, token.Owner, simToAccount.Address, 100)
-
-		//mintFee := k.GetTokenMintFee(ctx, token.Symbol)
+		msg := types.NewMsgMintToken(token.GetSymbol(), token.GetOwner(), simToAccount.Address, 100)
 
 		account := ak.GetAccount(ctx, msg.Owner)
-		fees, err := simulation.RandomFees(r, ctx, account.SpendableCoins(ctx.BlockTime()))
+		fees, err := simulation.RandomFees(r, ctx, maxFee)
 		if err != nil {
 			return simulation.NoOpMsg(types.ModuleName), nil, err
 		}
@@ -217,19 +205,18 @@ func SimulateTransferTokenOwner(k keeper.Keeper, ak auth.AccountKeeper) simulati
 		accs []simulation.Account, chainID string,
 	) (simulation.OperationMsg, []simulation.FutureOperation, error) {
 
-		_, _, err := SimulateIssueToken(k, ak)(r, app, ctx, accs, chainID)
-		if err != nil {
-			return simulation.NoOpMsg(types.ModuleName), nil, err
-		}
-
-		token := selectOneToken(ctx, k, false)
-		simAccount, found := simulation.FindAccount(accs, token.Owner)
+		token, _ := selectOneToken(ctx, k, ak, false)
+		simAccount, found := simulation.FindAccount(accs, token.GetOwner())
 		if !found {
-			return simulation.NoOpMsg(types.ModuleName), nil, fmt.Errorf("account %s not found", token.Owner)
+			return simulation.NoOpMsg(types.ModuleName), nil, fmt.Errorf("account %s not found", token.GetOwner())
 		}
 
-		simToAccount, _ := simulation.RandomAcc(r, accs)
-		msg := types.NewMsgTransferTokenOwner(token.Owner, simToAccount.Address, token.Symbol)
+		var simToAccount, _ = simulation.RandomAcc(r, accs)
+		for simToAccount.Address.Equals(token.GetOwner()) {
+			simToAccount, _ = simulation.RandomAcc(r, accs)
+		}
+
+		msg := types.NewMsgTransferTokenOwner(token.GetOwner(), simToAccount.Address, token.GetSymbol())
 
 		account := ak.GetAccount(ctx, msg.SrcOwner)
 		fees, err := simulation.RandomFees(r, ctx, account.SpendableCoins(ctx.BlockTime()))
@@ -255,38 +242,33 @@ func SimulateTransferTokenOwner(k keeper.Keeper, ak auth.AccountKeeper) simulati
 	}
 }
 
-func selectOneToken(ctx sdk.Context, k keeper.Keeper, mintable bool) types.FungibleToken {
+func selectOneToken(ctx sdk.Context,
+	k keeper.Keeper,
+	ak auth.AccountKeeper,
+	mint bool) (token exported.TokenI, maxFees sdk.Coins) {
 	tokens := k.GetTokens(ctx, nil)
 	if len(tokens) == 0 {
 		panic("No token available")
 	}
 
-	if !mintable {
-	loop:
-		idx := rand.Intn(len(tokens))
-		token := tokens[idx]
-		if token.Symbol == types.GetNativeToken().Symbol {
-			goto loop
-		}
-		return token
-	}
-
-	for _, token := range tokens {
-		if token.Mintable {
-			return token
-		}
-	}
-
-	for _, token := range tokens {
-		if token.Symbol == types.GetNativeToken().Symbol {
+	for _, t := range tokens {
+		if t.GetSymbol() == types.GetNativeToken().Symbol {
 			continue
 		}
-		if !mintable {
-			return token
+		if !mint {
+			return t, nil
 		}
-		if token.Mintable {
-			return token
+
+		mintFee := k.GetTokenMintFee(ctx, t.GetSymbol())
+		account := ak.GetAccount(ctx, t.GetOwner())
+		spendable := account.SpendableCoins(ctx.BlockTime())
+		spendableStake := spendable.AmountOf(nativeToken.MinUnit)
+		if spendableStake.IsZero() || spendableStake.LT(mintFee.Amount) {
+			continue
 		}
+		maxFees = sdk.NewCoins(sdk.NewCoin(nativeToken.MinUnit, spendableStake).Sub(mintFee))
+		token = t
+		return
 	}
 	panic("No token mintable")
 }
@@ -297,54 +279,65 @@ func randStringBetween(r *rand.Rand, min, max int) string {
 	return randStr
 }
 
-func randomToken(ctx sdk.Context,
+func genToken(ctx sdk.Context,
 	r *rand.Rand,
 	ak auth.AccountKeeper,
 	k keeper.Keeper,
 	accs []simulation.Account,
 ) (types.FungibleToken, sdk.Coins) {
 
-	symbol := randStringBetween(r, types.MinimumAssetSymbolLen, types.MaximumAssetSymbolLen)
-	minUint := randStringBetween(r, types.MinimumAssetMinUnitLen, types.MaximumAssetMinUnitLen)
-	name := randStringBetween(r, 1, types.MaximumAssetNameLen)
-	scale := simulation.RandIntBetween(r, 1, int(types.MaximumAssetDecimal))
-	initialSupply := r.Int63n(int64(types.MaximumAssetInitSupply))
-	maxSupply := r.Int63n(int64(types.MaximumAssetMaxSupply-types.MaximumAssetInitSupply)) + initialSupply
+	var token types.FungibleToken
+	token = randToken(r, accs)
 
-	issueFee := k.GetTokenIssueFee(ctx, symbol)
-
-	exit := make(chan int, 1)
-	var owner sdk.AccAddress
-	var maxFees sdk.Coins
-
-	go func() {
-	loop:
-		simAccount, _ := simulation.RandomAcc(r, accs)
-		account := ak.GetAccount(ctx, simAccount.Address)
-		spendable := account.SpendableCoins(ctx.BlockTime())
-		spendableStake := spendable.AmountOf(nativeToken.MinUnit)
-		if spendableStake.IsZero() || spendableStake.LT(issueFee.Amount) {
-			goto loop
-		}
-		owner = account.GetAddress()
-		maxFees = sdk.NewCoins(sdk.NewCoin(nativeToken.MinUnit, spendableStake).Sub(issueFee))
-		exit <- 1
-	}()
-
-	select {
-	case <-exit:
-	case <-time.After(30 * time.Second):
-		panic("no Spendable coins")
+	for k.HasToken(ctx, token.Symbol) {
+		token = randToken(r, accs)
 	}
 
+	issueFee := k.GetTokenIssueFee(ctx, token.Symbol)
+
+	account, maxFees := filterAccount(ctx, r, ak, accs, issueFee)
+	token.Owner = account
+
+	return token, maxFees
+}
+
+func filterAccount(ctx sdk.Context,
+	r *rand.Rand,
+	ak auth.AccountKeeper,
+	accs []simulation.Account, fee sdk.Coin) (owner sdk.AccAddress, maxFees sdk.Coins) {
+loop:
+	simAccount, _ := simulation.RandomAcc(r, accs)
+	account := ak.GetAccount(ctx, simAccount.Address)
+	spendable := account.SpendableCoins(ctx.BlockTime())
+	spendableStake := spendable.AmountOf(nativeToken.MinUnit)
+	if spendableStake.IsZero() || spendableStake.LT(fee.Amount) {
+		goto loop
+	}
+	owner = account.GetAddress()
+	maxFees = sdk.NewCoins(sdk.NewCoin(nativeToken.MinUnit, spendableStake).Sub(fee))
+	return
+}
+
+func randToken(r *rand.Rand,
+	accs []simulation.Account,
+) types.FungibleToken {
+
+	symbol := randStringBetween(r, types.MinimumSymbolLen, types.MaximumSymbolLen)
+	minUint := randStringBetween(r, types.MinimumMinUnitLen, types.MaximumMinUnitLen)
+	name := randStringBetween(r, 1, types.MaximumNameLen)
+	scale := simulation.RandIntBetween(r, 1, int(types.MaximumScale))
+	initialSupply := r.Int63n(int64(types.MaximumInitSupply))
+	maxSupply := r.Int63n(int64(types.MaximumMaxSupply-types.MaximumInitSupply)) + initialSupply
+	simAccount, _ := simulation.RandomAcc(r, accs)
+
 	return types.FungibleToken{
-		Symbol:        symbol,
+		Symbol:        strings.ToLower(symbol),
 		Name:          name,
 		Scale:         uint8(scale),
-		MinUnit:       minUint,
+		MinUnit:       strings.ToLower(minUint),
 		InitialSupply: uint64(initialSupply),
 		MaxSupply:     uint64(maxSupply),
 		Mintable:      true,
-		Owner:         owner,
-	}, maxFees
+		Owner:         simAccount.Address,
+	}
 }

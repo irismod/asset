@@ -14,9 +14,9 @@ import (
 )
 
 func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, queryRoute string) {
-	// Query token by symbol
+	// Query token by symbol or minUnit
 	r.HandleFunc(
-		fmt.Sprintf("/%s/tokens/{%s}", types.ModuleName, RestParamSymbol),
+		fmt.Sprintf("/%s/tokens/{%s}", types.ModuleName, RestParamDenom),
 		queryTokenHandlerFn(cliCtx, queryRoute),
 	).Methods("GET")
 
@@ -37,15 +37,8 @@ func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, queryRoute st
 func queryTokenHandlerFn(cliCtx context.CLIContext, queryRoute string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		symbol := vars[RestParamSymbol]
-
-		if err := types.CheckSymbol(symbol); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
 		params := types.QueryTokenParams{
-			Symbol: symbol,
+			Denom: vars[RestParamDenom],
 		}
 
 		bz, err := cliCtx.Codec.MarshalJSON(params)

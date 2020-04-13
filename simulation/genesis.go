@@ -36,6 +36,7 @@ func RandomizedGenState(simState *module.SimulationState) {
 	var assetTaxRate sdk.Dec
 	var issueTokenBaseFee sdk.Int
 	var mintTokenFeeRatio sdk.Dec
+	var tokens types.Tokens
 
 	simState.AppParams.GetOrGenerate(
 		simState.Cdc, AssetTaxRate, &assetTaxRate, simState.Rand,
@@ -46,6 +47,11 @@ func RandomizedGenState(simState *module.SimulationState) {
 		simState.Cdc, IssueTokenBaseFee, &issueTokenBaseFee, simState.Rand,
 		func(r *rand.Rand) {
 			issueTokenBaseFee = sdk.NewInt(int64(10))
+
+			// init 20 token
+			for i := 0; i < 50; i++ {
+				tokens = append(tokens, randToken(r, simState.Accounts))
+			}
 		},
 	)
 
@@ -54,9 +60,11 @@ func RandomizedGenState(simState *module.SimulationState) {
 		func(r *rand.Rand) { mintTokenFeeRatio = sdk.NewDecWithPrec(int64(r.Intn(5)), 1) },
 	)
 
+	tokens = append(tokens, types.GetNativeToken())
+
 	assetGenesis := types.NewGenesisState(
 		types.NewParams(assetTaxRate, sdk.NewCoin(sdk.DefaultBondDenom, issueTokenBaseFee), mintTokenFeeRatio),
-		types.Tokens{types.GetNativeToken()},
+		tokens,
 	)
 	simState.GenState[types.ModuleName] = simState.Cdc.MustMarshalJSON(assetGenesis)
 

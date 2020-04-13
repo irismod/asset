@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"github/irismod/asset/exported"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -88,10 +89,12 @@ func (k Keeper) IssueToken(ctx sdk.Context, msg types.MsgIssueToken) error {
 // EditToken edits the specified token
 func (k Keeper) EditToken(ctx sdk.Context, msg types.MsgEditToken) error {
 	// get the destination token
-	token, err := k.GetToken(ctx, msg.Symbol)
+	tokenI, err := k.GetToken(ctx, msg.Symbol)
 	if err != nil {
 		return err
 	}
+
+	token := tokenI.(types.FungibleToken)
 
 	if !msg.Owner.Equals(token.Owner) {
 		return sdkerrors.Wrapf(types.ErrInvalidOwner, "the address %d is not the owner of the token %s", msg.Owner, msg.Symbol)
@@ -124,11 +127,12 @@ func (k Keeper) EditToken(ctx sdk.Context, msg types.MsgEditToken) error {
 
 // TransferTokenOwner transfers the owner of the specified token to a new one
 func (k Keeper) TransferTokenOwner(ctx sdk.Context, msg types.MsgTransferTokenOwner) error {
-	// get the destination token
-	token, err := k.GetToken(ctx, msg.Symbol)
+	tokenI, err := k.GetToken(ctx, msg.Symbol)
 	if err != nil {
 		return err
 	}
+
+	token := tokenI.(types.FungibleToken)
 
 	if !msg.SrcOwner.Equals(token.Owner) {
 		return sdkerrors.Wrapf(types.ErrInvalidOwner, "the address %s is not the owner of the token %s", msg.SrcOwner.String(), msg.Symbol)
@@ -150,10 +154,12 @@ func (k Keeper) TransferTokenOwner(ctx sdk.Context, msg types.MsgTransferTokenOw
 
 // MintToken mints specified amount token to a specified owner
 func (k Keeper) MintToken(ctx sdk.Context, msg types.MsgMintToken) error {
-	token, err := k.GetToken(ctx, msg.Symbol)
+	tokenI, err := k.GetToken(ctx, msg.Symbol)
 	if err != nil {
 		return err
 	}
+
+	token := tokenI.(types.FungibleToken)
 
 	if !msg.Owner.Equals(token.Owner) {
 		return sdkerrors.Wrapf(types.ErrInvalidOwner, "the address %s is not the owner of the token %s", msg.Owner.String(), msg.Symbol)
@@ -193,7 +199,7 @@ func (k Keeper) MintToken(ctx sdk.Context, msg types.MsgMintToken) error {
 }
 
 // GetTokens returns all existing tokens
-func (k Keeper) GetTokens(ctx sdk.Context, owner sdk.AccAddress) (tokens types.Tokens) {
+func (k Keeper) GetTokens(ctx sdk.Context, owner sdk.AccAddress) (tokens []exported.TokenI) {
 	store := ctx.KVStore(k.storeKey)
 
 	var it sdk.Iterator
@@ -227,14 +233,14 @@ func (k Keeper) GetTokens(ctx sdk.Context, owner sdk.AccAddress) (tokens types.T
 }
 
 // GetToken returns the token of the specified symbol or minUint
-func (k Keeper) GetToken(ctx sdk.Context, param string) (token types.FungibleToken, err error) {
+func (k Keeper) GetToken(ctx sdk.Context, denom string) (token exported.TokenI, err error) {
 	store := ctx.KVStore(k.storeKey)
 
-	if token, err := k.getToken(ctx, param); err == nil {
+	if token, err := k.getToken(ctx, denom); err == nil {
 		return token, nil
 	}
 
-	bz := store.Get(types.KeyMinUint(param))
+	bz := store.Get(types.KeyMinUint(denom))
 
 	var symbol string
 	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &symbol)
@@ -244,7 +250,11 @@ func (k Keeper) GetToken(ctx sdk.Context, param string) (token types.FungibleTok
 // AddToken saves a new token
 func (k Keeper) AddToken(ctx sdk.Context, token types.FungibleToken) error {
 	if k.HasToken(ctx, token.Symbol) {
-		return sdkerrors.Wrapf(types.ErrAssetAlreadyExists, "token already exists: %s", token.Symbol)
+		return sdkerrors.Wrapf(types.ErrSymbolAlreadyExists, "symbol already exists: %s", token.Symbol)
+	}
+
+	if k.HasToken(ctx, token.MinUnit) {
+		return sdkerrors.Wrapf(types.ErrMinUnitAlreadyExists, "min-unit already exists: %s", token.MinUnit)
 	}
 
 	// set token
@@ -253,12 +263,12 @@ func (k Keeper) AddToken(ctx sdk.Context, token types.FungibleToken) error {
 	}
 
 	// Set token to be prefixed with owner
-	if err := k.setWithSymbol(ctx, token.Owner, token.Symbol); err != nil {
+	if err := k.setWithOwner(ctx, token.Owner, token.Symbol); err != nil {
 		return err
 	}
 
 	// Set token to be prefixed with min_unit
-	if err := k.setWithMinUnit(ctx, token.Symbol, token.MinUnit); err != nil {
+	if err := k.setWithMinUnit(ctx, token.MinUnit, token.Symbol); err != nil {
 		return err
 	}
 
@@ -288,7 +298,7 @@ func (k Keeper) SetParamSet(ctx sdk.Context, params types.Params) {
 	k.paramSpace.SetParamSet(ctx, &params)
 }
 
-func (k Keeper) setWithSymbol(ctx sdk.Context, owner sdk.AccAddress, symbol string) error {
+func (k Keeper) setWithOwner(ctx sdk.Context, owner sdk.AccAddress, symbol string) error {
 	store := ctx.KVStore(k.storeKey)
 
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(symbol)
@@ -297,7 +307,7 @@ func (k Keeper) setWithSymbol(ctx sdk.Context, owner sdk.AccAddress, symbol stri
 	return nil
 }
 
-func (k Keeper) setWithMinUnit(ctx sdk.Context, symbol, minUnit string) error {
+func (k Keeper) setWithMinUnit(ctx sdk.Context, minUnit, symbol string) error {
 	store := ctx.KVStore(k.storeKey)
 
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(symbol)
@@ -333,7 +343,7 @@ func (k Keeper) resetStoreKeyForQueryToken(ctx sdk.Context, msg types.MsgTransfe
 	store.Delete(types.KeyTokens(msg.SrcOwner, token.Symbol))
 
 	// add the new key
-	return k.setWithSymbol(ctx, msg.DstOwner, token.Symbol)
+	return k.setWithOwner(ctx, msg.DstOwner, token.Symbol)
 }
 
 // getTokenSupply query issued tokens supply from the total supply

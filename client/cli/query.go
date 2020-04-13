@@ -33,8 +33,8 @@ func GetQueryCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 // getCmdQueryToken implements the query token command.
 func getCmdQueryToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "token [symbol]",
-		Short:   "Query a token by symbol",
+		Use:     "token [denom]",
+		Short:   "Query a token by symbol or minUnit",
 		Example: "asset token <symbol>",
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -45,7 +45,7 @@ func getCmdQueryToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			}
 
 			params := types.QueryTokenParams{
-				Symbol: args[0],
+				Denom: args[0],
 			}
 
 			bz, err := cdc.MarshalJSON(params)
@@ -53,7 +53,7 @@ func getCmdQueryToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryTokens), bz)
+			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryToken), bz)
 			if err != nil {
 				return err
 			}

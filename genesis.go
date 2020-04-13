@@ -23,9 +23,13 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 
 // ExportGenesis - output genesis parameters
 func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
+	var tokens Tokens
+	for _, token := range k.GetTokens(ctx, nil) {
+		tokens = append(tokens, token.(FungibleToken))
+	}
 	return GenesisState{
 		Params: k.GetParamSet(ctx),
-		Tokens: k.GetTokens(ctx, nil),
+		Tokens: tokens,
 	}
 }
 

@@ -91,10 +91,9 @@ GOPATH ?= $(shell $(GO) env GOPATH)
 TOOLS_DESTDIR  ?= $(GOPATH)/bin
 RUNSIM 					= $(TOOLS_DESTDIR)/runsim
 
-runsim: $(RUNSIM)
-$(RUNSIM):
+runsim:
 	@echo "Installing runsim..."
-	@(cd /tmp && go get github.com/cosmos/tools/cmd/runsim@v1.0.0)
+	@go get github.com/cosmos/tools/cmd/runsim@v1.0.0
 
 tools-clean:
 	rm -f $(RUNSIM)

@@ -72,8 +72,8 @@ func (suite *KeeperSuite) TestIssueToken() {
 	token, err := suite.keeper.GetToken(suite.ctx, msg.Symbol)
 	require.NoError(suite.T(), err)
 
-	suite.Equal(msg.MinUnit, token.MinUnit)
-	suite.Equal(msg.Owner, token.Owner)
+	suite.Equal(msg.MinUnit, token.GetMinUnit())
+	suite.Equal(msg.Owner, token.GetOwner())
 
 	ftJson, _ := json.Marshal(msg)
 	tokenJson, _ := json.Marshal(token)
@@ -137,5 +137,5 @@ func (suite *KeeperSuite) TestTransferToken() {
 
 	token, err := suite.keeper.GetToken(suite.ctx, "btc")
 	require.NoError(suite.T(), err)
-	suite.Equal(dstOwner, token.Owner)
+	suite.Equal(dstOwner, token.GetOwner())
 }

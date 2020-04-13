@@ -55,9 +55,9 @@ func (k Keeper) GetTokenMintFee(ctx sdk.Context, symbol string) sdk.Coin {
 	return k.truncateFee(ctx, issueFee.Denom, mintFee)
 }
 
-func (k Keeper) truncateFee(ctx sdk.Context, minUnit string, feeAmt sdk.Dec) sdk.Coin {
-	token, _ := k.GetToken(ctx, minUnit)
-	precision := sdk.NewIntWithDecimal(1, int(token.Scale))
+func (k Keeper) truncateFee(ctx sdk.Context, denom string, feeAmt sdk.Dec) sdk.Coin {
+	token, _ := k.GetToken(ctx, denom)
+	precision := sdk.NewIntWithDecimal(1, int(token.GetScale()))
 	feeNativeToken := feeAmt.Quo(sdk.NewDecFromInt(precision))
 
 	var amount sdk.Int
@@ -66,7 +66,7 @@ func (k Keeper) truncateFee(ctx sdk.Context, minUnit string, feeAmt sdk.Dec) sdk
 	} else {
 		amount = sdk.NewInt(1).Mul(precision)
 	}
-	return sdk.NewCoin(token.MinUnit, amount)
+	return sdk.NewCoin(token.GetMinUnit(), amount)
 }
 
 // feeHandler handles the fee of asset

@@ -23,17 +23,16 @@ type (
 )
 
 const (
-	ModuleName            = types.ModuleName
-	StoreKey              = types.StoreKey
-	QuerierRoute          = types.QuerierRoute
-	RouterKey             = types.RouterKey
-	DefaultParamspace     = types.DefaultParamspace
-	MaximumAssetMaxSupply = types.MaximumAssetMaxSupply
+	ModuleName        = types.ModuleName
+	StoreKey          = types.StoreKey
+	QuerierRoute      = types.QuerierRoute
+	RouterKey         = types.RouterKey
+	DefaultParamspace = types.DefaultParamspace
+	MaximumMaxSupply  = types.MaximumMaxSupply
 )
 
 var (
-	ModuleCdc = types.ModuleCdc
-	//QuerierRoute             = types.QuerierRoute
+	ModuleCdc     = types.ModuleCdc
 	RegisterCodec = types.RegisterCodec
 	CheckSymbol   = types.CheckSymbol
 	ParseBool     = types.ParseBool

@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
+
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -136,12 +139,16 @@ func (tokens Tokens) Validate() error {
 
 // CheckSymbol checks if the given symbol is valid
 func CheckSymbol(symbol string) error {
-	if len(symbol) < MinimumAssetSymbolLen || len(symbol) > MaximumAssetSymbolLen {
-		return ErrInvalidAssetSymbol
+	if strings.Contains(strings.ToLower(symbol), nativeToken.Symbol) {
+		return sdkerrors.Wrapf(ErrInvalidAssetSymbol, "symbol can not contains : %s", nativeToken.Symbol)
+	}
+
+	if len(symbol) < MinimumSymbolLen || len(symbol) > MaximumSymbolLen {
+		return sdkerrors.Wrapf(ErrInvalidAssetSymbol, "invalid symbol: %s,  only accepts length [%d, %d]", symbol, MinimumSymbolLen, MaximumSymbolLen)
 	}
 
 	if !IsBeginWithAlpha(symbol) || !IsAlphaNumeric(symbol) {
-		return ErrInvalidAssetSymbol
+		return sdkerrors.Wrapf(ErrInvalidAssetSymbol, "invalid symbol: %s, only accepts alphanumeric characters, and begin with an english letter", symbol)
 	}
 
 	return nil

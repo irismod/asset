@@ -10,6 +10,7 @@ import (
 // Rest variable names
 // nolint
 const (
+	RestParamDenom  = "denom"
 	RestParamSymbol = "symbol"
 	RestParamOwner  = "owner"
 )

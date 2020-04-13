@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/99designs/keyring v1.1.4 // indirect
 	github.com/cosmos/cosmos-sdk v0.38.2
+	github.com/cosmos/tools/cmd/runsim v1.0.0 // indirect
 	github.com/golang/mock v1.4.3 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/spf13/cobra v0.0.7

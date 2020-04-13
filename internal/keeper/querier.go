@@ -34,11 +34,7 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, 
 		return nil, err
 	}
 
-	if err := types.CheckSymbol(params.Symbol); err != nil {
-		return nil, err
-	}
-
-	token, err := keeper.GetToken(ctx, strings.ToLower(params.Symbol))
+	token, err := keeper.GetToken(ctx, strings.ToLower(params.Denom))
 	if err != nil {
 		return nil, err
 	}

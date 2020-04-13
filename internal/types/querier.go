@@ -15,7 +15,7 @@ const (
 
 // QueryTokenParams is the query parameters for 'custom/asset/token'
 type QueryTokenParams struct {
-	Symbol string
+	Denom string
 }
 
 // QueryTokensParams is the query parameters for 'custom/asset/tokens'

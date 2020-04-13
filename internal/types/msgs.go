@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"regexp"
 	"strings"
 
@@ -19,14 +20,14 @@ const (
 	// constant used to indicate that some field should not be updated
 	DoNotModify = "[do-not-modify]"
 
-	MaximumAssetMaxSupply  = uint64(1000000000000) // maximal limitation for asset max supply，1000 billion
-	MaximumAssetInitSupply = uint64(100000000000)  // maximal limitation for asset initial supply，100 billion
-	MaximumAssetDecimal    = uint8(18)             // maximal limitation for asset decimal
-	MinimumAssetSymbolLen  = 3                     // minimal limitation for the length of the asset's symbol / canonical_symbol
-	MaximumAssetSymbolLen  = 8                     // maximal limitation for the length of the asset's symbol / canonical_symbol
-	MaximumAssetNameLen    = 32                    // maximal limitation for the length of the asset's name
-	MinimumAssetMinUnitLen = 3                     // minimal limitation for the length of the asset's min_unit
-	MaximumAssetMinUnitLen = 10                    // maximal limitation for the length of the asset's min_unit
+	MaximumMaxSupply  = uint64(1000000000000) // maximal limitation for asset max supply，1000 billion
+	MaximumInitSupply = uint64(100000000000)  // maximal limitation for asset initial supply，100 billion
+	MaximumScale      = uint8(18)             // maximal limitation for asset decimal
+	MinimumSymbolLen  = 3                     // minimal limitation for the length of the asset's symbol / canonical_symbol
+	MaximumSymbolLen  = 8                     // maximal limitation for the length of the asset's symbol / canonical_symbol
+	MaximumNameLen    = 32                    // maximal limitation for the length of the asset's name
+	MinimumMinUnitLen = 3                     // minimal limitation for the length of the asset's min_unit
+	MaximumMinUnitLen = 10                    // maximal limitation for the length of the asset's min_unit
 )
 
 var (
@@ -72,7 +73,7 @@ func ValidateMsgIssueToken(msg MsgIssueToken) error {
 
 	if msg.MaxSupply == 0 {
 		if msg.Mintable {
-			msg.MaxSupply = MaximumAssetMaxSupply
+			msg.MaxSupply = MaximumMaxSupply
 		} else {
 			msg.MaxSupply = msg.InitialSupply
 		}
@@ -83,29 +84,29 @@ func ValidateMsgIssueToken(msg MsgIssueToken) error {
 	}
 
 	nameLen := len(msg.Name)
-	if nameLen == 0 || nameLen > MaximumAssetNameLen {
-		return ErrInvalidAssetName
+	if nameLen == 0 || nameLen > MaximumNameLen {
+		return sdkerrors.Wrapf(ErrInvalidAssetName, "invalid token name %s, only accepts length (0, %d]", msg.Name, MaximumNameLen)
 	}
 
 	if err := CheckSymbol(msg.Symbol); err != nil {
 		return err
 	}
 
-	minUnitAliasLen := len(msg.MinUnit)
-	if minUnitAliasLen > 0 && (minUnitAliasLen < MinimumAssetMinUnitLen || minUnitAliasLen > MaximumAssetMinUnitLen || !IsAlphaNumeric(msg.MinUnit) || !IsBeginWithAlpha(msg.MinUnit)) {
-		return ErrInvalidAssetMinUnitAlias
+	minUnitLen := len(msg.MinUnit)
+	if minUnitLen < MinimumMinUnitLen || minUnitLen > MaximumMinUnitLen || !IsAlphaNumeric(msg.MinUnit) || !IsBeginWithAlpha(msg.MinUnit) {
+		return sdkerrors.Wrapf(ErrInvalidAssetMinUnit, "invalid token min_unit %s, only accepts alphanumeric characters, and begin with an english letter, length [%d, %d]", msg.MinUnit, MinimumMinUnitLen, MaximumMinUnitLen)
 	}
 
-	if msg.InitialSupply > MaximumAssetInitSupply {
-		return ErrInvalidAssetInitSupply
+	if msg.InitialSupply > MaximumInitSupply {
+		return sdkerrors.Wrapf(ErrInvalidAssetInitSupply, "invalid token initial supply %d, only accepts value [0, %d]", msg.InitialSupply, MaximumInitSupply)
 	}
 
-	if msg.MaxSupply < msg.InitialSupply || msg.MaxSupply > MaximumAssetMaxSupply {
-		return ErrInvalidAssetMaxSupply
+	if msg.MaxSupply < msg.InitialSupply || msg.MaxSupply > MaximumMaxSupply {
+		return sdkerrors.Wrapf(ErrInvalidAssetMaxSupply, "invalid token max supply %d, only accepts value [%d, %d]", msg.MaxSupply, msg.InitialSupply, MaximumMaxSupply)
 	}
 
-	if msg.Scale > MaximumAssetDecimal {
-		return ErrInvalidAssetDecimal
+	if msg.Scale > MaximumScale {
+		return sdkerrors.Wrapf(ErrInvalidAssetScale, "invalid token scale %d, only accepts value [0, %d]", msg.Scale, MaximumScale)
 	}
 
 	return nil
@@ -166,17 +167,17 @@ func (msg MsgTransferTokenOwner) GetSigners() []sdk.AccAddress {
 func (msg MsgTransferTokenOwner) ValidateBasic() error {
 	// check the SrcOwner
 	if len(msg.SrcOwner) == 0 {
-		return ErrInvalidAddress
+		return sdkerrors.Wrapf(ErrInvalidAddress, "the owner of the token must be specified")
 	}
 
 	// check if the `DstOwner` is empty
 	if len(msg.DstOwner) == 0 {
-		return ErrInvalidAddress
+		return sdkerrors.Wrapf(ErrInvalidAddress, "the new owner of the token must be specified")
 	}
 
 	// check if the `DstOwner` is same as the original owner
 	if msg.SrcOwner.Equals(msg.DstOwner) {
-		return ErrInvalidToAddress
+		return sdkerrors.Wrapf(ErrInvalidToAddress, "the new owner must not be same as the original owner")
 	}
 
 	// check the symbol
@@ -225,17 +226,17 @@ func (msg MsgEditToken) Type() string { return TypeMsgEditToken }
 func (msg MsgEditToken) ValidateBasic() error {
 	// check owner
 	if msg.Owner.Empty() {
-		return ErrNilAssetOwner
+		return sdkerrors.Wrapf(ErrNilAssetOwner, "the owner of the asset must be specified")
 	}
 
 	nameLen := len(msg.Name)
-	if DoNotModify != msg.Name && nameLen > MaximumAssetNameLen {
-		return ErrInvalidAssetName
+	if DoNotModify != msg.Name && nameLen > MaximumNameLen {
+		return sdkerrors.Wrapf(ErrInvalidAssetName, "invalid token name %s, only accepts length (0, %d]", msg.Name, MaximumNameLen)
 	}
 
 	// check max_supply for fast failed
-	if msg.MaxSupply > MaximumAssetMaxSupply {
-		return ErrInvalidAssetMaxSupply
+	if msg.MaxSupply > MaximumMaxSupply {
+		return sdkerrors.Wrapf(ErrInvalidAssetMaxSupply, "invalid token max supply %d, must be less than %d", msg.MaxSupply, MaximumMaxSupply)
 	}
 
 	// check symbol
@@ -305,11 +306,11 @@ func (msg MsgMintToken) GetSigners() []sdk.AccAddress {
 func (msg MsgMintToken) ValidateBasic() error {
 	// check the owner
 	if len(msg.Owner) == 0 {
-		return ErrInvalidAddress
+		return sdkerrors.Wrapf(ErrInvalidAddress, "the owner of the token must be specified")
 	}
 
-	if msg.Amount == 0 || msg.Amount > MaximumAssetMaxSupply {
-		return ErrInvalidAssetMaxSupply
+	if msg.Amount == 0 || msg.Amount > MaximumMaxSupply {
+		return sdkerrors.Wrapf(ErrInvalidAssetMaxSupply, "invalid token amount %d, only accepts value (0, %d]", msg.Amount, MaximumMaxSupply)
 	}
 
 	return CheckSymbol(msg.Symbol)
