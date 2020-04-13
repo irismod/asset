@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/client/context"
-	"github/irismod/asset/internal/types"
+	"github/irismod/token/internal/types"
 )
 
 // queryTokenFees retrieves the fees of issuance and minting for the specified symbol

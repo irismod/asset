@@ -27,14 +27,14 @@ func SetNativeToken(symbol,
 	maxSupply uint64,
 	mintable bool,
 	owner sdk.AccAddress) {
-	nativeToken = NewFungibleToken(symbol, name, minUnit, decimal, initialSupply, maxSupply, mintable, owner)
+	nativeToken = NewToken(symbol, name, minUnit, decimal, initialSupply, maxSupply, mintable, owner)
 }
 
-func GetNativeToken() FungibleToken {
+func GetNativeToken() Token {
 	return nativeToken
 }
 
-var nativeToken = FungibleToken{
+var nativeToken = Token{
 	Symbol:        sdk.DefaultBondDenom,
 	Name:          "Network staking token ",
 	Scale:         0,

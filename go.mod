@@ -1,4 +1,4 @@
-module github/irismod/asset
+module github/irismod/token
 
 go 1.13
 

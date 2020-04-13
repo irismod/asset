@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	"github/irismod/asset/internal/types"
+	"github/irismod/token/internal/types"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/codec"

@@ -5,7 +5,7 @@ import (
 	"math"
 	"strconv"
 
-	"github/irismod/asset/internal/types"
+	"github/irismod/token/internal/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )

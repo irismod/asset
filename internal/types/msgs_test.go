@@ -84,7 +84,7 @@ func TestMsgEditTokenRoute(t *testing.T) {
 		Mintable:  mintable,
 	}
 
-	require.Equal(t, "asset", msg.Route())
+	require.Equal(t, "token", msg.Route())
 }
 
 func TestMsgEditTokenGetSignBytes(t *testing.T) {

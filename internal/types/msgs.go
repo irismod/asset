@@ -10,7 +10,7 @@ import (
 
 const (
 	// MsgRoute identifies transaction types
-	MsgRoute = "asset"
+	MsgRoute = "token"
 
 	TypeMsgIssueToken         = "issue_token"
 	TypeMsgEditToken          = "edit_token"

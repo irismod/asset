@@ -1,8 +1,8 @@
 package types
 
 const (
-	// ModuleName is the name of the Asset module
-	ModuleName = "asset"
+	// ModuleName is the name of the Token module
+	ModuleName = "token"
 
 	// StoreKey is the string store representation
 	StoreKey string = ModuleName

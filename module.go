@@ -1,4 +1,4 @@
-package asset
+package token
 
 import (
 	"encoding/json"
@@ -15,8 +15,8 @@ import (
 	sim "github.com/cosmos/cosmos-sdk/x/simulation"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github/irismod/asset/client/cli"
-	"github/irismod/asset/simulation"
+	"github/irismod/token/client/cli"
+	"github/irismod/token/simulation"
 )
 
 var (
@@ -25,25 +25,25 @@ var (
 	_ module.AppModuleSimulation = AppModule{}
 )
 
-// AppModuleBasic defines the basic application module used by the asset module.
+// AppModuleBasic defines the basic application module used by the token module.
 type AppModuleBasic struct{}
 
-// Name returns the asset module's name.
+// Name returns the token module's name.
 func (AppModuleBasic) Name() string {
 	return ModuleName
 }
 
-// RegisterCodec registers the asset module's types for the given codec.
+// RegisterCodec registers the token module's types for the given codec.
 func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
 	RegisterCodec(cdc)
 }
 
-// DefaultGenesis returns default genesis state as raw bytes for the asset module.
+// DefaultGenesis returns default genesis state as raw bytes for the token module.
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
 	return ModuleCdc.MustMarshalJSON(DefaultGenesisState())
 }
 
-// ValidateGenesis performs genesis state validation for the asset module.
+// ValidateGenesis performs genesis state validation for the token module.
 func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	var data GenesisState
 	if err := ModuleCdc.UnmarshalJSON(bz, &data); err != nil {
@@ -52,24 +52,24 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	return ValidateGenesis(data)
 }
 
-// RegisterRESTRoutes registers the REST routes for the asset module.
+// RegisterRESTRoutes registers the REST routes for the token module.
 func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
 	//rest.RegisterRoutes(ctx, rtr)
 }
 
-// GetTxCmd returns no root tx command for the asset module.
+// GetTxCmd returns no root tx command for the token module.
 func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	return cli.GetTxCmd(StoreKey, cdc)
 }
 
-// GetQueryCmd returns the root query command for the asset module.
+// GetQueryCmd returns the root query command for the token module.
 func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	return cli.GetQueryCmd(StoreKey, cdc)
 }
 
 //____________________________________________________________________________
 
-// AppModule implements an application module for the asset module.
+// AppModule implements an application module for the token module.
 type AppModule struct {
 	AppModuleBasic
 	assetKeeper   Keeper
@@ -85,35 +85,35 @@ func NewAppModule(keeper Keeper, ak auth.AccountKeeper) AppModule {
 	}
 }
 
-// Name returns the asset module's name.
+// Name returns the token module's name.
 func (AppModule) Name() string {
 	return ModuleName
 }
 
-// RegisterInvariants registers the asset module invariants.
+// RegisterInvariants registers the token module invariants.
 func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
-// Route returns the message routing key for the asset module.
+// Route returns the message routing key for the token module.
 func (AppModule) Route() string {
 	return RouterKey
 }
 
-// NewHandler returns an sdk.Handler for the asset module.
+// NewHandler returns an sdk.Handler for the token module.
 func (am AppModule) NewHandler() sdk.Handler {
 	return NewHandler(am.assetKeeper)
 }
 
-// QuerierRoute returns the asset module's querier route name.
+// QuerierRoute returns the token module's querier route name.
 func (AppModule) QuerierRoute() string {
 	return QuerierRoute
 }
 
-// NewQuerierHandler returns the asset module sdk.Querier.
+// NewQuerierHandler returns the token module sdk.Querier.
 func (am AppModule) NewQuerierHandler() sdk.Querier {
 	return NewQuerier(am.assetKeeper)
 }
 
-// InitGenesis performs genesis initialization for the asset module. It returns
+// InitGenesis performs genesis initialization for the token module. It returns
 // no validator updates.
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState GenesisState
@@ -122,16 +122,16 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 	return []abci.ValidatorUpdate{}
 }
 
-// ExportGenesis returns the exported genesis state as raw bytes for the asset module.
+// ExportGenesis returns the exported genesis state as raw bytes for the token module.
 func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 	gs := ExportGenesis(ctx, am.assetKeeper)
 	return ModuleCdc.MustMarshalJSON(gs)
 }
 
-// BeginBlock returns the begin blocker for the asset module.
+// BeginBlock returns the begin blocker for the token module.
 func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {}
 
-// EndBlock returns the end blocker for the asset module. It returns no validator updates.
+// EndBlock returns the end blocker for the token module. It returns no validator updates.
 func (AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }
@@ -148,12 +148,12 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []sim.We
 	return simulation.WeightedOperations(simState.AppParams, simState.Cdc, am.assetKeeper, am.accountKeeper)
 }
 
-// RegisterStoreDecoder registers a decoder for asset module's types.
+// RegisterStoreDecoder registers a decoder for token module's types.
 func (AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
 	sdr[StoreKey] = simulation.DecodeStore
 }
 
-// GenerateGenesisState creates a randomized GenState of the asset module.
+// GenerateGenesisState creates a randomized GenState of the token module.
 func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 	simulation.RandomizedGenState(simState)
 }

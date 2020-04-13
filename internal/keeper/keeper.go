@@ -2,7 +2,7 @@ package keeper
 
 import (
 	"fmt"
-	"github/irismod/asset/exported"
+	"github/irismod/token/exported"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -11,7 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github/irismod/asset/internal/types"
+	"github/irismod/token/internal/types"
 )
 
 type Keeper struct {
@@ -28,7 +28,7 @@ type Keeper struct {
 
 func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace,
 	supplyKeeper types.SupplyKeeper, feeCollectorName string) Keeper {
-	// ensure asset module account is set
+	// ensure token module account is set
 	if addr := supplyKeeper.GetModuleAddress(types.ModuleName); addr == nil {
 		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
 	}
@@ -55,7 +55,7 @@ func (k Keeper) IssueToken(ctx sdk.Context, msg types.MsgIssueToken) error {
 	name := strings.TrimSpace(msg.Name)
 	minUnitAlias := strings.ToLower(strings.TrimSpace(msg.MinUnit))
 
-	token := types.NewFungibleToken(
+	token := types.NewToken(
 		symbol, name, minUnitAlias, msg.Scale, msg.InitialSupply,
 		msg.MaxSupply, msg.Mintable, msg.Owner,
 	)
@@ -94,7 +94,7 @@ func (k Keeper) EditToken(ctx sdk.Context, msg types.MsgEditToken) error {
 		return err
 	}
 
-	token := tokenI.(types.FungibleToken)
+	token := tokenI.(types.Token)
 
 	if !msg.Owner.Equals(token.Owner) {
 		return sdkerrors.Wrapf(types.ErrInvalidOwner, "the address %d is not the owner of the token %s", msg.Owner, msg.Symbol)
@@ -132,7 +132,7 @@ func (k Keeper) TransferTokenOwner(ctx sdk.Context, msg types.MsgTransferTokenOw
 		return err
 	}
 
-	token := tokenI.(types.FungibleToken)
+	token := tokenI.(types.Token)
 
 	if !msg.SrcOwner.Equals(token.Owner) {
 		return sdkerrors.Wrapf(types.ErrInvalidOwner, "the address %s is not the owner of the token %s", msg.SrcOwner.String(), msg.Symbol)
@@ -159,7 +159,7 @@ func (k Keeper) MintToken(ctx sdk.Context, msg types.MsgMintToken) error {
 		return err
 	}
 
-	token := tokenI.(types.FungibleToken)
+	token := tokenI.(types.Token)
 
 	if !msg.Owner.Equals(token.Owner) {
 		return sdkerrors.Wrapf(types.ErrInvalidOwner, "the address %s is not the owner of the token %s", msg.Owner.String(), msg.Symbol)
@@ -208,7 +208,7 @@ func (k Keeper) GetTokens(ctx sdk.Context, owner sdk.AccAddress) (tokens []expor
 		defer it.Close()
 
 		for ; it.Valid(); it.Next() {
-			var token types.FungibleToken
+			var token types.Token
 			k.cdc.MustUnmarshalBinaryLengthPrefixed(it.Value(), &token)
 
 			tokens = append(tokens, token)
@@ -248,7 +248,7 @@ func (k Keeper) GetToken(ctx sdk.Context, denom string) (token exported.TokenI, 
 }
 
 // AddToken saves a new token
-func (k Keeper) AddToken(ctx sdk.Context, token types.FungibleToken) error {
+func (k Keeper) AddToken(ctx sdk.Context, token types.Token) error {
 	if k.HasToken(ctx, token.Symbol) {
 		return sdkerrors.Wrapf(types.ErrSymbolAlreadyExists, "symbol already exists: %s", token.Symbol)
 	}
@@ -316,7 +316,7 @@ func (k Keeper) setWithMinUnit(ctx sdk.Context, minUnit, symbol string) error {
 	return nil
 }
 
-func (k Keeper) setToken(ctx sdk.Context, token types.FungibleToken) error {
+func (k Keeper) setToken(ctx sdk.Context, token types.Token) error {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(token)
 
@@ -324,7 +324,7 @@ func (k Keeper) setToken(ctx sdk.Context, token types.FungibleToken) error {
 	return nil
 }
 
-func (k Keeper) getToken(ctx sdk.Context, symbol string) (token types.FungibleToken, err error) {
+func (k Keeper) getToken(ctx sdk.Context, symbol string) (token types.Token, err error) {
 	store := ctx.KVStore(k.storeKey)
 
 	bz := store.Get(types.KeySymbol(symbol))
@@ -336,7 +336,7 @@ func (k Keeper) getToken(ctx sdk.Context, symbol string) (token types.FungibleTo
 }
 
 // reset all index by DstOwner of token for query-token command
-func (k Keeper) resetStoreKeyForQueryToken(ctx sdk.Context, msg types.MsgTransferTokenOwner, token types.FungibleToken) error {
+func (k Keeper) resetStoreKeyForQueryToken(ctx sdk.Context, msg types.MsgTransferTokenOwner, token types.Token) error {
 	store := ctx.KVStore(k.storeKey)
 
 	// delete the old key

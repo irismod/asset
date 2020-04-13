@@ -9,14 +9,14 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	kv "github.com/tendermint/tendermint/libs/kv"
 
-	"github/irismod/asset/internal/types"
+	"github/irismod/token/internal/types"
 )
 
 // DecodeStore unmarshals the KVPair's Value to the corresponding asset type
 func DecodeStore(cdc *codec.Codec, kvA, kvB kv.Pair) string {
 	switch {
 	case bytes.Equal(kvA.Key[:1], types.PrefixTokenForSymbol):
-		var tokenA, tokenB types.FungibleToken
+		var tokenA, tokenB types.Token
 		cdc.MustUnmarshalBinaryLengthPrefixed(kvA.Value, &tokenA)
 		cdc.MustUnmarshalBinaryLengthPrefixed(kvB.Value, &tokenB)
 		return fmt.Sprintf("%v\n%v", tokenA, tokenB)

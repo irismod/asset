@@ -11,7 +11,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgMintToken{}, "irismod/asset/MsgMintToken", nil)
 	cdc.RegisterConcrete(MsgTransferTokenOwner{}, "irismod/asset/MsgTransferTokenOwner", nil)
 
-	cdc.RegisterConcrete(FungibleToken{}, "irismod/asset/FungibleToken", nil)
+	cdc.RegisterConcrete(Token{}, "irismod/asset/Token", nil)
 
 	cdc.RegisterConcrete(&Params{}, "irismod/asset/Params", nil)
 }

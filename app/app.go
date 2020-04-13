@@ -32,7 +32,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 
-	asset "github/irismod/asset"
+	token "github/irismod/token"
 )
 
 const appName = "SimApp"
@@ -63,7 +63,7 @@ var (
 		slashing.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
 		evidence.AppModuleBasic{},
-		asset.AppModuleBasic{},
+		token.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -74,7 +74,7 @@ var (
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
-		asset.ModuleName:          {supply.Minter, supply.Burner},
+		token.ModuleName:          {supply.Minter, supply.Burner},
 	}
 
 	// module accounts that are allowed to receive tokens
@@ -127,7 +127,7 @@ type SimApp struct {
 	UpgradeKeeper  upgrade.Keeper
 	ParamsKeeper   params.Keeper
 	EvidenceKeeper evidence.Keeper
-	AssetKeeper    asset.Keeper
+	TokenKeeper    token.Keeper
 
 	// the module manager
 	mm *module.Manager
@@ -151,7 +151,7 @@ func NewSimApp(
 		bam.MainStoreKey, auth.StoreKey, staking.StoreKey,
 		supply.StoreKey, mint.StoreKey, distr.StoreKey, slashing.StoreKey,
 		gov.StoreKey, params.StoreKey, upgrade.StoreKey, evidence.StoreKey,
-		asset.StoreKey)
+		token.StoreKey)
 	tkeys := sdk.NewTransientStoreKeys(params.TStoreKey)
 
 	app := &SimApp{
@@ -174,7 +174,7 @@ func NewSimApp(
 	app.subspaces[gov.ModuleName] = app.ParamsKeeper.Subspace(gov.DefaultParamspace).WithKeyTable(gov.ParamKeyTable())
 	app.subspaces[crisis.ModuleName] = app.ParamsKeeper.Subspace(crisis.DefaultParamspace)
 	app.subspaces[evidence.ModuleName] = app.ParamsKeeper.Subspace(evidence.DefaultParamspace)
-	app.subspaces[asset.ModuleName] = app.ParamsKeeper.Subspace(asset.DefaultParamspace)
+	app.subspaces[token.ModuleName] = app.ParamsKeeper.Subspace(token.DefaultParamspace)
 
 	// add keepers
 	app.AccountKeeper = auth.NewAccountKeeper(
@@ -205,8 +205,8 @@ func NewSimApp(
 	)
 	app.UpgradeKeeper = upgrade.NewKeeper(skipUpgradeHeights, keys[upgrade.StoreKey], app.cdc)
 
-	app.AssetKeeper = asset.NewKeeper(
-		app.cdc, keys[asset.StoreKey], app.subspaces[asset.ModuleName], app.SupplyKeeper, auth.FeeCollectorName,
+	app.TokenKeeper = token.NewKeeper(
+		app.cdc, keys[token.StoreKey], app.subspaces[token.ModuleName], app.SupplyKeeper, auth.FeeCollectorName,
 	)
 
 	// create evidence keeper with router
@@ -250,7 +250,7 @@ func NewSimApp(
 		staking.NewAppModule(app.StakingKeeper, app.AccountKeeper, app.SupplyKeeper),
 		upgrade.NewAppModule(app.UpgradeKeeper),
 		evidence.NewAppModule(app.EvidenceKeeper),
-		asset.NewAppModule(app.AssetKeeper, app.AccountKeeper),
+		token.NewAppModule(app.TokenKeeper, app.AccountKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -264,7 +264,7 @@ func NewSimApp(
 	app.mm.SetOrderInitGenesis(
 		auth.ModuleName, distr.ModuleName, staking.ModuleName, bank.ModuleName,
 		slashing.ModuleName, gov.ModuleName, mint.ModuleName, supply.ModuleName,
-		crisis.ModuleName, genutil.ModuleName, evidence.ModuleName, asset.ModuleName,
+		crisis.ModuleName, genutil.ModuleName, evidence.ModuleName, token.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -283,7 +283,7 @@ func NewSimApp(
 		distr.NewAppModule(app.DistrKeeper, app.AccountKeeper, app.SupplyKeeper, app.StakingKeeper),
 		staking.NewAppModule(app.StakingKeeper, app.AccountKeeper, app.SupplyKeeper),
 		slashing.NewAppModule(app.SlashingKeeper, app.AccountKeeper, app.StakingKeeper),
-		asset.NewAppModule(app.AssetKeeper, app.AccountKeeper),
+		token.NewAppModule(app.TokenKeeper, app.AccountKeeper),
 	)
 
 	app.sm.RegisterStoreDecoders()
@@ -295,7 +295,7 @@ func NewSimApp(
 	// initialize BaseApp
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
-	app.SetAnteHandler(NewAnteHandler(app.AccountKeeper, app.SupplyKeeper, app.AssetKeeper, auth.DefaultSigVerificationGasConsumer))
+	app.SetAnteHandler(NewAnteHandler(app.AccountKeeper, app.SupplyKeeper, app.TokenKeeper, auth.DefaultSigVerificationGasConsumer))
 	app.SetEndBlocker(app.EndBlocker)
 
 	if loadLatest {

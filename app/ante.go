@@ -5,13 +5,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	"github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	"github.com/cosmos/cosmos-sdk/x/supply"
-	"github/irismod/asset"
+	"github/irismod/token"
 )
 
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
 // numbers, checks signatures & account numbers, and deducts fees from the first
 // signer.
-func NewAnteHandler(ak keeper.AccountKeeper, supplyKeeper supply.Keeper, assetKeeper asset.Keeper, sigGasConsumer ante.SignatureVerificationGasConsumer) sdk.AnteHandler {
+func NewAnteHandler(ak keeper.AccountKeeper, supplyKeeper supply.Keeper, assetKeeper token.Keeper, sigGasConsumer ante.SignatureVerificationGasConsumer) sdk.AnteHandler {
 	return sdk.ChainAnteDecorators(
 		ante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
 		ante.NewMempoolFeeDecorator(),
@@ -24,6 +24,6 @@ func NewAnteHandler(ak keeper.AccountKeeper, supplyKeeper supply.Keeper, assetKe
 		ante.NewSigGasConsumeDecorator(ak, sigGasConsumer),
 		ante.NewSigVerificationDecorator(ak),
 		ante.NewIncrementSequenceDecorator(ak), // innermost AnteDecorator
-		asset.NewValidateTokenFeeDecorator(assetKeeper, ak),
+		token.NewValidateTokenFeeDecorator(assetKeeper, ak),
 	)
 }

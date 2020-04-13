@@ -25,7 +25,7 @@ type Params struct {
 
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
-		paramtypes.NewParamSetPair(KeyAssetTaxRate, &p.AssetTaxRate, validateAssetTaxRate),
+		paramtypes.NewParamSetPair(KeyAssetTaxRate, &p.AssetTaxRate, validateTaxRate),
 		paramtypes.NewParamSetPair(KeyIssueTokenBaseFee, &p.IssueTokenBaseFee, validateIssueTokenBaseFee),
 		paramtypes.NewParamSetPair(KeyMintTokenFeeRatio, &p.MintTokenFeeRatio, validateMintTokenFeeRatio),
 	}
@@ -58,7 +58,7 @@ func DefaultParams() Params {
 }
 
 func ValidateParams(p Params) error {
-	if err := validateAssetTaxRate(p.AssetTaxRate); err != nil {
+	if err := validateTaxRate(p.AssetTaxRate); err != nil {
 		return err
 	}
 	if err := validateMintTokenFeeRatio(p.MintTokenFeeRatio); err != nil {
@@ -71,7 +71,7 @@ func ValidateParams(p Params) error {
 	return nil
 }
 
-func validateAssetTaxRate(i interface{}) error {
+func validateTaxRate(i interface{}) error {
 	v, ok := i.(sdk.Dec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)

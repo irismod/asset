@@ -8,9 +8,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/supply"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	simapp "github/irismod/asset/app"
-	"github/irismod/asset/internal/keeper"
-	"github/irismod/asset/internal/types"
+	simapp "github/irismod/token/app"
+	"github/irismod/token/internal/keeper"
+	"github/irismod/token/internal/types"
 	"testing"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -43,7 +43,7 @@ func (suite *KeeperSuite) SetupTest() {
 
 	suite.cdc = app.Codec()
 	suite.ctx = app.BaseApp.NewContext(isCheck, abci.Header{})
-	suite.keeper = app.AssetKeeper
+	suite.keeper = app.TokenKeeper
 	suite.bk = app.BankKeeper
 	suite.sk = app.SupplyKeeper
 
@@ -92,7 +92,7 @@ func (suite *KeeperSuite) TestEditToken() {
 	token2, err := suite.keeper.GetToken(suite.ctx, msgEditToken.Symbol)
 	require.NoError(suite.T(), err)
 
-	expToken := types.NewFungibleToken("btc", "Bitcoin Token", "satoshi", 18, 21000000, 22000000, mintable.ToBool(), owner)
+	expToken := types.NewToken("btc", "Bitcoin Token", "satoshi", 18, 21000000, 22000000, mintable.ToBool(), owner)
 
 	expJson, _ := json.Marshal(expToken)
 	actJson, _ := json.Marshal(token2)

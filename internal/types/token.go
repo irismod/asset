@@ -11,8 +11,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// FungibleToken defines a struct for the fungible token
-type FungibleToken struct {
+// Token defines a struct for the fungible token
+type Token struct {
 	Symbol        string         `json:"symbol" yaml:"symbol"`
 	Name          string         `json:"name" yaml:"name"`
 	Scale         uint8          `json:"scale" yaml:"scale"`
@@ -23,8 +23,8 @@ type FungibleToken struct {
 	Owner         sdk.AccAddress `json:"owner" yaml:"owner"`
 }
 
-// NewFungibleToken constructs a new FungibleToken instance
-func NewFungibleToken(
+// NewToken constructs a new Token instance
+func NewToken(
 	symbol,
 	name,
 	minUnit string,
@@ -33,8 +33,8 @@ func NewFungibleToken(
 	maxSupply uint64,
 	mintable bool,
 	owner sdk.AccAddress,
-) FungibleToken {
-	return FungibleToken{
+) Token {
+	return Token{
 		Symbol:        symbol,
 		Name:          name,
 		MinUnit:       minUnit,
@@ -47,48 +47,48 @@ func NewFungibleToken(
 }
 
 // GetSymbol implements exported.TokenI
-func (ft FungibleToken) GetSymbol() string {
+func (ft Token) GetSymbol() string {
 	return ft.Symbol
 }
 
 // GetName implements exported.TokenI
-func (ft FungibleToken) GetName() string {
+func (ft Token) GetName() string {
 	return ft.Name
 }
 
 // GetScale implements exported.TokenI
-func (ft FungibleToken) GetScale() uint8 {
+func (ft Token) GetScale() uint8 {
 	return ft.Scale
 }
 
 // GetMinUnit implements exported.TokenI
-func (ft FungibleToken) GetMinUnit() string {
+func (ft Token) GetMinUnit() string {
 	return ft.MinUnit
 }
 
 // GetInitialSupply implements exported.TokenI
-func (ft FungibleToken) GetInitialSupply() uint64 {
+func (ft Token) GetInitialSupply() uint64 {
 	return ft.InitialSupply
 }
 
 // GetMaxSupply implements exported.TokenI
-func (ft FungibleToken) GetMaxSupply() uint64 {
+func (ft Token) GetMaxSupply() uint64 {
 	return ft.MaxSupply
 }
 
 // GetMintable implements exported.TokenI
-func (ft FungibleToken) GetMintable() bool {
+func (ft Token) GetMintable() bool {
 	return ft.Mintable
 }
 
 // GetOwner implements exported.TokenI
-func (ft FungibleToken) GetOwner() sdk.AccAddress {
+func (ft Token) GetOwner() sdk.AccAddress {
 	return ft.Owner
 }
 
 // String implements fmt.Stringer
-func (ft FungibleToken) String() string {
-	return fmt.Sprintf(`FungibleToken:
+func (ft Token) String() string {
+	return fmt.Sprintf(`Token:
   Name:              %s
   Symbol:            %s
   Scale:             %d
@@ -103,7 +103,7 @@ func (ft FungibleToken) String() string {
 }
 
 // Tokens is a set of tokens
-type Tokens []FungibleToken
+type Tokens []Token
 
 // String implements Stringer
 func (tokens Tokens) String() string {

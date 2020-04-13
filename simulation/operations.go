@@ -2,9 +2,9 @@ package simulation
 
 import (
 	"fmt"
-	"github/irismod/asset/exported"
-	"github/irismod/asset/internal/keeper"
-	"github/irismod/asset/internal/types"
+	"github/irismod/token/exported"
+	"github/irismod/token/internal/keeper"
+	"github/irismod/token/internal/types"
 	"math/rand"
 	"strings"
 
@@ -284,9 +284,9 @@ func genToken(ctx sdk.Context,
 	ak auth.AccountKeeper,
 	k keeper.Keeper,
 	accs []simulation.Account,
-) (types.FungibleToken, sdk.Coins) {
+) (types.Token, sdk.Coins) {
 
-	var token types.FungibleToken
+	var token types.Token
 	token = randToken(r, accs)
 
 	for k.HasToken(ctx, token.Symbol) {
@@ -320,7 +320,7 @@ loop:
 
 func randToken(r *rand.Rand,
 	accs []simulation.Account,
-) types.FungibleToken {
+) types.Token {
 
 	symbol := randStringBetween(r, types.MinimumSymbolLen, types.MaximumSymbolLen)
 	minUint := randStringBetween(r, types.MinimumMinUnitLen, types.MaximumMinUnitLen)
@@ -330,7 +330,7 @@ func randToken(r *rand.Rand,
 	maxSupply := r.Int63n(int64(types.MaximumMaxSupply-types.MaximumInitSupply)) + initialSupply
 	simAccount, _ := simulation.RandomAcc(r, accs)
 
-	return types.FungibleToken{
+	return types.Token{
 		Symbol:        strings.ToLower(symbol),
 		Name:          name,
 		Scale:         uint8(scale),

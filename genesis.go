@@ -1,8 +1,8 @@
-package asset
+package token
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github/irismod/asset/internal/types"
+	"github/irismod/token/internal/types"
 )
 
 // InitGenesis - store genesis parameters

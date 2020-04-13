@@ -13,17 +13,17 @@ const (
 	QueryFees   = "fees"
 )
 
-// QueryTokenParams is the query parameters for 'custom/asset/token'
+// QueryTokenParams is the query parameters for 'custom/token/token'
 type QueryTokenParams struct {
 	Denom string
 }
 
-// QueryTokensParams is the query parameters for 'custom/asset/tokens'
+// QueryTokensParams is the query parameters for 'custom/token/tokens'
 type QueryTokensParams struct {
 	Owner sdk.AccAddress
 }
 
-// QueryTokenFeesParams is the query parameters for 'custom/asset/fees'
+// QueryTokenFeesParams is the query parameters for 'custom/token/fees'
 type QueryTokenFeesParams struct {
 	Symbol string
 }

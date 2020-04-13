@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github/irismod/asset/internal/types"
+	"github/irismod/token/internal/types"
 )
 
 // GetQueryCmd returns the query commands for the asset module.
@@ -58,7 +58,7 @@ func getCmdQueryToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			var tokens types.FungibleToken
+			var tokens types.Token
 			if err := cdc.UnmarshalJSON(res, &tokens); err != nil {
 				return err
 			}

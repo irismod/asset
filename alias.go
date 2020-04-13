@@ -1,8 +1,8 @@
-package asset
+package token
 
 import (
-	"github/irismod/asset/internal/keeper"
-	"github/irismod/asset/internal/types"
+	"github/irismod/token/internal/keeper"
+	"github/irismod/token/internal/types"
 )
 
 type (
@@ -12,11 +12,11 @@ type (
 	MsgTransferTokenOwner = types.MsgTransferTokenOwner
 	Tokens                = types.Tokens
 	Params                = types.Params
-	FungibleToken         = types.FungibleToken
+	FungibleToken         = types.Token
 	QueryTokenParams      = types.QueryTokenParams
 	QueryTokensParams     = types.QueryTokensParams
 	QueryTokenFeesParams  = types.QueryTokenFeesParams
-	TokenFeesOutput       = types.TokenFees
+	TokenFees             = types.TokenFees
 	GenesisState          = types.GenesisState
 
 	Keeper = keeper.Keeper
@@ -37,7 +37,7 @@ var (
 	CheckSymbol   = types.CheckSymbol
 	ParseBool     = types.ParseBool
 
-	NewFungibleToken             = types.NewFungibleToken
+	NewFungibleToken             = types.NewToken
 	NewMsgEditToken              = types.NewMsgEditToken
 	NewMsgMintToken              = types.NewMsgMintToken
 	NewMsgTransferTokenOwner     = types.NewMsgTransferTokenOwner

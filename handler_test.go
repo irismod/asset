@@ -1,4 +1,4 @@
-package asset_test
+package token_test
 
 import (
 	"testing"
@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/suite"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github/irismod/asset"
-	simapp "github/irismod/asset/app"
-	"github/irismod/asset/internal/types"
+	"github/irismod/token"
+	simapp "github/irismod/token/app"
+	"github/irismod/token/internal/types"
 )
 
 const (
@@ -36,7 +36,7 @@ type HandlerSuite struct {
 
 	cdc    *codec.Codec
 	ctx    sdk.Context
-	keeper asset.Keeper
+	keeper token.Keeper
 	sk     supply.Keeper
 	bk     bank.Keeper
 }
@@ -46,7 +46,7 @@ func (suite *HandlerSuite) SetupTest() {
 
 	suite.cdc = app.Codec()
 	suite.ctx = app.BaseApp.NewContext(isCheck, abci.Header{})
-	suite.keeper = app.AssetKeeper
+	suite.keeper = app.TokenKeeper
 	suite.bk = app.BankKeeper
 	suite.sk = app.SupplyKeeper
 
@@ -61,7 +61,7 @@ func (suite *HandlerSuite) SetupTest() {
 }
 
 func (suite *HandlerSuite) TestIssueToken() {
-	h := asset.NewHandler(suite.keeper)
+	h := token.NewHandler(suite.keeper)
 
 	balance := suite.bk.GetCoins(suite.ctx, owner)
 	nativeTokenAmt1 := balance.AmountOf(denom)
@@ -96,7 +96,7 @@ func (suite *HandlerSuite) TestMintToken() {
 
 	beginNativeAmt := balance.AmountOf(denom)
 
-	h := asset.NewHandler(suite.keeper)
+	h := token.NewHandler(suite.keeper)
 
 	msgMintToken := types.NewMsgMintToken(msg.Symbol, owner, nil, 1000)
 	_, err = h(suite.ctx, msgMintToken)

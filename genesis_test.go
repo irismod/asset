@@ -1,4 +1,4 @@
-package asset_test
+package token_test
 
 import (
 	"testing"
@@ -8,9 +8,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github/irismod/asset"
-	simapp "github/irismod/asset/app"
-	"github/irismod/asset/internal/types"
+	"github/irismod/token"
+	simapp "github/irismod/token/app"
+	"github/irismod/token/internal/types"
 )
 
 func TestExportGenesis(t *testing.T) {
@@ -19,7 +19,7 @@ func TestExportGenesis(t *testing.T) {
 	ctx := app.BaseApp.NewContext(false, abci.Header{})
 
 	// export genesis
-	genesisState := asset.ExportGenesis(ctx, app.AssetKeeper)
+	genesisState := token.ExportGenesis(ctx, app.TokenKeeper)
 
 	require.Equal(t, types.DefaultParams(), genesisState.Params)
 	for _, token := range genesisState.Tokens {
@@ -34,7 +34,7 @@ func TestInitGenesis(t *testing.T) {
 
 	// add token
 	addr := sdk.AccAddress([]byte("addr1"))
-	ft := types.NewFungibleToken("btc", "Bitcoin Network", "satoshi", 1, 1, 1, true, addr)
+	ft := types.NewToken("btc", "Bitcoin Network", "satoshi", 1, 1, 1, true, addr)
 
 	genesis := types.GenesisState{
 		Params: types.DefaultParams(),
@@ -42,10 +42,10 @@ func TestInitGenesis(t *testing.T) {
 	}
 
 	// initialize genesis
-	asset.InitGenesis(ctx, app.AssetKeeper, genesis)
+	token.InitGenesis(ctx, app.TokenKeeper, genesis)
 
 	// query all tokens
-	var tokens = app.AssetKeeper.GetTokens(ctx, nil)
+	var tokens = app.TokenKeeper.GetTokens(ctx, nil)
 	require.Equal(t, len(tokens), 2)
 	require.Equal(t, tokens[0], ft)
 }

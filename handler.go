@@ -1,4 +1,4 @@
-package asset
+package token
 
 import (
 	"strconv"
@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github/irismod/asset/internal/types"
+	"github/irismod/token/internal/types"
 )
 
 // handle all "asset" type messages.
