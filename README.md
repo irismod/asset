@@ -1,2 +1,2 @@
-# asset
-Asset Module
+# token
+Fungible Token Module
