@@ -13,4 +13,7 @@ type TokenI interface {
 	GetMaxSupply() uint64
 	GetMintable() bool
 	GetOwner() sdk.AccAddress
+
+	ToMainCoin(coin sdk.Coin) (sdk.DecCoin, error)
+	ToMinCoin(coin sdk.DecCoin) (sdk.Coin, error)
 }

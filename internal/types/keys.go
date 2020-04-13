@@ -2,6 +2,7 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"strings"
 )
 
 const (
@@ -29,15 +30,18 @@ var (
 
 // KeySymbol returns the key of the token with the specified symbol
 func KeySymbol(symbol string) []byte {
+	symbol = strings.ToLower(strings.TrimSpace(symbol))
 	return append(PrefixTokenForSymbol, []byte(symbol)...)
 }
 
 // KeyMinUint returns the key of the token with the specified min_unit
 func KeyMinUint(minUnit string) []byte {
+	minUnit = strings.ToLower(strings.TrimSpace(minUnit))
 	return append(PrefixTokenForMinUint, []byte(minUnit)...)
 }
 
 // KeyTokens returns the key of the specified owner and symbol. Intended for querying all tokens of an owner
 func KeyTokens(owner sdk.AccAddress, symbol string) []byte {
+	symbol = strings.ToLower(strings.TrimSpace(symbol))
 	return append(append(PrefixTokens, owner.Bytes()...), []byte(symbol)...)
 }

@@ -6,9 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // Token defines a struct for the fungible token
@@ -34,6 +33,18 @@ func NewToken(
 	mintable bool,
 	owner sdk.AccAddress,
 ) Token {
+	symbol = strings.ToLower(strings.TrimSpace(symbol))
+	minUnit = strings.ToLower(strings.TrimSpace(minUnit))
+	name = strings.TrimSpace(name)
+
+	if maxSupply == 0 {
+		if mintable {
+			maxSupply = MaximumMaxSupply
+		} else {
+			maxSupply = initialSupply
+		}
+	}
+
 	return Token{
 		Symbol:        symbol,
 		Name:          name,
@@ -47,47 +58,83 @@ func NewToken(
 }
 
 // GetSymbol implements exported.TokenI
-func (ft Token) GetSymbol() string {
-	return ft.Symbol
+func (t Token) GetSymbol() string {
+	return t.Symbol
 }
 
 // GetName implements exported.TokenI
-func (ft Token) GetName() string {
-	return ft.Name
+func (t Token) GetName() string {
+	return t.Name
 }
 
 // GetScale implements exported.TokenI
-func (ft Token) GetScale() uint8 {
-	return ft.Scale
+func (t Token) GetScale() uint8 {
+	return t.Scale
 }
 
 // GetMinUnit implements exported.TokenI
-func (ft Token) GetMinUnit() string {
-	return ft.MinUnit
+func (t Token) GetMinUnit() string {
+	return t.MinUnit
 }
 
 // GetInitialSupply implements exported.TokenI
-func (ft Token) GetInitialSupply() uint64 {
-	return ft.InitialSupply
+func (t Token) GetInitialSupply() uint64 {
+	return t.InitialSupply
 }
 
 // GetMaxSupply implements exported.TokenI
-func (ft Token) GetMaxSupply() uint64 {
-	return ft.MaxSupply
+func (t Token) GetMaxSupply() uint64 {
+	return t.MaxSupply
 }
 
 // GetMintable implements exported.TokenI
-func (ft Token) GetMintable() bool {
-	return ft.Mintable
+func (t Token) GetMintable() bool {
+	return t.Mintable
 }
 
 // GetOwner implements exported.TokenI
-func (ft Token) GetOwner() sdk.AccAddress {
-	return ft.Owner
+func (t Token) GetOwner() sdk.AccAddress {
+	return t.Owner
+}
+
+//ToMainCoin return the main denom coin from args
+func (t Token) ToMainCoin(coin sdk.Coin) (sdk.DecCoin, error) {
+	if t.Symbol != coin.Denom && t.MinUnit != coin.Denom {
+		return sdk.NewDecCoinFromDec(coin.Denom, sdk.ZeroDec()), sdkerrors.Wrapf(ErrTokenNotExists, "token not match")
+	}
+
+	if t.Symbol == coin.Denom {
+		return sdk.NewDecCoin(coin.Denom, coin.Amount), nil
+	}
+
+	// dest amount = src amount / 10^(scale)
+	precision := sdk.NewDecFromIntWithPrec(sdk.NewInt(1), int64(t.Scale))
+	amount := sdk.NewDecFromInt(coin.Amount)
+
+	amt := amount.Quo(precision)
+	return sdk.NewDecCoinFromDec(t.Symbol, amt), nil
+}
+
+//ToMinCoin return the min denom coin from args
+func (t Token) ToMinCoin(coin sdk.DecCoin) (newCoin sdk.Coin, err error) {
+	if t.Symbol != coin.Denom && t.MinUnit != coin.Denom {
+		return sdk.NewCoin(coin.Denom, sdk.ZeroInt()), sdkerrors.Wrapf(ErrTokenNotExists, "token not match")
+	}
+
+	if t.MinUnit == coin.Denom {
+		return sdk.NewCoin(coin.Denom, coin.Amount.TruncateInt()), nil
+	}
+
+	// dest amount = src amount * 10^(dest scale)
+	precision := sdk.NewDecFromIntWithPrec(sdk.NewInt(1), int64(t.Scale))
+	amount := coin.Amount
+
+	amt := amount.Mul(precision)
+	return sdk.NewCoin(t.MinUnit, amt.TruncateInt()), nil
 }
 
 // String implements fmt.Stringer
-func (ft Token) String() string {
+func (t Token) String() string {
 	return fmt.Sprintf(`Token:
   Name:              %s
   Symbol:            %s
@@ -97,8 +144,8 @@ func (ft Token) String() string {
   Max Supply:        %d
   Mintable:          %v
   Owner:             %s`,
-		ft.Name, ft.Symbol, ft.Scale, ft.MinUnit,
-		ft.InitialSupply, ft.MaxSupply, ft.Mintable, ft.Owner,
+		t.Name, t.Symbol, t.Scale, t.MinUnit,
+		t.InitialSupply, t.MaxSupply, t.Mintable, t.Owner,
 	)
 }
 
@@ -191,7 +238,7 @@ func (b Bool) MarshalJSON() ([]byte, error) {
 	return json.Marshal(b.String())
 }
 
-// Unmarshals from JSON assuming Bech32 encoding
+// UnmarshalJSON from using string
 func (b *Bool) UnmarshalJSON(data []byte) error {
 	var s string
 	err := json.Unmarshal(data, &s)
