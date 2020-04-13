@@ -11,8 +11,8 @@ type (
 	MsgMintToken          = types.MsgMintToken
 	MsgTransferTokenOwner = types.MsgTransferTokenOwner
 	Tokens                = types.Tokens
+	Token                 = types.Token
 	Params                = types.Params
-	FungibleToken         = types.Token
 	QueryTokenParams      = types.QueryTokenParams
 	QueryTokensParams     = types.QueryTokensParams
 	QueryTokenFeesParams  = types.QueryTokenFeesParams

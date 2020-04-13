@@ -4,7 +4,6 @@ import (
 	"github/irismod/token/internal/types"
 	"strings"
 
-	"github.com/cosmos/cosmos-sdk/codec"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -39,7 +38,7 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, 
 		return nil, err
 	}
 
-	bz, err := codec.MarshalJSONIndent(keeper.cdc, token)
+	bz, err := keeper.cdc.MarshalJSON(token)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +52,7 @@ func queryTokens(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte,
 		return nil, err
 	}
 	tokens := keeper.GetTokens(ctx, params.Owner)
-	return codec.MarshalJSONIndent(keeper.cdc, tokens)
+	return keeper.cdc.MarshalJSON(tokens)
 }
 
 func queryFees(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, error) {
@@ -77,7 +76,7 @@ func queryFees(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, e
 		MintFee:  mintFee,
 	}
 
-	bz, err := codec.MarshalJSONIndent(keeper.cdc, fees)
+	bz, err := keeper.cdc.MarshalJSON(fees)
 	if err != nil {
 		return nil, err
 	}
