@@ -104,7 +104,7 @@ func (k Keeper) EditToken(ctx sdk.Context, msg types.MsgEditToken) error {
 		issuedAmt := k.getTokenSupply(ctx, token.MinUnit)
 		issuedMainUnitAmt := uint64(issuedAmt.Quo(sdk.NewIntWithDecimal(1, int(token.Scale))).Int64())
 		if msg.MaxSupply < issuedMainUnitAmt {
-			return sdkerrors.Wrapf(types.ErrInvalidAssetMaxSupply, "max supply must not be less than %d", issuedMainUnitAmt)
+			return sdkerrors.Wrapf(types.ErrInvalidMaxSupply, "max supply must not be less than %d", issuedMainUnitAmt)
 		}
 
 		token.MaxSupply = msg.MaxSupply
@@ -166,7 +166,7 @@ func (k Keeper) MintToken(ctx sdk.Context, msg types.MsgMintToken) error {
 	}
 
 	if !token.Mintable {
-		return sdkerrors.Wrapf(types.ErrInvalidOwner, "the token %s is set to be non-mintable", msg.Symbol)
+		return sdkerrors.Wrapf(types.ErrNotMintable, "the token %s is set to be non-mintable", msg.Symbol)
 	}
 
 	issuedAmt := k.getTokenSupply(ctx, token.MinUnit)
@@ -174,7 +174,7 @@ func (k Keeper) MintToken(ctx sdk.Context, msg types.MsgMintToken) error {
 	mintableMaxMainUnitAmt := uint64(mintableMaxAmt.Quo(sdk.NewIntWithDecimal(1, int(token.Scale))).Int64())
 
 	if msg.Amount > mintableMaxMainUnitAmt {
-		return sdkerrors.Wrapf(types.ErrInvalidAssetMaxSupply, "The amount of minting tokens plus the total amount of issued tokens has exceeded the maximum supply, only accepts amount (0, %d]", mintableMaxMainUnitAmt)
+		return sdkerrors.Wrapf(types.ErrInvalidMaxSupply, "The amount of minting tokens plus the total amount of issued tokens has exceeded the maximum supply, only accepts amount (0, %d]", mintableMaxMainUnitAmt)
 	}
 
 	mintCoin := sdk.NewCoin(token.MinUnit, sdk.NewIntWithDecimal(int64(msg.Amount), int(token.Scale)))
@@ -329,7 +329,7 @@ func (k Keeper) getToken(ctx sdk.Context, symbol string) (token types.FungibleTo
 
 	bz := store.Get(types.KeySymbol(symbol))
 	if bz == nil {
-		return token, sdkerrors.Wrap(types.ErrAssetNotExists, fmt.Sprintf("token %s does not exist", symbol))
+		return token, sdkerrors.Wrap(types.ErrTokenNotExists, fmt.Sprintf("token %s does not exist", symbol))
 	}
 	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &token)
 	return token, nil
@@ -349,10 +349,4 @@ func (k Keeper) resetStoreKeyForQueryToken(ctx sdk.Context, msg types.MsgTransfe
 // getTokenSupply query issued tokens supply from the total supply
 func (k Keeper) getTokenSupply(ctx sdk.Context, denom string) sdk.Int {
 	return k.supplyKeeper.GetSupply(ctx).GetTotal().AmountOf(denom)
-}
-
-// addCollectedFees implements an alias call to the underlying supply keeper's
-// addCollectedFees to be used in BeginBlocker.
-func (k Keeper) addCollectedFees(ctx sdk.Context, fees sdk.Coins) error {
-	return k.supplyKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, k.feeCollectorName, fees)
 }

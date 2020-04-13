@@ -1,7 +1,6 @@
 package simulation
 
 import (
-	"fmt"
 	"math/rand"
 
 	"github.com/cosmos/cosmos-sdk/x/simulation"
@@ -21,17 +20,17 @@ func ParamChanges(r *rand.Rand) []simulation.ParamChange {
 	return []simulation.ParamChange{
 		simulation.NewSimParamChange(types.ModuleName, keyAssetTaxRate,
 			func(r *rand.Rand) string {
-				return fmt.Sprintf("%s", RandomDec(r))
+				return RandomDec(r).String()
 			},
 		),
 		simulation.NewSimParamChange(types.ModuleName, keyIssueTokenBaseFee,
 			func(r *rand.Rand) string {
-				return fmt.Sprintf("%s", RandomInt(r))
+				return RandomInt(r).String()
 			},
 		),
 		simulation.NewSimParamChange(types.ModuleName, keyMintTokenFeeRatio,
 			func(r *rand.Rand) string {
-				return fmt.Sprintf("%s", RandomDec(r))
+				return RandomDec(r).String()
 			},
 		),
 	}

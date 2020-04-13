@@ -80,12 +80,12 @@ func ValidateMsgIssueToken(msg MsgIssueToken) error {
 	}
 
 	if msg.Owner.Empty() {
-		return ErrNilAssetOwner
+		return ErrNilOwner
 	}
 
 	nameLen := len(msg.Name)
 	if nameLen == 0 || nameLen > MaximumNameLen {
-		return sdkerrors.Wrapf(ErrInvalidAssetName, "invalid token name %s, only accepts length (0, %d]", msg.Name, MaximumNameLen)
+		return sdkerrors.Wrapf(ErrInvalidName, "invalid token name %s, only accepts length (0, %d]", msg.Name, MaximumNameLen)
 	}
 
 	if err := CheckSymbol(msg.Symbol); err != nil {
@@ -94,19 +94,19 @@ func ValidateMsgIssueToken(msg MsgIssueToken) error {
 
 	minUnitLen := len(msg.MinUnit)
 	if minUnitLen < MinimumMinUnitLen || minUnitLen > MaximumMinUnitLen || !IsAlphaNumeric(msg.MinUnit) || !IsBeginWithAlpha(msg.MinUnit) {
-		return sdkerrors.Wrapf(ErrInvalidAssetMinUnit, "invalid token min_unit %s, only accepts alphanumeric characters, and begin with an english letter, length [%d, %d]", msg.MinUnit, MinimumMinUnitLen, MaximumMinUnitLen)
+		return sdkerrors.Wrapf(ErrInvalidMinUnit, "invalid token min_unit %s, only accepts alphanumeric characters, and begin with an english letter, length [%d, %d]", msg.MinUnit, MinimumMinUnitLen, MaximumMinUnitLen)
 	}
 
 	if msg.InitialSupply > MaximumInitSupply {
-		return sdkerrors.Wrapf(ErrInvalidAssetInitSupply, "invalid token initial supply %d, only accepts value [0, %d]", msg.InitialSupply, MaximumInitSupply)
+		return sdkerrors.Wrapf(ErrInvalidInitSupply, "invalid token initial supply %d, only accepts value [0, %d]", msg.InitialSupply, MaximumInitSupply)
 	}
 
 	if msg.MaxSupply < msg.InitialSupply || msg.MaxSupply > MaximumMaxSupply {
-		return sdkerrors.Wrapf(ErrInvalidAssetMaxSupply, "invalid token max supply %d, only accepts value [%d, %d]", msg.MaxSupply, msg.InitialSupply, MaximumMaxSupply)
+		return sdkerrors.Wrapf(ErrInvalidMaxSupply, "invalid token max supply %d, only accepts value [%d, %d]", msg.MaxSupply, msg.InitialSupply, MaximumMaxSupply)
 	}
 
 	if msg.Scale > MaximumScale {
-		return sdkerrors.Wrapf(ErrInvalidAssetScale, "invalid token scale %d, only accepts value [0, %d]", msg.Scale, MaximumScale)
+		return sdkerrors.Wrapf(ErrInvalidScale, "invalid token scale %d, only accepts value [0, %d]", msg.Scale, MaximumScale)
 	}
 
 	return nil
@@ -226,17 +226,17 @@ func (msg MsgEditToken) Type() string { return TypeMsgEditToken }
 func (msg MsgEditToken) ValidateBasic() error {
 	// check owner
 	if msg.Owner.Empty() {
-		return sdkerrors.Wrapf(ErrNilAssetOwner, "the owner of the asset must be specified")
+		return sdkerrors.Wrapf(ErrNilOwner, "the owner of the asset must be specified")
 	}
 
 	nameLen := len(msg.Name)
 	if DoNotModify != msg.Name && nameLen > MaximumNameLen {
-		return sdkerrors.Wrapf(ErrInvalidAssetName, "invalid token name %s, only accepts length (0, %d]", msg.Name, MaximumNameLen)
+		return sdkerrors.Wrapf(ErrInvalidName, "invalid token name %s, only accepts length (0, %d]", msg.Name, MaximumNameLen)
 	}
 
 	// check max_supply for fast failed
 	if msg.MaxSupply > MaximumMaxSupply {
-		return sdkerrors.Wrapf(ErrInvalidAssetMaxSupply, "invalid token max supply %d, must be less than %d", msg.MaxSupply, MaximumMaxSupply)
+		return sdkerrors.Wrapf(ErrInvalidMaxSupply, "invalid token max supply %d, must be less than %d", msg.MaxSupply, MaximumMaxSupply)
 	}
 
 	// check symbol
@@ -310,7 +310,7 @@ func (msg MsgMintToken) ValidateBasic() error {
 	}
 
 	if msg.Amount == 0 || msg.Amount > MaximumMaxSupply {
-		return sdkerrors.Wrapf(ErrInvalidAssetMaxSupply, "invalid token amount %d, only accepts value (0, %d]", msg.Amount, MaximumMaxSupply)
+		return sdkerrors.Wrapf(ErrInvalidMaxSupply, "invalid token amount %d, only accepts value (0, %d]", msg.Amount, MaximumMaxSupply)
 	}
 
 	return CheckSymbol(msg.Symbol)

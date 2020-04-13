@@ -7,7 +7,7 @@ import (
 
 // InitGenesis - store genesis parameters
 func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
-	if err := ValidateGenesis(data); err != nil && err != types.ErrNilAssetOwner {
+	if err := ValidateGenesis(data); err != nil && err != types.ErrNilOwner {
 		panic(err.Error())
 	}
 

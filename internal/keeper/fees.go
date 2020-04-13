@@ -86,7 +86,7 @@ func feeHandler(ctx sdk.Context, k Keeper, feeAcc sdk.AccAddress, fee sdk.Coin) 
 	}
 
 	// send community tax to collectedFees
-	if err := k.addCollectedFees(ctx, sdk.NewCoins(communityTaxCoin)); err != nil {
+	if err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, k.feeCollectorName, sdk.NewCoins(communityTaxCoin)); err != nil {
 		return err
 	}
 

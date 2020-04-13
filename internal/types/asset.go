@@ -140,15 +140,15 @@ func (tokens Tokens) Validate() error {
 // CheckSymbol checks if the given symbol is valid
 func CheckSymbol(symbol string) error {
 	if strings.Contains(strings.ToLower(symbol), nativeToken.Symbol) {
-		return sdkerrors.Wrapf(ErrInvalidAssetSymbol, "symbol can not contains : %s", nativeToken.Symbol)
+		return sdkerrors.Wrapf(ErrInvalidSymbol, "symbol can not contains : %s", nativeToken.Symbol)
 	}
 
 	if len(symbol) < MinimumSymbolLen || len(symbol) > MaximumSymbolLen {
-		return sdkerrors.Wrapf(ErrInvalidAssetSymbol, "invalid symbol: %s,  only accepts length [%d, %d]", symbol, MinimumSymbolLen, MaximumSymbolLen)
+		return sdkerrors.Wrapf(ErrInvalidSymbol, "invalid symbol: %s,  only accepts length [%d, %d]", symbol, MinimumSymbolLen, MaximumSymbolLen)
 	}
 
 	if !IsBeginWithAlpha(symbol) || !IsAlphaNumeric(symbol) {
-		return sdkerrors.Wrapf(ErrInvalidAssetSymbol, "invalid symbol: %s, only accepts alphanumeric characters, and begin with an english letter", symbol)
+		return sdkerrors.Wrapf(ErrInvalidSymbol, "invalid symbol: %s, only accepts alphanumeric characters, and begin with an english letter", symbol)
 	}
 
 	return nil
