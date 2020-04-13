@@ -5,9 +5,9 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-// asset module sentinel errors
+// token module sentinel errors
 var (
-	ErrNilOwner             = sdkerrors.Register(ModuleName, 1, "the owner of the asset must be specified")
+	ErrNilOwner             = sdkerrors.Register(ModuleName, 1, "the owner of the token must be specified")
 	ErrInvalidName          = sdkerrors.Register(ModuleName, 2, "invalid token name")
 	ErrInvalidMinUnit       = sdkerrors.Register(ModuleName, 3, "invalid token min_unit")
 	ErrInvalidSymbol        = sdkerrors.Register(ModuleName, 4, "must be standard denom")

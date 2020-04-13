@@ -1,4 +1,4 @@
-package lcd
+package rest
 
 import (
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -15,7 +15,7 @@ const (
 	RestParamOwner  = "owner"
 )
 
-// RegisterRoutes registers asset-related REST handlers to a router
+// RegisterRoutes registers token-related REST handlers to a router
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, queryRoute string) {
 	registerQueryRoutes(cliCtx, r, queryRoute)
 	registerTxRoutes(cliCtx, r)

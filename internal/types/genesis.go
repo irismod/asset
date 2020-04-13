@@ -4,9 +4,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// GenesisState - all asset state that must be provided at genesis
+// GenesisState - all token state that must be provided at genesis
 type GenesisState struct {
-	Params Params `json:"params"` // asset params
+	Params Params `json:"params"` // token params
 	Tokens Tokens `json:"tokens"` // issued tokens
 }
 

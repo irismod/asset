@@ -21,7 +21,7 @@ import (
 	"github/irismod/token/internal/types"
 )
 
-// GetTxCmd returns the transaction commands for the asset module.
+// GetTxCmd returns the transaction commands for the token module.
 func GetTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	txCmd := &cobra.Command{
 		Use:                        types.ModuleName,

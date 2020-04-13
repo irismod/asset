@@ -41,7 +41,7 @@ func DefaultGenesisState() GenesisState {
 	}
 }
 
-// ValidateGenesis validates the provided asset genesis state to ensure the
+// ValidateGenesis validates the provided token genesis state to ensure the
 // expected invariants holds.
 func ValidateGenesis(data GenesisState) error {
 	if err := ValidateParams(data.Params); err != nil {

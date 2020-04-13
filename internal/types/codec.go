@@ -6,14 +6,14 @@ import (
 
 // Register concrete types on codec
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(MsgIssueToken{}, "irismod/asset/MsgIssueToken", nil)
-	cdc.RegisterConcrete(MsgEditToken{}, "irismod/asset/MsgEditToken", nil)
-	cdc.RegisterConcrete(MsgMintToken{}, "irismod/asset/MsgMintToken", nil)
-	cdc.RegisterConcrete(MsgTransferTokenOwner{}, "irismod/asset/MsgTransferTokenOwner", nil)
+	cdc.RegisterConcrete(MsgIssueToken{}, "irismod/token/MsgIssueToken", nil)
+	cdc.RegisterConcrete(MsgEditToken{}, "irismod/token/MsgEditToken", nil)
+	cdc.RegisterConcrete(MsgMintToken{}, "irismod/token/MsgMintToken", nil)
+	cdc.RegisterConcrete(MsgTransferTokenOwner{}, "irismod/token/MsgTransferTokenOwner", nil)
 
-	cdc.RegisterConcrete(Token{}, "irismod/asset/Token", nil)
+	cdc.RegisterConcrete(Token{}, "irismod/token/Token", nil)
 
-	cdc.RegisterConcrete(&Params{}, "irismod/asset/Params", nil)
+	cdc.RegisterConcrete(&Params{}, "irismod/token/Params", nil)
 }
 
 var ModuleCdc *codec.Codec

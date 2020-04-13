@@ -22,7 +22,7 @@ func NewQuerier(k Keeper) sdk.Querier {
 		case types.QueryFees:
 			return queryFees(ctx, req, k)
 		default:
-			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "unknown asset query endpoint")
+			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "unknown token query endpoint")
 		}
 	}
 }

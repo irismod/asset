@@ -11,7 +11,7 @@ import (
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
 // numbers, checks signatures & account numbers, and deducts fees from the first
 // signer.
-func NewAnteHandler(ak keeper.AccountKeeper, supplyKeeper supply.Keeper, assetKeeper token.Keeper, sigGasConsumer ante.SignatureVerificationGasConsumer) sdk.AnteHandler {
+func NewAnteHandler(ak keeper.AccountKeeper, supplyKeeper supply.Keeper, tokenKeeper token.Keeper, sigGasConsumer ante.SignatureVerificationGasConsumer) sdk.AnteHandler {
 	return sdk.ChainAnteDecorators(
 		ante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
 		ante.NewMempoolFeeDecorator(),
@@ -24,6 +24,6 @@ func NewAnteHandler(ak keeper.AccountKeeper, supplyKeeper supply.Keeper, assetKe
 		ante.NewSigGasConsumeDecorator(ak, sigGasConsumer),
 		ante.NewSigVerificationDecorator(ak),
 		ante.NewIncrementSequenceDecorator(ak), // innermost AnteDecorator
-		token.NewValidateTokenFeeDecorator(assetKeeper, ak),
+		token.NewValidateTokenFeeDecorator(tokenKeeper, ak),
 	)
 }

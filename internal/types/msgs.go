@@ -20,14 +20,14 @@ const (
 	// constant used to indicate that some field should not be updated
 	DoNotModify = "[do-not-modify]"
 
-	MaximumMaxSupply  = uint64(1000000000000) // maximal limitation for asset max supply，1000 billion
-	MaximumInitSupply = uint64(100000000000)  // maximal limitation for asset initial supply，100 billion
-	MaximumScale      = uint8(18)             // maximal limitation for asset decimal
-	MinimumSymbolLen  = 3                     // minimal limitation for the length of the asset's symbol / canonical_symbol
-	MaximumSymbolLen  = 8                     // maximal limitation for the length of the asset's symbol / canonical_symbol
-	MaximumNameLen    = 32                    // maximal limitation for the length of the asset's name
-	MinimumMinUnitLen = 3                     // minimal limitation for the length of the asset's min_unit
-	MaximumMinUnitLen = 10                    // maximal limitation for the length of the asset's min_unit
+	MaximumMaxSupply  = uint64(1000000000000) // maximal limitation for token max supply，1000 billion
+	MaximumInitSupply = uint64(100000000000)  // maximal limitation for token initial supply，100 billion
+	MaximumScale      = uint8(18)             // maximal limitation for token decimal
+	MinimumSymbolLen  = 3                     // minimal limitation for the length of the token's symbol / canonical_symbol
+	MaximumSymbolLen  = 8                     // maximal limitation for the length of the token's symbol / canonical_symbol
+	MaximumNameLen    = 32                    // maximal limitation for the length of the token's name
+	MinimumMinUnitLen = 3                     // minimal limitation for the length of the token's min_unit
+	MaximumMinUnitLen = 10                    // maximal limitation for the length of the token's min_unit
 )
 
 var (
@@ -49,7 +49,7 @@ type MsgIssueToken struct {
 	Owner         sdk.AccAddress `json:"owner"`
 }
 
-// NewMsgIssueToken - construct asset issue msg.
+// NewMsgIssueToken - construct token issue msg.
 func NewMsgIssueToken(symbol string, minUnit string, name string, scale uint8, initialSupply, maxSupply uint64, mintable bool, owner sdk.AccAddress) MsgIssueToken {
 	return MsgIssueToken{
 		Symbol:        symbol,
@@ -226,7 +226,7 @@ func (msg MsgEditToken) Type() string { return TypeMsgEditToken }
 func (msg MsgEditToken) ValidateBasic() error {
 	// check owner
 	if msg.Owner.Empty() {
-		return sdkerrors.Wrapf(ErrNilOwner, "the owner of the asset must be specified")
+		return sdkerrors.Wrapf(ErrNilOwner, "the owner of the token must be specified")
 	}
 
 	nameLen := len(msg.Name)

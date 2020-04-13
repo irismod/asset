@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	keyAssetTaxRate      = "AssetTaxRate"
+	keyTokenTaxRate      = "TokenTaxRate"
 	keyIssueTokenBaseFee = "IssueTokenBaseFee"
 	keyMintTokenFeeRatio = "MintTokenFeeRatio"
 )
@@ -18,7 +18,7 @@ const (
 // on the simulation
 func ParamChanges(r *rand.Rand) []simulation.ParamChange {
 	return []simulation.ParamChange{
-		simulation.NewSimParamChange(types.ModuleName, keyAssetTaxRate,
+		simulation.NewSimParamChange(types.ModuleName, keyTokenTaxRate,
 			func(r *rand.Rand) string {
 				return RandomDec(r).String()
 			},

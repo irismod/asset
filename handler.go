@@ -9,7 +9,7 @@ import (
 	"github/irismod/token/internal/types"
 )
 
-// handle all "asset" type messages.
+// handle all "token" type messages.
 func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
 		switch msg := msg.(type) {

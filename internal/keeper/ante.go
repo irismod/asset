@@ -20,7 +20,7 @@ func NewValidateTokenFeeDecorator(k Keeper, ak types.AccountKeeper) ValidateToke
 }
 
 // AnteHandle returns an AnteHandler that checks if the balance of
-// the fee payer is sufficient for asset related fee
+// the fee payer is sufficient for token related fee
 func (dtf ValidateTokenFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (newCtx sdk.Context, err error) {
 
 	// new ctx
@@ -28,7 +28,7 @@ func (dtf ValidateTokenFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simu
 	// total fee
 	feeMap := make(map[string]sdk.Coin)
 	for _, msg := range tx.GetMsgs() {
-		// only check consecutive msgs which are routed to asset from the beginning
+		// only check consecutive msgs which are routed to token from the beginning
 		if msg.Route() != types.ModuleName {
 			break
 		}
@@ -57,7 +57,7 @@ func (dtf ValidateTokenFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simu
 		balance := account.GetCoins()
 		if balance.IsAllLT(sdk.NewCoins(fee)) {
 			return ctx, sdkerrors.Wrapf(
-				sdkerrors.ErrInsufficientFunds, "insufficient coins for asset fee; %s < %s", balance, fee)
+				sdkerrors.ErrInsufficientFunds, "insufficient coins for token fee; %s < %s", balance, fee)
 		}
 	}
 	// continue

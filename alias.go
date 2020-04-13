@@ -37,7 +37,7 @@ var (
 	CheckSymbol   = types.CheckSymbol
 	ParseBool     = types.ParseBool
 
-	NewFungibleToken             = types.NewToken
+	NewToken                     = types.NewToken
 	NewMsgEditToken              = types.NewMsgEditToken
 	NewMsgMintToken              = types.NewMsgMintToken
 	NewMsgTransferTokenOwner     = types.NewMsgTransferTokenOwner

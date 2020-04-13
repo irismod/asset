@@ -35,7 +35,7 @@ func getCmdQueryToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "token [denom]",
 		Short:   "Query a token by symbol or minUnit",
-		Example: "asset token <symbol>",
+		Example: "token <symbol>",
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
@@ -75,7 +75,7 @@ func getCmdQueryTokens(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "tokens [owner]",
 		Short:   "Query tokens by owner",
-		Example: "asset tokens <owner>",
+		Example: "tokens <owner>",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
@@ -117,7 +117,7 @@ func getCmdQueryFee(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		Use:     "fee [symbol]",
 		Short:   "Query the token related fees",
 		Args:    cobra.ExactArgs(1),
-		Example: "asset token fee <symbol>",
+		Example: "token fee <symbol>",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 

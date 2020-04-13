@@ -16,6 +16,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github/irismod/token/client/cli"
+	"github/irismod/token/client/rest"
 	"github/irismod/token/simulation"
 )
 
@@ -54,7 +55,7 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 
 // RegisterRESTRoutes registers the REST routes for the token module.
 func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	//rest.RegisterRoutes(ctx, rtr)
+	rest.RegisterRoutes(ctx, rtr, StoreKey)
 }
 
 // GetTxCmd returns no root tx command for the token module.
@@ -72,16 +73,16 @@ func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 // AppModule implements an application module for the token module.
 type AppModule struct {
 	AppModuleBasic
-	assetKeeper   Keeper
-	accountKeeper auth.AccountKeeper
+	tk Keeper
+	ak auth.AccountKeeper
 }
 
 // NewAppModule creates a new AppModule object
 func NewAppModule(keeper Keeper, ak auth.AccountKeeper) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
-		assetKeeper:    keeper,
-		accountKeeper:  ak,
+		tk:             keeper,
+		ak:             ak,
 	}
 }
 
@@ -100,7 +101,7 @@ func (AppModule) Route() string {
 
 // NewHandler returns an sdk.Handler for the token module.
 func (am AppModule) NewHandler() sdk.Handler {
-	return NewHandler(am.assetKeeper)
+	return NewHandler(am.tk)
 }
 
 // QuerierRoute returns the token module's querier route name.
@@ -110,7 +111,7 @@ func (AppModule) QuerierRoute() string {
 
 // NewQuerierHandler returns the token module sdk.Querier.
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return NewQuerier(am.assetKeeper)
+	return NewQuerier(am.tk)
 }
 
 // InitGenesis performs genesis initialization for the token module. It returns
@@ -118,13 +119,13 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState GenesisState
 	ModuleCdc.MustUnmarshalJSON(data, &genesisState)
-	InitGenesis(ctx, am.assetKeeper, genesisState)
+	InitGenesis(ctx, am.tk, genesisState)
 	return []abci.ValidatorUpdate{}
 }
 
 // ExportGenesis returns the exported genesis state as raw bytes for the token module.
 func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
-	gs := ExportGenesis(ctx, am.assetKeeper)
+	gs := ExportGenesis(ctx, am.tk)
 	return ModuleCdc.MustMarshalJSON(gs)
 }
 
@@ -145,7 +146,7 @@ func (am AppModule) RandomizedParams(r *rand.Rand) []sim.ParamChange {
 }
 
 func (am AppModule) WeightedOperations(simState module.SimulationState) []sim.WeightedOperation {
-	return simulation.WeightedOperations(simState.AppParams, simState.Cdc, am.assetKeeper, am.accountKeeper)
+	return simulation.WeightedOperations(simState.AppParams, simState.Cdc, am.tk, am.ak)
 }
 
 // RegisterStoreDecoder registers a decoder for token module's types.

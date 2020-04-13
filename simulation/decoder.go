@@ -12,7 +12,7 @@ import (
 	"github/irismod/token/internal/types"
 )
 
-// DecodeStore unmarshals the KVPair's Value to the corresponding asset type
+// DecodeStore unmarshals the KVPair's Value to the corresponding token type
 func DecodeStore(cdc *codec.Codec, kvA, kvB kv.Pair) string {
 	switch {
 	case bytes.Equal(kvA.Key[:1], types.PrefixTokenForSymbol):

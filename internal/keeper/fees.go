@@ -69,13 +69,13 @@ func (k Keeper) truncateFee(ctx sdk.Context, denom string, feeAmt sdk.Dec) sdk.C
 	return sdk.NewCoin(token.GetMinUnit(), amount)
 }
 
-// feeHandler handles the fee of asset
+// feeHandler handles the fee of token
 func feeHandler(ctx sdk.Context, k Keeper, feeAcc sdk.AccAddress, fee sdk.Coin) error {
 	params := k.GetParamSet(ctx)
-	assetTaxRate := params.AssetTaxRate
+	tokenTaxRate := params.TokenTaxRate
 
 	// compute community tax and burned coin
-	communityTaxCoin := sdk.NewCoin(fee.Denom, sdk.NewDecFromInt(fee.Amount).Mul(assetTaxRate).TruncateInt())
+	communityTaxCoin := sdk.NewCoin(fee.Denom, sdk.NewDecFromInt(fee.Amount).Mul(tokenTaxRate).TruncateInt())
 	burnedCoins := sdk.NewCoins(fee.Sub(communityTaxCoin))
 
 	// send all fees to module account

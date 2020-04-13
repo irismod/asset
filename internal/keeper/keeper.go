@@ -286,14 +286,14 @@ func (k Keeper) HasToken(ctx sdk.Context, param string) bool {
 	return store.Has(types.KeyMinUint(param))
 }
 
-// GetParamSet returns asset params from the global param store
+// GetParamSet returns token params from the global param store
 func (k Keeper) GetParamSet(ctx sdk.Context) types.Params {
 	var p types.Params
 	k.paramSpace.GetParamSet(ctx, &p)
 	return p
 }
 
-// SetParamSet set asset params from the global param store
+// SetParamSet set token params from the global param store
 func (k Keeper) SetParamSet(ctx sdk.Context, params types.Params) {
 	k.paramSpace.SetParamSet(ctx, &params)
 }
