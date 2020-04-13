@@ -12,7 +12,6 @@ const (
 	FlagInitialSupply = "initial-supply"
 	FlagMaxSupply     = "max-supply"
 	FlagMintable      = "mintable"
-	FlagOwner         = "owner"
 	FlagTo            = "to"
 	FlagAmount        = "amount"
 )

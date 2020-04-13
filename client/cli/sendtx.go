@@ -46,7 +46,7 @@ func getCmdIssueToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "issue",
 		Short:   "Issue a new token",
-		Example: `asset token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --scale=0 --initial-supply=100000000000 --max-supply=1000000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
+		Example: `token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --scale=0 --initial-supply=100000000000 --max-supply=1000000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			inBuf := bufio.NewReader(cmd.InOrStdin())
 			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
@@ -112,7 +112,7 @@ func getCmdEditToken(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "edit [symbol]",
 		Short:   "Edit an existing token",
-		Example: `asset token edit <symbol> --name="Cat Token" --max-supply=100000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
+		Example: `token edit <symbol> --name="Cat Token" --max-supply=100000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			inBuf := bufio.NewReader(cmd.InOrStdin())
@@ -146,7 +146,7 @@ func getCmdMintToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "mint [symbol]",
 		Short:   "Mint tokens to a specified address",
-		Example: `asset token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chain-id=<chain-id>  --fee=<fee>`,
+		Example: `token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chain-id=<chain-id>  --fee=<fee>`,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			inBuf := bufio.NewReader(cmd.InOrStdin())
@@ -215,7 +215,7 @@ func getCmdTransferTokenOwner(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "transfer [symbol]",
 		Short:   "Transfer the owner of a token to a new owner",
-		Example: `asset token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
+		Example: `token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			inBuf := bufio.NewReader(cmd.InOrStdin())

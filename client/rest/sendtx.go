@@ -17,25 +17,25 @@ import (
 func registerTxRoutes(cliCtx context.CLIContext, r *mux.Router) {
 	// issue a token
 	r.HandleFunc(
-		fmt.Sprintf("/%s/tokens/{%s}", types.ModuleName, RestParamDenom),
+		fmt.Sprintf("/%s", types.ModuleName),
 		issueTokenHandlerFn(cliCtx),
 	).Methods("POST")
 
 	// edit a token
 	r.HandleFunc(
-		fmt.Sprintf("/%s/tokens/{%s}", types.ModuleName, RestParamDenom),
+		fmt.Sprintf("/%s/{%s}", types.ModuleName, RestParamSymbol),
 		editTokenHandlerFn(cliCtx),
 	).Methods("PUT")
 
 	// transfer owner
 	r.HandleFunc(
-		fmt.Sprintf("/%s/tokens/{%s}/transfer", types.ModuleName, RestParamDenom),
+		fmt.Sprintf("/%s/{%s}/transfer", types.ModuleName, RestParamSymbol),
 		transferOwnerHandlerFn(cliCtx),
 	).Methods("POST")
 
 	// mint token
 	r.HandleFunc(
-		fmt.Sprintf("/%s/tokens/{%s}/mint", types.ModuleName, RestParamDenom),
+		fmt.Sprintf("/%s/{%s}/mint", types.ModuleName, RestParamSymbol),
 		mintTokenHandlerFn(cliCtx),
 	).Methods("POST")
 }
@@ -75,7 +75,7 @@ func issueTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 func editTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		symbol := vars[RestParamDenom]
+		symbol := vars[RestParamSymbol]
 
 		var req editTokenReq
 		if !rest.ReadRESTReq(w, r, cliCtx.Codec, &req) {
@@ -107,7 +107,7 @@ func editTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 func transferOwnerHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		symbol := vars[RestParamDenom]
+		symbol := vars[RestParamSymbol]
 
 		var req transferTokenOwnerReq
 		if !rest.ReadRESTReq(w, r, cliCtx.Codec, &req) {
@@ -133,7 +133,7 @@ func transferOwnerHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 func mintTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		symbol := vars[RestParamDenom]
+		symbol := vars[RestParamSymbol]
 
 		var req mintTokenReq
 		if !rest.ReadRESTReq(w, r, cliCtx.Codec, &req) {

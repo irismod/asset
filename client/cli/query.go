@@ -13,7 +13,7 @@ import (
 	"github/irismod/token/internal/types"
 )
 
-// GetQueryCmd returns the query commands for the asset module.
+// GetQueryCmd returns the query commands for the token module.
 func GetQueryCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	queryCmd := &cobra.Command{
 		Use:                types.ModuleName,
