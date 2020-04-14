@@ -49,10 +49,11 @@ func ValidateGenesis(data GenesisState) error {
 		return err
 	}
 
-	// validate tokens
-	if err := data.Tokens.Validate(); err != nil {
-		return err
+	// validate token
+	for _, token := range data.Tokens {
+		if err := ValidateToken(token); err != nil {
+			return err
+		}
 	}
-
 	return nil
 }

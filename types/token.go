@@ -166,19 +166,35 @@ func (tokens Tokens) String() string {
 	return out[:len(out)-1]
 }
 
-func (tokens Tokens) Validate() error {
-	if len(tokens) == 0 {
-		return nil
+func ValidateToken(token Token) error {
+	if token.Owner.Empty() {
+		return ErrNilOwner
 	}
 
-	for _, token := range tokens {
-		msg := NewMsgIssueToken(
-			token.Symbol, token.MinUnit, token.Name, token.Scale,
-			token.InitialSupply, token.MaxSupply, token.Mintable, token.Owner,
-		)
-		if err := ValidateMsgIssueToken(msg); err != nil {
-			return err
-		}
+	nameLen := len(strings.TrimSpace(token.Name))
+	if nameLen == 0 || nameLen > MaximumNameLen {
+		return sdkerrors.Wrapf(ErrInvalidName, "invalid token name %s, only accepts length (0, %d]", token.Name, MaximumNameLen)
+	}
+
+	if err := CheckSymbol(token.Symbol); err != nil {
+		return err
+	}
+
+	minUnitLen := len(strings.TrimSpace(token.MinUnit))
+	if minUnitLen < MinimumMinUnitLen || minUnitLen > MaximumMinUnitLen || !IsAlphaNumeric(token.MinUnit) || !IsBeginWithAlpha(token.MinUnit) {
+		return sdkerrors.Wrapf(ErrInvalidMinUnit, "invalid token min_unit %s, only accepts alphanumeric characters, and begin with an english letter, length [%d, %d]", token.MinUnit, MinimumMinUnitLen, MaximumMinUnitLen)
+	}
+
+	if token.InitialSupply > MaximumInitSupply {
+		return sdkerrors.Wrapf(ErrInvalidInitSupply, "invalid token initial supply %d, only accepts value [0, %d]", token.InitialSupply, MaximumInitSupply)
+	}
+
+	if token.MaxSupply < token.InitialSupply || token.MaxSupply > MaximumMaxSupply {
+		return sdkerrors.Wrapf(ErrInvalidMaxSupply, "invalid token max supply %d, only accepts value [%d, %d]", token.MaxSupply, token.InitialSupply, MaximumMaxSupply)
+	}
+
+	if token.Scale > MaximumScale {
+		return sdkerrors.Wrapf(ErrInvalidScale, "invalid token scale %d, only accepts value [0, %d]", token.Scale, MaximumScale)
 	}
 
 	return nil

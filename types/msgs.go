@@ -68,54 +68,18 @@ func NewMsgIssueToken(symbol string, minUnit string, name string, scale uint8, i
 func (msg MsgIssueToken) Route() string { return MsgRoute }
 func (msg MsgIssueToken) Type() string  { return TypeMsgIssueToken }
 
-func ValidateMsgIssueToken(msg MsgIssueToken) error {
-	msg.Name = strings.TrimSpace(msg.Name)
-	msg.MinUnit = strings.TrimSpace(msg.MinUnit)
-
-	if msg.MaxSupply == 0 {
-		if msg.Mintable {
-			msg.MaxSupply = MaximumMaxSupply
-		} else {
-			msg.MaxSupply = msg.InitialSupply
-		}
-	}
-
-	if msg.Owner.Empty() {
-		return ErrNilOwner
-	}
-
-	nameLen := len(msg.Name)
-	if nameLen == 0 || nameLen > MaximumNameLen {
-		return sdkerrors.Wrapf(ErrInvalidName, "invalid token name %s, only accepts length (0, %d]", msg.Name, MaximumNameLen)
-	}
-
-	if err := CheckSymbol(msg.Symbol); err != nil {
-		return err
-	}
-
-	minUnitLen := len(msg.MinUnit)
-	if minUnitLen < MinimumMinUnitLen || minUnitLen > MaximumMinUnitLen || !IsAlphaNumeric(msg.MinUnit) || !IsBeginWithAlpha(msg.MinUnit) {
-		return sdkerrors.Wrapf(ErrInvalidMinUnit, "invalid token min_unit %s, only accepts alphanumeric characters, and begin with an english letter, length [%d, %d]", msg.MinUnit, MinimumMinUnitLen, MaximumMinUnitLen)
-	}
-
-	if msg.InitialSupply > MaximumInitSupply {
-		return sdkerrors.Wrapf(ErrInvalidInitSupply, "invalid token initial supply %d, only accepts value [0, %d]", msg.InitialSupply, MaximumInitSupply)
-	}
-
-	if msg.MaxSupply < msg.InitialSupply || msg.MaxSupply > MaximumMaxSupply {
-		return sdkerrors.Wrapf(ErrInvalidMaxSupply, "invalid token max supply %d, only accepts value [%d, %d]", msg.MaxSupply, msg.InitialSupply, MaximumMaxSupply)
-	}
-
-	if msg.Scale > MaximumScale {
-		return sdkerrors.Wrapf(ErrInvalidScale, "invalid token scale %d, only accepts value [0, %d]", msg.Scale, MaximumScale)
-	}
-
-	return nil
-}
-
 // Implements Msg.
 func (msg MsgIssueToken) ValidateBasic() error {
-	return ValidateMsgIssueToken(msg)
+	return ValidateToken(
+		NewToken(msg.Symbol,
+			msg.Name,
+			msg.MinUnit,
+			msg.Scale,
+			msg.InitialSupply,
+			msg.MaxSupply,
+			msg.Mintable,
+			msg.Owner),
+	)
 }
 
 // Implements Msg.

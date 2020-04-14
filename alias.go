@@ -45,6 +45,7 @@ var (
 	SetNativeToken               = types.SetNativeToken
 	GetNativeToken               = types.GetNativeToken
 	ValidateParams               = types.ValidateParams
+	ValidateToken                = types.ValidateToken
 	NewGenesisState              = types.NewGenesisState
 	NewParams                    = types.NewParams
 	NewValidateTokenFeeDecorator = keeper.NewValidateTokenFeeDecorator
