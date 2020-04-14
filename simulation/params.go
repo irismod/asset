@@ -5,7 +5,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
-	"github/irismod/token/types"
+	"github.com/irismod/token/types"
 )
 
 const (

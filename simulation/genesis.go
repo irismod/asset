@@ -4,13 +4,14 @@ package simulation
 
 import (
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/codec"
 	"math/rand"
+
+	"github.com/cosmos/cosmos-sdk/codec"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
-	"github/irismod/token/types"
+	"github.com/irismod/token/types"
 )
 
 // Simulation parameter constants
@@ -48,10 +49,10 @@ func RandomizedGenState(simState *module.SimulationState) {
 		func(r *rand.Rand) {
 			issueTokenBaseFee = sdk.NewInt(int64(10))
 
-			// init 20 token
-			for i := 0; i < 50; i++ {
+			for i := 0; i < 5; i++ {
 				tokens = append(tokens, randToken(r, simState.Accounts))
 			}
+			tokens = append(tokens, types.GetNativeToken())
 		},
 	)
 
@@ -59,8 +60,6 @@ func RandomizedGenState(simState *module.SimulationState) {
 		simState.Cdc, MintTokenFeeRatio, &mintTokenFeeRatio, simState.Rand,
 		func(r *rand.Rand) { mintTokenFeeRatio = sdk.NewDecWithPrec(int64(r.Intn(5)), 1) },
 	)
-
-	tokens = append(tokens, types.GetNativeToken())
 
 	tokenGenesis := types.NewGenesisState(
 		types.NewParams(tokenTaxRate, sdk.NewCoin(sdk.DefaultBondDenom, issueTokenBaseFee), mintTokenFeeRatio),

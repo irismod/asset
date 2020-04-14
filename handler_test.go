@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/suite"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github/irismod/token"
-	simapp "github/irismod/token/app"
-	"github/irismod/token/types"
+	"github.com/irismod/token"
+	simapp "github.com/irismod/token/app"
+	"github.com/irismod/token/types"
 )
 
 const (

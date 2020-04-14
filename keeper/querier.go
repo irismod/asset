@@ -1,8 +1,9 @@
 package keeper
 
 import (
-	"github/irismod/token/types"
 	"strings"
+
+	"github.com/irismod/token/types"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 

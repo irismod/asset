@@ -15,9 +15,9 @@ import (
 	sim "github.com/cosmos/cosmos-sdk/x/simulation"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github/irismod/token/client/cli"
-	"github/irismod/token/client/rest"
-	"github/irismod/token/simulation"
+	"github.com/irismod/token/client/cli"
+	"github.com/irismod/token/client/rest"
+	"github.com/irismod/token/simulation"
 )
 
 var (

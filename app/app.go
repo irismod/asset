@@ -32,7 +32,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 
-	token "github/irismod/token"
+	token "github.com/irismod/token"
 )
 
 const appName = "SimApp"
@@ -276,13 +276,13 @@ func NewSimApp(
 	// transactions
 	app.sm = module.NewSimulationManager(
 		auth.NewAppModule(app.AccountKeeper),
-		bank.NewAppModule(app.BankKeeper, app.AccountKeeper),
-		supply.NewAppModule(app.SupplyKeeper, app.AccountKeeper),
-		gov.NewAppModule(app.GovKeeper, app.AccountKeeper, app.SupplyKeeper),
-		mint.NewAppModule(app.MintKeeper),
-		distr.NewAppModule(app.DistrKeeper, app.AccountKeeper, app.SupplyKeeper, app.StakingKeeper),
+		//bank.NewAppModule(app.BankKeeper, app.AccountKeeper),
+		//supply.NewAppModule(app.SupplyKeeper, app.AccountKeeper),
+		//gov.NewAppModule(app.GovKeeper, app.AccountKeeper, app.SupplyKeeper),
+		//mint.NewAppModule(app.MintKeeper),
+		//distr.NewAppModule(app.DistrKeeper, app.AccountKeeper, app.SupplyKeeper, app.StakingKeeper),
 		staking.NewAppModule(app.StakingKeeper, app.AccountKeeper, app.SupplyKeeper),
-		slashing.NewAppModule(app.SlashingKeeper, app.AccountKeeper, app.StakingKeeper),
+		//slashing.NewAppModule(app.SlashingKeeper, app.AccountKeeper, app.StakingKeeper),
 		token.NewAppModule(app.TokenKeeper, app.AccountKeeper),
 	)
 

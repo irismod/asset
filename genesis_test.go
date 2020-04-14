@@ -8,9 +8,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github/irismod/token"
-	simapp "github/irismod/token/app"
-	"github/irismod/token/types"
+	"github.com/irismod/token"
+	simapp "github.com/irismod/token/app"
+	"github.com/irismod/token/types"
 )
 
 func TestExportGenesis(t *testing.T) {

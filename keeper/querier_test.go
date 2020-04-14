@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github/irismod/token"
-	simapp "github/irismod/token/app"
-	"github/irismod/token/exported"
-	"github/irismod/token/types"
+	"github.com/irismod/token"
+	simapp "github.com/irismod/token/app"
+	"github.com/irismod/token/exported"
+	"github.com/irismod/token/types"
 )
 
 func TestQueryToken(t *testing.T) {

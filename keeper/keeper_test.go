@@ -2,16 +2,17 @@ package keeper_test
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/supply"
+	simapp "github.com/irismod/token/app"
+	"github.com/irismod/token/keeper"
+	"github.com/irismod/token/types"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	simapp "github/irismod/token/app"
-	"github/irismod/token/keeper"
-	"github/irismod/token/types"
-	"testing"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 )

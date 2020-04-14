@@ -2,7 +2,7 @@ package types
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github/irismod/token/exported"
+	"github.com/irismod/token/exported"
 )
 
 // Register concrete types on codec

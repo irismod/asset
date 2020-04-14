@@ -186,10 +186,6 @@ func (tokens Tokens) Validate() error {
 
 // CheckSymbol checks if the given symbol is valid
 func CheckSymbol(symbol string) error {
-	if strings.Contains(strings.ToLower(symbol), nativeToken.Symbol) {
-		return sdkerrors.Wrapf(ErrInvalidSymbol, "symbol can not contains : %s", nativeToken.Symbol)
-	}
-
 	if len(symbol) < MinimumSymbolLen || len(symbol) > MaximumSymbolLen {
 		return sdkerrors.Wrapf(ErrInvalidSymbol, "invalid symbol: %s,  only accepts length [%d, %d]", symbol, MinimumSymbolLen, MaximumSymbolLen)
 	}

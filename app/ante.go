@@ -5,7 +5,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	"github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	"github.com/cosmos/cosmos-sdk/x/supply"
-	"github/irismod/token"
+	"github.com/irismod/token"
 )
 
 // NewAnteHandler returns an AnteHandler that checks and increments sequence

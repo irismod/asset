@@ -2,11 +2,12 @@ package keeper
 
 import (
 	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github/irismod/token/exported"
-	"github/irismod/token/types"
+	"github.com/irismod/token/exported"
+	"github.com/irismod/token/types"
 )
 
 // GetTokens returns all existing tokens

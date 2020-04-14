@@ -2,11 +2,12 @@ package simulation
 
 import (
 	"fmt"
-	"github/irismod/token/exported"
-	"github/irismod/token/keeper"
-	"github/irismod/token/types"
 	"math/rand"
 	"strings"
+
+	"github.com/irismod/token/exported"
+	"github.com/irismod/token/keeper"
+	"github.com/irismod/token/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"

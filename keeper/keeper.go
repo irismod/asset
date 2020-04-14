@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github/irismod/token/types"
+	"github.com/irismod/token/types"
 )
 
 type Keeper struct {

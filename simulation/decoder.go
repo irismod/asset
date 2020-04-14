@@ -9,7 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	kv "github.com/tendermint/tendermint/libs/kv"
 
-	"github/irismod/token/types"
+	"github.com/irismod/token/types"
 )
 
 // DecodeStore unmarshals the KVPair's Value to the corresponding token type

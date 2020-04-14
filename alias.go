@@ -1,8 +1,8 @@
 package token
 
 import (
-	"github/irismod/token/keeper"
-	"github/irismod/token/types"
+	"github.com/irismod/token/keeper"
+	"github.com/irismod/token/types"
 )
 
 type (

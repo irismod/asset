@@ -2,12 +2,12 @@ package token
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github/irismod/token/types"
+	"github.com/irismod/token/types"
 )
 
 // InitGenesis - store genesis parameters
 func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
-	if err := ValidateGenesis(data); err != nil && err != types.ErrNilOwner {
+	if err := ValidateGenesis(data); err != nil {
 		panic(err.Error())
 	}
 

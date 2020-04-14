@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github/irismod/token/types"
+	"github.com/irismod/token/types"
 )
 
 // handle all "token" type messages.
