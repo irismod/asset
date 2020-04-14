@@ -2,6 +2,7 @@ package token
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/irismod/token/types"
 )
 

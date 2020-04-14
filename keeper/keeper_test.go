@@ -8,11 +8,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/supply"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
+
 	simapp "github.com/irismod/token/app"
 	"github.com/irismod/token/keeper"
 	"github.com/irismod/token/types"
-	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 )

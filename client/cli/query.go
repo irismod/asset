@@ -35,7 +35,7 @@ func getCmdQueryToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "token [denom]",
 		Short:   "Query a token by symbol or minUnit",
-		Example: "token <symbol>",
+		Example: "token <denom>",
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
@@ -74,7 +74,7 @@ func getCmdQueryToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 func getCmdQueryTokens(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "tokens [owner]",
-		Short:   "Query tokens by owner",
+		Short:   "Query tokens (or by owner)",
 		Example: "tokens <owner>",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
