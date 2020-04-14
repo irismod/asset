@@ -10,7 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
-	"github/irismod/token/internal/types"
+	"github/irismod/token/types"
 )
 
 // Simulation parameter constants

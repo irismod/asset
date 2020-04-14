@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	simapp "github/irismod/token/app"
-	"github/irismod/token/internal/keeper"
-	"github/irismod/token/internal/types"
+	"github/irismod/token/keeper"
+	"github/irismod/token/types"
 	"testing"
 
 	abci "github.com/tendermint/tendermint/abci/types"

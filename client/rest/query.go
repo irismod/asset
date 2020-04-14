@@ -10,7 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 
-	"github/irismod/token/internal/types"
+	"github/irismod/token/types"
 )
 
 func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, queryRoute string) {

@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github/irismod/token/internal/types"
+	"github/irismod/token/types"
 )
 
 // GetQueryCmd returns the query commands for the token module.

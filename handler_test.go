@@ -12,7 +12,7 @@ import (
 
 	"github/irismod/token"
 	simapp "github/irismod/token/app"
-	"github/irismod/token/internal/types"
+	"github/irismod/token/types"
 )
 
 const (
@@ -52,7 +52,6 @@ func (suite *HandlerSuite) SetupTest() {
 
 	// set params
 	suite.keeper.SetParamSet(suite.ctx, types.DefaultParams())
-	//_ = suite.keeper.AddToken(suite.ctx,types.NativeToken)
 	// init tokens to addr
 	err := suite.sk.MintCoins(suite.ctx, types.ModuleName, initCoin)
 	suite.NoError(err)

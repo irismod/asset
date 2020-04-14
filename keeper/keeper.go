@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github/irismod/token/internal/types"
+	"github/irismod/token/types"
 )
 
 type Keeper struct {
@@ -45,7 +45,7 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace,
 
 // Logger returns a module-specific logger.
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", types.ModuleName)
+	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
 // IssueToken issues a new token
@@ -77,7 +77,6 @@ func (k Keeper) IssueToken(ctx sdk.Context, msg types.MsgIssueToken) error {
 	); err != nil {
 		return err
 	}
-
 	return nil
 }
 

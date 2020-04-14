@@ -18,7 +18,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
-	"github/irismod/token/internal/types"
+	"github/irismod/token/types"
 )
 
 // GetTxCmd returns the transaction commands for the token module.

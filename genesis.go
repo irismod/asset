@@ -2,7 +2,7 @@ package token
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github/irismod/token/internal/types"
+	"github/irismod/token/types"
 )
 
 // InitGenesis - store genesis parameters

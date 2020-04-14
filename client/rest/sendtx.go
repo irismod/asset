@@ -11,7 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
-	"github/irismod/token/internal/types"
+	"github/irismod/token/types"
 )
 
 func registerTxRoutes(cliCtx context.CLIContext, r *mux.Router) {

@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github/irismod/token/internal/types"
+	"github/irismod/token/types"
 )
 
 // handle all "token" type messages.
@@ -38,14 +38,17 @@ func handleIssueToken(ctx sdk.Context, k Keeper, msg MsgIssueToken) (*sdk.Result
 		return nil, err
 	}
 
-	ctx.EventManager().EmitEvent(
+	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeIssueToken,
-			sdk.NewAttribute(types.AttributeValueSymbol, msg.Symbol),
-			sdk.NewAttribute(types.AttributeValueOwner, msg.Owner.String()),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 		),
-	)
-
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Owner.String()),
+		),
+	})
 	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }
 
@@ -55,13 +58,17 @@ func handleMsgEditToken(ctx sdk.Context, k Keeper, msg MsgEditToken) (*sdk.Resul
 		return nil, err
 	}
 
-	ctx.EventManager().EmitEvent(
+	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeEditToken,
-			sdk.NewAttribute(types.AttributeValueSymbol, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 		),
-	)
-
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Owner.String()),
+		),
+	})
 	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }
 
@@ -71,12 +78,17 @@ func handleMsgTransferTokenOwner(ctx sdk.Context, k Keeper, msg MsgTransferToken
 		return nil, err
 	}
 
-	ctx.EventManager().EmitEvent(
+	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeTransferTokenOwner,
-			sdk.NewAttribute(types.AttributeValueSymbol, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 		),
-	)
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.SrcOwner.String()),
+		),
+	})
 
 	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }
@@ -91,13 +103,18 @@ func handleMsgMintToken(ctx sdk.Context, k Keeper, msg MsgMintToken) (*sdk.Resul
 		return nil, err
 	}
 
-	ctx.EventManager().EmitEvent(
+	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeMintToken,
-			sdk.NewAttribute(types.AttributeValueSymbol, msg.Symbol),
-			sdk.NewAttribute(types.AttributeValueAmount, strconv.FormatUint(msg.Amount, 10)),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeyAmount, strconv.FormatUint(msg.Amount, 10)),
 		),
-	)
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Owner.String()),
+		),
+	})
 
 	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }

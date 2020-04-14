@@ -11,7 +11,7 @@ import (
 	"github/irismod/token"
 	simapp "github/irismod/token/app"
 	"github/irismod/token/exported"
-	"github/irismod/token/internal/types"
+	"github/irismod/token/types"
 )
 
 func TestQueryToken(t *testing.T) {

@@ -9,7 +9,6 @@ const (
 	EventTypeMintToken          = "mint_token"
 	EventTypeTransferTokenOwner = "transfer_token_owner"
 
-	AttributeValueSymbol = "symbol"
-	AttributeValueOwner  = "owner"
-	AttributeValueAmount = "amount"
+	AttributeKeySymbol = "symbol"
+	AttributeKeyAmount = "amount"
 )

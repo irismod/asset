@@ -6,7 +6,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github/irismod/token/exported"
-	"github/irismod/token/internal/types"
+	"github/irismod/token/types"
 )
 
 // GetTokens returns all existing tokens
