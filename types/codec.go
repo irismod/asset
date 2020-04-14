@@ -14,8 +14,6 @@ func RegisterCodec(cdc *codec.Codec) {
 
 	cdc.RegisterInterface((*exported.TokenI)(nil), nil)
 	cdc.RegisterConcrete(Token{}, "irismod/token/Token", nil)
-
-	cdc.RegisterConcrete(&Params{}, "irismod/token/Params", nil)
 }
 
 var ModuleCdc *codec.Codec
