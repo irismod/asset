@@ -9,61 +9,56 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/irisnet/irishub/app/v3/asset"
-	"github.com/irisnet/irishub/client"
-	"github.com/irisnet/irishub/client/context"
-	"github.com/irisnet/irishub/client/utils"
-	"github.com/irisnet/irishub/codec"
-	sdk "github.com/irisnet/irishub/types"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/input"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+
+	"github.com/irismod/token/types"
 )
 
-func GetTokenCmd(cdc *codec.Codec) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:                        "token",
-		Short:                      "token subcommands",
+// GetTxCmd returns the transaction commands for the token module.
+func GetTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	txCmd := &cobra.Command{
+		Use:                        types.ModuleName,
+		Short:                      "Asset transaction subcommands",
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
+		RunE:                       client.ValidateCmd,
 	}
-	cmd.AddCommand(client.PostCommands(
-		getCmdIssueToken(cdc),
+
+	txCmd.AddCommand(flags.PostCommands(
+		getCmdIssueToken(queryRoute, cdc),
 		getCmdEditToken(cdc),
-		getCmdMintToken(cdc),
+		getCmdMintToken(queryRoute, cdc),
 		getCmdTransferTokenOwner(cdc),
 	)...)
 
-	cmd.AddCommand(client.GetCommands(
-		getCmdQueryToken(cdc),
-		getCmdQueryTokens(cdc),
-		getCmdQueryFee(cdc),
-	)...)
-
-	return cmd
+	return txCmd
 }
 
 // getCmdIssueToken implements the issue token command
-func getCmdIssueToken(cdc *codec.Codec) *cobra.Command {
+func getCmdIssueToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "issue",
 		Short:   "Issue a new token",
-		Example: `iriscli asset token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --scale=0 --initial-supply=100000000000 --max-supply=1000000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=0.6iris`,
+		Example: `token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --scale=0 --initial-supply=100000000000 --max-supply=1000000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().
-				WithCodec(cdc).
-				WithLogger(os.Stdout).
-				WithAccountDecoder(utils.GetAccountDecoder(cdc))
-			txCtx := utils.NewTxContextFromCLI().WithCodec(cdc).
-				WithCliCtx(cliCtx)
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			owner, err := cliCtx.GetFromAddress()
-			if err != nil {
-				return err
-			}
+			owner := cliCtx.GetFromAddress()
 
-			msg := asset.MsgIssueToken{
+			msg := types.MsgIssueToken{
 				Symbol:        viper.GetString(FlagSymbol),
 				Name:          viper.GetString(FlagName),
-				MinUnitAlias:  viper.GetString(FlagMinUnit),
-				Decimal:       uint8(viper.GetInt(FlagScale)),
+				MinUnit:       viper.GetString(FlagMinUnit),
+				Scale:         uint8(viper.GetInt(FlagScale)),
 				InitialSupply: uint64(viper.GetInt(FlagInitialSupply)),
 				MaxSupply:     uint64(viper.GetInt(FlagMaxSupply)),
 				Mintable:      viper.GetBool(FlagMintable),
@@ -76,21 +71,21 @@ func getCmdIssueToken(cdc *codec.Codec) *cobra.Command {
 
 			var prompt = "The token issue transaction will consume extra fee"
 
-			if !viper.GetBool(client.FlagGenerateOnly) {
+			if !viper.GetBool(flags.FlagGenerateOnly) {
 				// query fee
-				fee, err1 := queryTokenFees(cliCtx, msg.Symbol)
+				fee, err1 := queryTokenFees(cliCtx, queryRoute, msg.Symbol)
 				if err1 != nil {
 					return fmt.Errorf("failed to query token issue fee: %s", err1.Error())
 				}
 
 				// append issue fee to prompt
-				issueFeeMainUnit := sdk.Coins{fee.IssueFee}.MainUnitString()
+				issueFeeMainUnit := sdk.Coins{fee.IssueFee}.String()
 				prompt += fmt.Sprintf(": %s", issueFeeMainUnit)
 			}
 
 			// a confirmation is needed
 			prompt += "\nAre you sure to proceed?"
-			confirmed, err := client.GetConfirmation(prompt, bufio.NewReader(os.Stdin))
+			confirmed, err := input.GetConfirmation(prompt, bufio.NewReader(os.Stdin))
 			if err != nil {
 				return err
 			}
@@ -99,7 +94,7 @@ func getCmdIssueToken(cdc *codec.Codec) *cobra.Command {
 				return fmt.Errorf("operation aborted")
 			}
 
-			return utils.SendOrPrintTx(txCtx, cliCtx, []sdk.Msg{msg})
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -117,35 +112,29 @@ func getCmdEditToken(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "edit [symbol]",
 		Short:   "Edit an existing token",
-		Example: `iriscli asset token edit <symbol> --name="Cat Token" --max-supply=100000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=0.6iris`,
+		Example: `token edit <symbol> --name="Cat Token" --max-supply=100000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().
-				WithCodec(cdc).
-				WithLogger(os.Stdout).
-				WithAccountDecoder(utils.GetAccountDecoder(cdc))
-			txCtx := utils.NewTxContextFromCLI().WithCodec(cdc).
-				WithCliCtx(cliCtx)
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			owner, err := cliCtx.GetFromAddress()
-			if err != nil {
-				return err
-			}
+			owner := cliCtx.GetFromAddress()
 
 			name := viper.GetString(FlagName)
 			maxSupply := uint64(viper.GetInt(FlagMaxSupply))
 
-			mintable, err := asset.ParseBool(viper.GetString(FlagMintable))
+			mintable, err := types.ParseBool(viper.GetString(FlagMintable))
 			if err != nil {
 				return err
 			}
 
-			msg := asset.NewMsgEditToken(name, args[0], maxSupply, mintable, owner)
+			msg := types.NewMsgEditToken(name, args[0], maxSupply, mintable, owner)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
 
-			return utils.SendOrPrintTx(txCtx, cliCtx, []sdk.Msg{msg})
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -153,28 +142,23 @@ func getCmdEditToken(cdc *codec.Codec) *cobra.Command {
 	return cmd
 }
 
-func getCmdMintToken(cdc *codec.Codec) *cobra.Command {
+func getCmdMintToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "mint [symbol]",
 		Short:   "Mint tokens to a specified address",
-		Example: `iriscli asset token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chain-id=<chain-id> --fee=0.3iris`,
+		Example: `token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chain-id=<chain-id>  --fee=<fee>`,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().
-				WithCodec(cdc).
-				WithLogger(os.Stdout).
-				WithAccountDecoder(utils.GetAccountDecoder(cdc))
-			txCtx := utils.NewTxContextFromCLI().WithCodec(cdc).
-				WithCliCtx(cliCtx)
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			owner, err := cliCtx.GetFromAddress()
-			if err != nil {
-				return err
-			}
+			owner := cliCtx.GetFromAddress()
 
 			amount := uint64(viper.GetInt64(FlagAmount))
 
 			var to sdk.AccAddress
+			var err error
 			addr := viper.GetString(FlagTo)
 			if len(strings.TrimSpace(addr)) > 0 {
 				to, err = sdk.AccAddressFromBech32(addr)
@@ -183,7 +167,7 @@ func getCmdMintToken(cdc *codec.Codec) *cobra.Command {
 				}
 			}
 
-			msg := asset.NewMsgMintToken(
+			msg := types.NewMsgMintToken(
 				args[0], owner, to, amount,
 			)
 
@@ -193,21 +177,21 @@ func getCmdMintToken(cdc *codec.Codec) *cobra.Command {
 
 			var prompt = "The token mint transaction will consume extra fee"
 
-			if !viper.GetBool(client.FlagGenerateOnly) {
+			if !viper.GetBool(flags.FlagGenerateOnly) {
 				// query fee
-				fee, err1 := queryTokenFees(cliCtx, args[0])
+				fee, err1 := queryTokenFees(cliCtx, queryRoute, args[0])
 				if err1 != nil {
 					return fmt.Errorf("failed to query token mint fee: %s", err1.Error())
 				}
 
 				// append mint fee to prompt
-				mintFeeMainUnit := sdk.Coins{fee.MintFee}.MainUnitString()
+				mintFeeMainUnit := sdk.Coins{fee.MintFee}.String()
 				prompt += fmt.Sprintf(": %s", mintFeeMainUnit)
 			}
 
 			// a confirmation is needed
 			prompt += "\nAre you sure to proceed?"
-			confirmed, err := client.GetConfirmation(prompt, bufio.NewReader(os.Stdin))
+			confirmed, err := input.GetConfirmation(prompt, bufio.NewReader(os.Stdin))
 			if err != nil {
 				return err
 			}
@@ -216,7 +200,7 @@ func getCmdMintToken(cdc *codec.Codec) *cobra.Command {
 				return fmt.Errorf("operation aborted")
 			}
 
-			return utils.SendOrPrintTx(txCtx, cliCtx, []sdk.Msg{msg})
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -231,34 +215,27 @@ func getCmdTransferTokenOwner(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "transfer [symbol]",
 		Short:   "Transfer the owner of a token to a new owner",
-		Example: `iriscli asset token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id> --fee=0.3iris`,
+		Example: `token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().
-				WithCodec(cdc).
-				WithLogger(os.Stdout).
-				WithAccountDecoder(utils.GetAccountDecoder(cdc))
-			txCtx := utils.NewTxContextFromCLI().WithCodec(cdc).
-				WithCliCtx(cliCtx)
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			owner, err := cliCtx.GetFromAddress()
-			if err != nil {
-				return err
-			}
+			owner := cliCtx.GetFromAddress()
 
 			to, err := sdk.AccAddressFromBech32(viper.GetString(FlagTo))
 			if err != nil {
 				return err
 			}
 
-			var msg sdk.Msg
-			msg = asset.NewMsgTransferTokenOwner(owner, to, args[0])
+			msg := types.NewMsgTransferTokenOwner(owner, to, args[0])
 
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
 
-			return utils.SendOrPrintTx(txCtx, cliCtx, []sdk.Msg{msg})
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 

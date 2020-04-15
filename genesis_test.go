@@ -1,83 +1,51 @@
-package asset
+package token_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/log"
-	dbm "github.com/tendermint/tm-db"
 
-	"github.com/irisnet/irishub/app/v1/auth"
-	"github.com/irisnet/irishub/app/v1/bank"
-	"github.com/irisnet/irishub/app/v1/params"
-	"github.com/irisnet/irishub/codec"
-	"github.com/irisnet/irishub/modules/guardian"
-	"github.com/irisnet/irishub/store"
-	sdk "github.com/irisnet/irishub/types"
+	"github.com/irismod/token"
+	simapp "github.com/irismod/token/app"
+	"github.com/irismod/token/types"
 )
 
-func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.TransientStoreKey) {
-	db := dbm.NewMemDB()
+func TestExportGenesis(t *testing.T) {
+	app := simapp.Setup(false)
 
-	accountKey := sdk.NewKVStoreKey("accountKey")
-	assetKey := sdk.NewKVStoreKey("assetKey")
-	guardianKey := sdk.NewKVStoreKey("guardianKey")
-	paramskey := sdk.NewKVStoreKey("params")
-	paramsTkey := sdk.NewTransientStoreKey("transient_params")
+	ctx := app.BaseApp.NewContext(false, abci.Header{})
 
-	ms := store.NewCommitMultiStore(db)
-	ms.MountStoreWithDB(accountKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(assetKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(paramskey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(paramsTkey, sdk.StoreTypeIAVL, db)
-	_ = ms.LoadLatestVersion()
+	// export genesis
+	genesisState := token.ExportGenesis(ctx, app.TokenKeeper)
 
-	return ms, accountKey, assetKey, guardianKey, paramskey, paramsTkey
+	require.Equal(t, types.DefaultParams(), genesisState.Params)
+	for _, token := range genesisState.Tokens {
+		require.Equal(t, token, types.GetNativeToken())
+	}
 }
 
-func TestExportGenesis(t *testing.T) {
-	ms, accountKey, assetKey, guardianKey, paramskey, paramsTkey := setupMultiStore()
+func TestInitGenesis(t *testing.T) {
+	app := simapp.Setup(false)
 
-	cdc := codec.New()
-	RegisterCodec(cdc)
-	auth.RegisterBaseAccount(cdc)
-
-	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
-	paramsKeeper := params.NewKeeper(cdc, paramskey, paramsTkey)
-	ak := auth.NewAccountKeeper(cdc, accountKey, auth.ProtoBaseAccount)
-	bk := bank.NewBaseKeeper(cdc, ak)
-	gk := guardian.NewKeeper(cdc, guardianKey, guardian.DefaultCodespace)
-	keeper := NewKeeper(cdc, assetKey, bk, gk, DefaultCodespace, paramsKeeper.Subspace(DefaultParamSpace))
+	ctx := app.BaseApp.NewContext(false, abci.Header{})
 
 	// add token
 	addr := sdk.AccAddress([]byte("addr1"))
-	acc := ak.NewAccountWithAddress(ctx, addr)
-	ft := NewFungibleToken("btc", "Bitcoin Network", "satoshi", 1, 1, 1, true, acc.GetAddress())
+	ft := types.NewToken("btc", "Bitcoin Network", "satoshi", 1, 1, 1, true, addr)
 
-	genesis := GenesisState{
-		Params: DefaultParams(),
-		Tokens: Tokens{ft},
+	genesis := types.GenesisState{
+		Params: types.DefaultParams(),
+		Tokens: types.Tokens{ft},
 	}
 
 	// initialize genesis
-	InitGenesis(ctx, keeper, genesis)
+	token.InitGenesis(ctx, app.TokenKeeper, genesis)
 
 	// query all tokens
-	var tokens Tokens
-	keeper.IterateTokens(ctx, func(token FungibleToken) (stop bool) {
-		tokens = append(tokens, token)
-		return false
-	})
-
-	require.Equal(t, len(tokens), 1)
-
-	// export genesis
-	genesisState := ExportGenesis(ctx, keeper)
-
-	require.Equal(t, DefaultParams(), genesisState.Params)
-	for _, token := range genesisState.Tokens {
-		require.Equal(t, token, ft)
-	}
+	var tokens = app.TokenKeeper.GetTokens(ctx, nil)
+	require.Equal(t, len(tokens), 2)
+	require.Equal(t, tokens[0], ft)
 }

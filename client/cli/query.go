@@ -5,43 +5,65 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/irisnet/irishub/app/protocol"
-	"github.com/irisnet/irishub/app/v3/asset"
-	"github.com/irisnet/irishub/client/context"
-	"github.com/irisnet/irishub/codec"
-	sdk "github.com/irisnet/irishub/types"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/irismod/token/types"
 )
 
+// GetQueryCmd returns the query commands for the token module.
+func GetQueryCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	queryCmd := &cobra.Command{
+		Use:                types.ModuleName,
+		Short:              "Querying commands for the token module",
+		DisableFlagParsing: true,
+	}
+
+	queryCmd.AddCommand(flags.GetCommands(
+		getCmdQueryToken(queryRoute, cdc),
+		getCmdQueryTokens(queryRoute, cdc),
+		getCmdQueryFee(queryRoute, cdc),
+	)...)
+
+	return queryCmd
+}
+
 // getCmdQueryToken implements the query token command.
-func getCmdQueryToken(cdc *codec.Codec) *cobra.Command {
+func getCmdQueryToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "token [symbol]",
-		Short:   "Query a token by symbol",
-		Example: "iriscli asset token token <symbol>",
+		Use:     "token [denom]",
+		Short:   "Query a token by symbol or minUnit",
+		Example: "token <denom>",
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			if err := asset.CheckSymbol(args[0]); err != nil {
+			if err := types.CheckSymbol(args[0]); err != nil {
 				return err
 			}
 
-			params := asset.QueryTokenParams{
-				Symbol: args[0],
+			params := types.QueryTokenParams{
+				Denom: args[0],
 			}
 
-			bz := cdc.MustMarshalJSON(params)
-			res, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", protocol.AssetRoute, asset.QueryToken), bz)
+			bz, err := cdc.MarshalJSON(params)
 			if err != nil {
 				return err
 			}
 
-			var token asset.TokenOutput
-			if err := cdc.UnmarshalJSON(res, &token); err != nil {
+			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryToken), bz)
+			if err != nil {
 				return err
 			}
 
-			return cliCtx.PrintOutput(token)
+			var tokens types.Token
+			if err := cdc.UnmarshalJSON(res, &tokens); err != nil {
+				return err
+			}
+
+			return cliCtx.PrintOutput(tokens)
 		},
 	}
 
@@ -49,11 +71,11 @@ func getCmdQueryToken(cdc *codec.Codec) *cobra.Command {
 }
 
 // getCmdQueryTokens implements the query tokens command.
-func getCmdQueryTokens(cdc *codec.Codec) *cobra.Command {
+func getCmdQueryTokens(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "tokens [owner]",
-		Short:   "Query tokens by owner",
-		Example: "iriscli asset token tokens <owner>",
+		Short:   "Query tokens (or by owner)",
+		Example: "tokens <owner>",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
@@ -67,17 +89,17 @@ func getCmdQueryTokens(cdc *codec.Codec) *cobra.Command {
 				}
 			}
 
-			params := asset.QueryTokensParams{
+			params := types.QueryTokensParams{
 				Owner: owner,
 			}
 
 			bz := cdc.MustMarshalJSON(params)
-			res, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", protocol.AssetRoute, asset.QueryTokens), bz)
+			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryTokens), bz)
 			if err != nil {
 				return err
 			}
 
-			var tokens asset.TokensOutput
+			var tokens types.Tokens
 			if err := cdc.UnmarshalJSON(res, &tokens); err != nil {
 				return err
 			}
@@ -90,22 +112,22 @@ func getCmdQueryTokens(cdc *codec.Codec) *cobra.Command {
 }
 
 // getCmdQueryFee implements the query token related fees command.
-func getCmdQueryFee(cdc *codec.Codec) *cobra.Command {
+func getCmdQueryFee(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "fee [symbol]",
 		Short:   "Query the token related fees",
 		Args:    cobra.ExactArgs(1),
-		Example: "iriscli asset token fee <symbol>",
+		Example: "token fee <symbol>",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			symbol := args[0]
-			if err := asset.CheckSymbol(symbol); err != nil {
+			if err := types.CheckSymbol(symbol); err != nil {
 				return err
 			}
 
 			// query token fees
-			fees, err := queryTokenFees(cliCtx, symbol)
+			fees, err := queryTokenFees(cliCtx, queryRoute, symbol)
 			if err != nil {
 				return err
 			}
