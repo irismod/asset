@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/irismod/token/exported"
 
 	"github.com/spf13/cobra"
 
@@ -99,7 +100,7 @@ func getCmdQueryTokens(queryRoute string, cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			var tokens types.Tokens
+			var tokens []exported.TokenI
 			if err := cdc.UnmarshalJSON(res, &tokens); err != nil {
 				return err
 			}
