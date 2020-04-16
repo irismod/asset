@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-	"github.com/irismod/token/exported"
+
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/irismod/token/exported"
 	"github.com/irismod/token/types"
 )
 
