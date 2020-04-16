@@ -100,7 +100,7 @@ func getCmdQueryTokens(queryRoute string, cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			var tokens exported.TokenI
+			var tokens []exported.TokenI
 			if err := cdc.UnmarshalJSON(res, &tokens); err != nil {
 				return err
 			}
