@@ -22,7 +22,7 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, queryRoute string)
 }
 
 type issueTokenReq struct {
-	BaseTx        rest.BaseReq   `json:"base_tx"`
+	BaseReq       rest.BaseReq   `json:"base_req"`
 	Owner         sdk.AccAddress `json:"owner"` // owner of the token
 	Symbol        string         `json:"symbol"`
 	Name          string         `json:"name"`
@@ -34,7 +34,7 @@ type issueTokenReq struct {
 }
 
 type editTokenReq struct {
-	BaseTx    rest.BaseReq   `json:"base_tx"`
+	BaseReq   rest.BaseReq   `json:"base_req"`
 	Owner     sdk.AccAddress `json:"owner"` //  owner of the token
 	MaxSupply uint64         `json:"max_supply"`
 	Mintable  string         `json:"mintable"` // mintable of the token
@@ -42,14 +42,14 @@ type editTokenReq struct {
 }
 
 type transferTokenOwnerReq struct {
-	BaseTx   rest.BaseReq   `json:"base_tx"`
+	BaseReq  rest.BaseReq   `json:"base_req"`
 	SrcOwner sdk.AccAddress `json:"src_owner"` // the current owner address of the token
 	DstOwner sdk.AccAddress `json:"dst_owner"` // the new owner
 }
 
 type mintTokenReq struct {
-	BaseTx rest.BaseReq   `json:"base_tx"`
-	Owner  sdk.AccAddress `json:"owner"`  // the current owner address of the token
-	To     sdk.AccAddress `json:"to"`     // address of minting token to
-	Amount uint64         `json:"amount"` // amount of minting token
+	BaseReq rest.BaseReq   `json:"base_req"`
+	Owner   sdk.AccAddress `json:"owner"`  // the current owner address of the token
+	To      sdk.AccAddress `json:"to"`     // address of minting token to
+	Amount  uint64         `json:"amount"` // amount of minting token
 }
