@@ -53,6 +53,9 @@ func (k Keeper) GetToken(ctx sdk.Context, denom string) (token exported.TokenI, 
 	}
 
 	bz := store.Get(types.KeyMinUint(denom))
+	if bz == nil {
+		return token, sdkerrors.Wrap(types.ErrTokenNotExists, fmt.Sprintf("token %s does not exist", denom))
+	}
 
 	var symbol string
 	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &symbol)

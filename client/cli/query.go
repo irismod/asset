@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/irismod/token/exported"
 	"github.com/irismod/token/types"
 )
 
@@ -99,7 +100,7 @@ func getCmdQueryTokens(queryRoute string, cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			var tokens types.Tokens
+			var tokens []exported.TokenI
 			if err := cdc.UnmarshalJSON(res, &tokens); err != nil {
 				return err
 			}

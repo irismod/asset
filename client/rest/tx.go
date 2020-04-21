@@ -47,7 +47,7 @@ func issueTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		baseReq := req.BaseTx.Sanitize()
+		baseReq := req.BaseReq.Sanitize()
 		if !baseReq.ValidateBasic(w) {
 			return
 		}
@@ -68,7 +68,7 @@ func issueTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseTx, []sdk.Msg{msg})
+		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }
 
@@ -82,7 +82,7 @@ func editTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		baseReq := req.BaseTx.Sanitize()
+		baseReq := req.BaseReq.Sanitize()
 		if !baseReq.ValidateBasic(w) {
 			return
 		}
@@ -100,7 +100,7 @@ func editTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseTx, []sdk.Msg{msg})
+		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }
 
@@ -114,7 +114,7 @@ func transferOwnerHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		baseReq := req.BaseTx.Sanitize()
+		baseReq := req.BaseReq.Sanitize()
 		if !baseReq.ValidateBasic(w) {
 			return
 		}
@@ -126,7 +126,7 @@ func transferOwnerHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseTx, []sdk.Msg{msg})
+		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }
 
@@ -140,7 +140,7 @@ func mintTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		baseReq := req.BaseTx.Sanitize()
+		baseReq := req.BaseReq.Sanitize()
 		if !baseReq.ValidateBasic(w) {
 			return
 		}
@@ -152,6 +152,6 @@ func mintTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseTx, []sdk.Msg{msg})
+		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }
