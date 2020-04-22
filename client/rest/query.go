@@ -47,13 +47,14 @@ func queryTokenHandlerFn(cliCtx context.CLIContext, queryRoute string) http.Hand
 			return
 		}
 
-		res, _, err := cliCtx.QueryWithData(
+		res, height, err := cliCtx.QueryWithData(
 			fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryToken), bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
+		cliCtx = cliCtx.WithHeight(height)
 		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
@@ -84,13 +85,14 @@ func queryTokensHandlerFn(cliCtx context.CLIContext, queryRoute string) http.Han
 			return
 		}
 
-		res, _, err := cliCtx.QueryWithData(
+		res, height, err := cliCtx.QueryWithData(
 			fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryTokens), bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
+		cliCtx = cliCtx.WithHeight(height)
 		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
@@ -116,13 +118,14 @@ func queryTokenFeesHandlerFn(cliCtx context.CLIContext, queryRoute string) http.
 			return
 		}
 
-		res, _, err := cliCtx.QueryWithData(
+		res, height, err := cliCtx.QueryWithData(
 			fmt.Sprintf("custom/%s/%s/tokens", queryRoute, types.QueryFees), bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
+		cliCtx = cliCtx.WithHeight(height)
 		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
