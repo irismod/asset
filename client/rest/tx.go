@@ -17,25 +17,25 @@ import (
 func registerTxRoutes(cliCtx context.CLIContext, r *mux.Router) {
 	// issue a token
 	r.HandleFunc(
-		fmt.Sprintf("/%s", types.ModuleName),
+		fmt.Sprintf("/%s/tokens", types.ModuleName),
 		issueTokenHandlerFn(cliCtx),
 	).Methods("POST")
 
 	// edit a token
 	r.HandleFunc(
-		fmt.Sprintf("/%s/{%s}", types.ModuleName, RestParamSymbol),
+		fmt.Sprintf("/%s/tokens/{%s}", types.ModuleName, RestParamSymbol),
 		editTokenHandlerFn(cliCtx),
 	).Methods("PUT")
 
 	// transfer owner
 	r.HandleFunc(
-		fmt.Sprintf("/%s/{%s}/transfer", types.ModuleName, RestParamSymbol),
+		fmt.Sprintf("/%s/tokens/{%s}/transfer", types.ModuleName, RestParamSymbol),
 		transferOwnerHandlerFn(cliCtx),
 	).Methods("POST")
 
 	// mint token
 	r.HandleFunc(
-		fmt.Sprintf("/%s/{%s}/mint", types.ModuleName, RestParamSymbol),
+		fmt.Sprintf("/%s/tokens/{%s}/mint", types.ModuleName, RestParamSymbol),
 		mintTokenHandlerFn(cliCtx),
 	).Methods("POST")
 }

@@ -16,19 +16,19 @@ import (
 func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, queryRoute string) {
 	// Query token by symbol or minUnit
 	r.HandleFunc(
-		fmt.Sprintf("/%s/{%s}", types.ModuleName, RestParamDenom),
+		fmt.Sprintf("/%s/tokens/{%s}", types.ModuleName, RestParamDenom),
 		queryTokenHandlerFn(cliCtx, queryRoute),
 	).Methods("GET")
 
 	// Query tokens by owner
 	r.HandleFunc(
-		fmt.Sprintf("/%s", types.ModuleName),
+		fmt.Sprintf("/%s/tokens", types.ModuleName),
 		queryTokensHandlerFn(cliCtx, queryRoute),
 	).Methods("GET")
 
 	// Query token fees
 	r.HandleFunc(
-		fmt.Sprintf("/%s/{%s}/fee", types.ModuleName, RestParamSymbol),
+		fmt.Sprintf("/%s/tokens/{%s}/fee", types.ModuleName, RestParamSymbol),
 		queryTokenFeesHandlerFn(cliCtx, queryRoute),
 	).Methods("GET")
 }
