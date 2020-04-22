@@ -47,6 +47,11 @@ func queryTokenHandlerFn(cliCtx context.CLIContext, queryRoute string) http.Hand
 			return
 		}
 
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
+
 		res, height, err := cliCtx.QueryWithData(
 			fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryToken), bz)
 		if err != nil {
@@ -85,6 +90,11 @@ func queryTokensHandlerFn(cliCtx context.CLIContext, queryRoute string) http.Han
 			return
 		}
 
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
+
 		res, height, err := cliCtx.QueryWithData(
 			fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryTokens), bz)
 		if err != nil {
@@ -115,6 +125,11 @@ func queryTokenFeesHandlerFn(cliCtx context.CLIContext, queryRoute string) http.
 		bz, err := cliCtx.Codec.MarshalJSON(params)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
 			return
 		}
 
