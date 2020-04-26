@@ -3,6 +3,7 @@ package cli
 import (
 	"bufio"
 	"fmt"
+
 	"os"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/input"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
@@ -44,9 +46,14 @@ func GetTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 // getCmdIssueToken implements the issue token command
 func getCmdIssueToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "issue",
-		Short:   "Issue a new token",
-		Example: `token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --scale=0 --initial-supply=100000000000 --max-supply=1000000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
+		Use: "issue",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Issue a new token.
+Example:
+$ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --scale=0 --initial-supply=100000000000 --max-supply=1000000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
+				version.ClientName,
+			),
+		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			inBuf := bufio.NewReader(cmd.InOrStdin())
 			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
@@ -110,10 +117,15 @@ func getCmdIssueToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 // getCmdEditToken implements the edit token command
 func getCmdEditToken(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "edit [symbol]",
-		Short:   "Edit an existing token",
-		Example: `token edit <symbol> --name="Cat Token" --max-supply=100000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
-		Args:    cobra.ExactArgs(1),
+		Use: "edit [symbol]",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Edit an existing token.
+Example:
+$ %s tx token edit <symbol> --name="Cat Token" --max-supply=100000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
+				version.ClientName,
+			),
+		),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			inBuf := bufio.NewReader(cmd.InOrStdin())
 			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
@@ -144,10 +156,15 @@ func getCmdEditToken(cdc *codec.Codec) *cobra.Command {
 
 func getCmdMintToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "mint [symbol]",
-		Short:   "Mint tokens to a specified address",
-		Example: `token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chain-id=<chain-id>  --fee=<fee>`,
-		Args:    cobra.ExactArgs(1),
+		Use: "mint [symbol]",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Mint tokens to a specified address.
+Example:
+$ %s tx token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
+				version.ClientName,
+			),
+		),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			inBuf := bufio.NewReader(cmd.InOrStdin())
 			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
@@ -213,10 +230,15 @@ func getCmdMintToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 // getCmdTransferTokenOwner implements the transfer token owner command
 func getCmdTransferTokenOwner(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "transfer [symbol]",
-		Short:   "Transfer the owner of a token to a new owner",
-		Example: `token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
-		Args:    cobra.ExactArgs(1),
+		Use: "transfer [symbol]",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Transfer the owner of a token to a new owner.
+Example:
+$ %s tx token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
+				version.ClientName,
+			),
+		),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			inBuf := bufio.NewReader(cmd.InOrStdin())
 			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))

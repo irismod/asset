@@ -21,6 +21,8 @@ func NewQuerier(k Keeper) sdk.Querier {
 			return queryTokens(ctx, req, k)
 		case types.QueryFees:
 			return queryFees(ctx, req, k)
+		case types.QueryParams:
+			return queryParams(ctx, req, k)
 		default:
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "unknown token query endpoint")
 		}
@@ -82,5 +84,14 @@ func queryFees(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, e
 		return nil, err
 	}
 
+	return bz, nil
+}
+
+func queryParams(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, error) {
+	params := keeper.GetParamSet(ctx)
+	bz, err := keeper.cdc.MarshalJSON(params)
+	if err != nil {
+		return nil, err
+	}
 	return bz, nil
 }

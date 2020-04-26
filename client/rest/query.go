@@ -31,6 +31,12 @@ func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, queryRoute st
 		fmt.Sprintf("/%s/tokens/{%s}/fee", types.ModuleName, RestParamSymbol),
 		queryTokenFeesHandlerFn(cliCtx, queryRoute),
 	).Methods("GET")
+
+	// Query token params
+	r.HandleFunc(
+		fmt.Sprintf("/%s/tokens/params", types.ModuleName),
+		queryTokenParamsHandlerFn(cliCtx, queryRoute),
+	).Methods("GET")
 }
 
 // queryTokenHandlerFn is the HTTP request handler to query token
@@ -135,6 +141,27 @@ func queryTokenFeesHandlerFn(cliCtx context.CLIContext, queryRoute string) http.
 
 		res, height, err := cliCtx.QueryWithData(
 			fmt.Sprintf("custom/%s/%s/tokens", queryRoute, types.QueryFees), bz)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		cliCtx = cliCtx.WithHeight(height)
+		rest.PostProcessResponse(w, cliCtx, res)
+	}
+}
+
+
+// queryTokenParamsHandlerFn is the HTTP request handler to query token params
+func queryTokenParamsHandlerFn(cliCtx context.CLIContext, queryRoute string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
+
+		res, height, err := cliCtx.QueryWithData(
+			fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryParams), nil)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
