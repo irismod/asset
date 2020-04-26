@@ -50,7 +50,7 @@ func getCmdIssueToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Issue a new token.
 Example:
-$ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --scale=0 --initial-supply=100000000000 --max-supply=1000000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
+$ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --scale=0 --initial-supply=100000000000 --max-supply=1000000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fees=<fee>`,
 				version.ClientName,
 			),
 		),
@@ -121,7 +121,7 @@ func getCmdEditToken(cdc *codec.Codec) *cobra.Command {
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Edit an existing token.
 Example:
-$ %s tx token edit <symbol> --name="Cat Token" --max-supply=100000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
+$ %s tx token edit <symbol> --name="Cat Token" --max-supply=100000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fees=<fee>`,
 				version.ClientName,
 			),
 		),
@@ -160,7 +160,7 @@ func getCmdMintToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Mint tokens to a specified address.
 Example:
-$ %s tx token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
+$ %s tx token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chain-id=<chain-id> --fees=<fee>`,
 				version.ClientName,
 			),
 		),
@@ -234,7 +234,7 @@ func getCmdTransferTokenOwner(cdc *codec.Codec) *cobra.Command {
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Transfer the owner of a token to a new owner.
 Example:
-$ %s tx token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id> --fee=<fee>`,
+$ %s tx token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id> --fees=<fee>`,
 				version.ClientName,
 			),
 		),
