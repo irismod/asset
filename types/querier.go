@@ -11,6 +11,7 @@ const (
 	QueryToken  = "token"
 	QueryTokens = "tokens"
 	QueryFees   = "fees"
+	QueryParams = "params"
 )
 
 // QueryTokenParams is the query parameters for 'custom/token/token'

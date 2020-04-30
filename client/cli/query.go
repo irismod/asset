@@ -3,12 +3,15 @@ package cli
 import (
 	"fmt"
 
+	"strings"
+
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/version"
 
 	"github.com/irismod/token/exported"
 	"github.com/irismod/token/types"
@@ -26,6 +29,7 @@ func GetQueryCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		getCmdQueryToken(queryRoute, cdc),
 		getCmdQueryTokens(queryRoute, cdc),
 		getCmdQueryFee(queryRoute, cdc),
+		getCmdQueryParams(queryRoute, cdc),
 	)...)
 
 	return queryCmd
@@ -34,10 +38,16 @@ func GetQueryCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 // getCmdQueryToken implements the query token command.
 func getCmdQueryToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "token [denom]",
-		Short:   "Query a token by symbol or minUnit",
-		Example: "token <denom>",
-		Args:    cobra.ExactArgs(1),
+		Use: "token [denom]",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Query a token by symbol or minUnit.
+Example:
+$ %s query token token <denom>
+`,
+				version.ClientName,
+			),
+		),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
@@ -74,9 +84,15 @@ func getCmdQueryToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 // getCmdQueryTokens implements the query tokens command.
 func getCmdQueryTokens(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "tokens [owner]",
-		Short:   "Query tokens (or by owner)",
-		Example: "tokens <owner>",
+		Use: "tokens [owner]",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Query token by the owner.
+Example:
+$ %s query token tokens <owner>
+`,
+				version.ClientName,
+			),
+		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
@@ -115,10 +131,16 @@ func getCmdQueryTokens(queryRoute string, cdc *codec.Codec) *cobra.Command {
 // getCmdQueryFee implements the query token related fees command.
 func getCmdQueryFee(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "fee [symbol]",
-		Short:   "Query the token related fees",
-		Args:    cobra.ExactArgs(1),
-		Example: "token fee <symbol>",
+		Use:  "fee [symbol]",
+		Args: cobra.ExactArgs(1),
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Query the token related fees.
+Example:
+$ %s query token fee <symbol>
+`,
+				version.ClientName,
+			),
+		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
@@ -134,6 +156,38 @@ func getCmdQueryFee(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			}
 
 			return cliCtx.PrintOutput(fees)
+		},
+	}
+
+	return cmd
+}
+
+// getCmdQueryParams implements the query token related param command.
+func getCmdQueryParams(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "params",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Query values set as token parameters.
+Example:
+$ %s query token params
+`,
+				version.ClientName,
+			),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+
+			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryParams), nil)
+			if err != nil {
+				return err
+			}
+
+			var params types.Params
+			if err := cdc.UnmarshalJSON(res, &params); err != nil {
+				return err
+			}
+
+			return cliCtx.PrintOutput(params)
 		},
 	}
 
