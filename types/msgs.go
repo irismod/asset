@@ -23,7 +23,7 @@ const (
 
 	MaximumMaxSupply  = uint64(1000000000000) // maximal limitation for token max supply，1000 billion
 	MaximumInitSupply = uint64(100000000000)  // maximal limitation for token initial supply，100 billion
-	MaximumScale      = uint8(18)             // maximal limitation for token decimal
+	MaximumScale      = uint32(18)            // maximal limitation for token decimal
 	MinimumSymbolLen  = 3                     // minimal limitation for the length of the token's symbol / canonical_symbol
 	MaximumSymbolLen  = 8                     // maximal limitation for the length of the token's symbol / canonical_symbol
 	MaximumNameLen    = 32                    // maximal limitation for the length of the token's name
@@ -38,20 +38,8 @@ var (
 
 var _, _, _, _ sdk.Msg = &MsgIssueToken{}, &MsgEditToken{}, &MsgMintToken{}, &MsgTransferTokenOwner{}
 
-// MsgIssueToken
-type MsgIssueToken struct {
-	Symbol        string         `json:"symbol"`
-	Name          string         `json:"name"`
-	Scale         uint8          `json:"scale"`
-	MinUnit       string         `json:"min_unit"`
-	InitialSupply uint64         `json:"initial_supply"`
-	MaxSupply     uint64         `json:"max_supply"`
-	Mintable      bool           `json:"mintable"`
-	Owner         sdk.AccAddress `json:"owner"`
-}
-
 // NewMsgIssueToken - construct token issue msg.
-func NewMsgIssueToken(symbol string, minUnit string, name string, scale uint8, initialSupply, maxSupply uint64, mintable bool, owner sdk.AccAddress) MsgIssueToken {
+func NewMsgIssueToken(symbol string, minUnit string, name string, scale uint32, initialSupply, maxSupply uint64, mintable bool, owner sdk.AccAddress) MsgIssueToken {
 	return MsgIssueToken{
 		Symbol:        symbol,
 		Name:          name,
@@ -159,15 +147,6 @@ func (msg MsgTransferTokenOwner) Route() string { return MsgRoute }
 // Type implements Msg
 func (msg MsgTransferTokenOwner) Type() string { return TypeMsgTransferTokenOwner }
 
-// MsgEditToken for editing a specified token
-type MsgEditToken struct {
-	Symbol    string         `json:"symbol"` //  symbol of token
-	Owner     sdk.AccAddress `json:"owner"`  //  owner of token
-	MaxSupply uint64         `json:"max_supply"`
-	Mintable  Bool           `json:"mintable"` //  mintable of token
-	Name      string         `json:"name"`
-}
-
 // NewMsgEditToken creates a MsgEditToken
 func NewMsgEditToken(name, symbol string, maxSupply uint64, mintable Bool, owner sdk.AccAddress) MsgEditToken {
 	name = strings.TrimSpace(name)
@@ -225,14 +204,6 @@ func (msg MsgEditToken) GetSignBytes() []byte {
 // GetSigners implements Msg
 func (msg MsgEditToken) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Owner}
-}
-
-// MsgMintToken for minting the token to a specified address
-type MsgMintToken struct {
-	Symbol string         `json:"symbol"` // the symbol of the token
-	Owner  sdk.AccAddress `json:"owner"`  // the current owner address of the token
-	To     sdk.AccAddress `json:"to"`     // address of minting token to
-	Amount uint64         `json:"amount"` // amount of minting token
 }
 
 // NewMsgMintToken creates a MsgMintToken

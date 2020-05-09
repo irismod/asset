@@ -10,24 +10,12 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-// Token defines a struct for the fungible token
-type Token struct {
-	Symbol        string         `json:"symbol" yaml:"symbol"`
-	Name          string         `json:"name" yaml:"name"`
-	Scale         uint8          `json:"scale" yaml:"scale"`
-	MinUnit       string         `json:"min_unit" yaml:"min_unit"`
-	InitialSupply uint64         `json:"initial_supply" yaml:"initial_supply"`
-	MaxSupply     uint64         `json:"max_supply" yaml:"max_supply"`
-	Mintable      bool           `json:"mintable" yaml:"mintable"`
-	Owner         sdk.AccAddress `json:"owner" yaml:"owner"`
-}
-
 // NewToken constructs a new Token instance
 func NewToken(
 	symbol,
 	name,
 	minUnit string,
-	scale uint8,
+	scale uint32,
 	initialSupply,
 	maxSupply uint64,
 	mintable bool,
@@ -68,7 +56,7 @@ func (t Token) GetName() string {
 }
 
 // GetScale implements exported.TokenI
-func (t Token) GetScale() uint8 {
+func (t Token) GetScale() uint32 {
 	return t.Scale
 }
 
@@ -131,22 +119,6 @@ func (t Token) ToMinCoin(coin sdk.DecCoin) (newCoin sdk.Coin, err error) {
 
 	amt := amount.Mul(precision)
 	return sdk.NewCoin(t.MinUnit, amt.TruncateInt()), nil
-}
-
-// String implements fmt.Stringer
-func (t Token) String() string {
-	return fmt.Sprintf(`Token:
-  Name:              %s
-  Symbol:            %s
-  Scale:             %d
-  MinUnit:           %s
-  Initial Supply:    %d
-  Max Supply:        %d
-  Mintable:          %v
-  Owner:             %s`,
-		t.Name, t.Symbol, t.Scale, t.MinUnit,
-		t.InitialSupply, t.MaxSupply, t.Mintable, t.Owner,
-	)
 }
 
 // Tokens is a set of tokens

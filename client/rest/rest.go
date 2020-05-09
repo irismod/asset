@@ -26,7 +26,7 @@ type issueTokenReq struct {
 	Owner         sdk.AccAddress `json:"owner"` // owner of the token
 	Symbol        string         `json:"symbol"`
 	Name          string         `json:"name"`
-	Scale         uint8          `json:"scale"`
+	Scale         uint32         `json:"scale"`
 	MinUnit       string         `json:"min_unit"`
 	InitialSupply uint64         `json:"initial_supply"`
 	MaxSupply     uint64         `json:"max_supply"`

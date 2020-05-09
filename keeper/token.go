@@ -3,6 +3,8 @@ package keeper
 import (
 	"fmt"
 
+	gogotypes "github.com/gogo/protobuf/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -21,7 +23,7 @@ func (k Keeper) GetTokens(ctx sdk.Context, owner sdk.AccAddress) (tokens []expor
 
 		for ; it.Valid(); it.Next() {
 			var token types.Token
-			k.cdc.MustUnmarshalBinaryLengthPrefixed(it.Value(), &token)
+			k.cdc.MustUnmarshalBinaryBare(it.Value(), &token)
 
 			tokens = append(tokens, token)
 		}
@@ -32,10 +34,10 @@ func (k Keeper) GetTokens(ctx sdk.Context, owner sdk.AccAddress) (tokens []expor
 	defer it.Close()
 
 	for ; it.Valid(); it.Next() {
-		var symbol string
-		k.cdc.MustUnmarshalBinaryLengthPrefixed(it.Value(), &symbol)
+		var symbol gogotypes.StringValue
+		k.cdc.MustUnmarshalBinaryBare(it.Value(), &symbol)
 
-		token, err := k.GetToken(ctx, symbol)
+		token, err := k.GetToken(ctx, symbol.Value)
 		if err != nil {
 			continue
 		}
@@ -57,9 +59,9 @@ func (k Keeper) GetToken(ctx sdk.Context, denom string) (token exported.TokenI, 
 		return token, sdkerrors.Wrap(types.ErrTokenNotExists, fmt.Sprintf("token %s does not exist", denom))
 	}
 
-	var symbol string
-	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &symbol)
-	return k.getToken(ctx, symbol)
+	var symbol gogotypes.StringValue
+	k.cdc.MustUnmarshalBinaryBare(bz, &symbol)
+	return k.getToken(ctx, symbol.Value)
 }
 
 // AddToken saves a new token
@@ -116,7 +118,7 @@ func (k Keeper) SetParamSet(ctx sdk.Context, params types.Params) {
 func (k Keeper) setWithOwner(ctx sdk.Context, owner sdk.AccAddress, symbol string) error {
 	store := ctx.KVStore(k.storeKey)
 
-	bz := k.cdc.MustMarshalBinaryLengthPrefixed(symbol)
+	bz := k.cdc.MustMarshalBinaryBare(&gogotypes.StringValue{Value: symbol})
 
 	store.Set(types.KeyTokens(owner, symbol), bz)
 	return nil
@@ -125,7 +127,7 @@ func (k Keeper) setWithOwner(ctx sdk.Context, owner sdk.AccAddress, symbol strin
 func (k Keeper) setWithMinUnit(ctx sdk.Context, minUnit, symbol string) error {
 	store := ctx.KVStore(k.storeKey)
 
-	bz := k.cdc.MustMarshalBinaryLengthPrefixed(symbol)
+	bz := k.cdc.MustMarshalBinaryBare(&gogotypes.StringValue{Value: symbol})
 
 	store.Set(types.KeyMinUint(minUnit), bz)
 	return nil
@@ -133,7 +135,7 @@ func (k Keeper) setWithMinUnit(ctx sdk.Context, minUnit, symbol string) error {
 
 func (k Keeper) setToken(ctx sdk.Context, token types.Token) error {
 	store := ctx.KVStore(k.storeKey)
-	bz := k.cdc.MustMarshalBinaryLengthPrefixed(token)
+	bz := k.cdc.MustMarshalBinaryBare(&token)
 
 	store.Set(types.KeySymbol(token.Symbol), bz)
 	return nil
@@ -146,7 +148,7 @@ func (k Keeper) getToken(ctx sdk.Context, symbol string) (token types.Token, err
 	if bz == nil {
 		return token, sdkerrors.Wrap(types.ErrTokenNotExists, fmt.Sprintf("token %s does not exist", symbol))
 	}
-	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &token)
+	k.cdc.MustUnmarshalBinaryBare(bz, &token)
 	return token, nil
 }
 
@@ -163,5 +165,5 @@ func (k Keeper) resetStoreKeyForQueryToken(ctx sdk.Context, msg types.MsgTransfe
 
 // getTokenSupply query issued tokens supply from the total supply
 func (k Keeper) getTokenSupply(ctx sdk.Context, denom string) sdk.Int {
-	return k.supplyKeeper.GetSupply(ctx).GetTotal().AmountOf(denom)
+	return k.bankKeeper.GetSupply(ctx).GetTotal().AmountOf(denom)
 }

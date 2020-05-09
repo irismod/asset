@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 
+	"gopkg.in/yaml.v2"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params"
 )
@@ -15,13 +17,6 @@ var (
 	KeyIssueTokenBaseFee = []byte("IssueTokenBaseFee")
 	KeyMintTokenFeeRatio = []byte("MintTokenFeeRatio")
 )
-
-// token params
-type Params struct {
-	TokenTaxRate      sdk.Dec  `json:"token_tax_rate"`       // e.g., 40%
-	IssueTokenBaseFee sdk.Coin `json:"issue_token_base_fee"` // e.g., 300000*10^18iris-atto
-	MintTokenFeeRatio sdk.Dec  `json:"mint_token_fee_ratio"` // e.g., 10%
-} // issuance fee = IssueTokenBaseFee / (ln(len(symbol))/ln3)^4
 
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
@@ -55,6 +50,12 @@ func DefaultParams() Params {
 		IssueTokenBaseFee: sdk.NewCoin(defaultToken.Symbol, sdk.NewIntWithDecimal(60000, int(defaultToken.Scale))),
 		MintTokenFeeRatio: sdk.NewDecWithPrec(1, 1), // 0.1 (10%)
 	}
+}
+
+// String returns a human readable string representation of the parameters.
+func (p Params) String() string {
+	out, _ := yaml.Marshal(p)
+	return string(out)
 }
 
 func ValidateParams(p Params) error {

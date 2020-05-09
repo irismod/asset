@@ -23,7 +23,7 @@ func NewGenesisState(params Params, tokens Tokens) GenesisState {
 func SetNativeToken(symbol,
 	name,
 	minUnit string,
-	decimal uint8,
+	decimal uint32,
 	initialSupply,
 	maxSupply uint64,
 	mintable bool,

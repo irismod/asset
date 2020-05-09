@@ -151,7 +151,6 @@ func queryTokenFeesHandlerFn(cliCtx context.CLIContext, queryRoute string) http.
 	}
 }
 
-
 // queryTokenParamsHandlerFn is the HTTP request handler to query token params
 func queryTokenParamsHandlerFn(cliCtx context.CLIContext, queryRoute string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
