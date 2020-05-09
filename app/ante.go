@@ -7,6 +7,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/ibc"
 	ibcante "github.com/cosmos/cosmos-sdk/x/ibc/ante"
+
+	"github.com/irismod/token"
 )
 
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
@@ -14,7 +16,7 @@ import (
 // signer.
 func NewAnteHandler(
 	ak auth.AccountKeeper, bankKeeper bank.Keeper, ibcKeeper ibc.Keeper,
-	sigGasConsumer ante.SignatureVerificationGasConsumer,
+	tk token.Keeper, sigGasConsumer ante.SignatureVerificationGasConsumer,
 ) sdk.AnteHandler {
 	return sdk.ChainAnteDecorators(
 		ante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
@@ -25,10 +27,10 @@ func NewAnteHandler(
 		ante.NewSetPubKeyDecorator(ak), // SetPubKeyDecorator must be called before all signature verification decorators
 		ante.NewValidateSigCountDecorator(ak),
 		ante.NewDeductFeeDecorator(ak, bankKeeper),
-		ante.NewDeductFeeDecorator(ak, bankKeeper),
 		ante.NewSigGasConsumeDecorator(ak, sigGasConsumer),
 		ante.NewSigVerificationDecorator(ak),
 		ante.NewIncrementSequenceDecorator(ak),
 		ibcante.NewProofVerificationDecorator(ibcKeeper.ClientKeeper, ibcKeeper.ChannelKeeper), // innermost AnteDecorator
+		token.NewValidateTokenFeeDecorator(tk, ak, bankKeeper),
 	)
 }
