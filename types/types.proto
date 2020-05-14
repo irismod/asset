@@ -19,6 +19,13 @@ message MsgIssueToken {
   bytes  owner          = 8 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
 }
 
+// MsgMintToken defines an SDK message for transferring the token owner.
+message MsgTransferTokenOwner {
+  bytes  src_owner = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  bytes  dst_owner = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string symbol    = 3;
+}
+
 // MsgEditToken defines an SDK message for editing a new token.
 message MsgEditToken {
   string symbol     = 1;

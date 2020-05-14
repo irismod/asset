@@ -85,13 +85,6 @@ func (msg MsgIssueToken) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Owner}
 }
 
-// MsgTransferTokenOwner for transferring the token owner
-type MsgTransferTokenOwner struct {
-	SrcOwner sdk.AccAddress `json:"src_owner"` // the current owner address of the token
-	DstOwner sdk.AccAddress `json:"dst_owner"` // the new owner
-	Symbol   string         `json:"symbol"`    // the token symbol
-}
-
 func NewMsgTransferTokenOwner(srcOwner, dstOwner sdk.AccAddress, symbol string) MsgTransferTokenOwner {
 	symbol = strings.TrimSpace(symbol)
 
