@@ -7,7 +7,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/supply"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
@@ -35,7 +34,6 @@ type KeeperSuite struct {
 	cdc    *codec.Codec
 	ctx    sdk.Context
 	keeper keeper.Keeper
-	sk     supply.Keeper
 	bk     bank.Keeper
 }
 
@@ -47,15 +45,14 @@ func (suite *KeeperSuite) SetupTest() {
 	suite.ctx = app.BaseApp.NewContext(isCheck, abci.Header{})
 	suite.keeper = app.TokenKeeper
 	suite.bk = app.BankKeeper
-	suite.sk = app.SupplyKeeper
 
 	// set params
 	suite.keeper.SetParamSet(suite.ctx, types.DefaultParams())
 
 	// init tokens to addr
-	err := suite.sk.MintCoins(suite.ctx, types.ModuleName, initCoin)
+	err := suite.bk.MintCoins(suite.ctx, types.ModuleName, initCoin)
 	suite.NoError(err)
-	err = suite.sk.SendCoinsFromModuleToAccount(suite.ctx, types.ModuleName, owner, initCoin)
+	err = suite.bk.SendCoinsFromModuleToAccount(suite.ctx, types.ModuleName, owner, initCoin)
 	suite.NoError(err)
 }
 
@@ -111,17 +108,15 @@ func (suite *KeeperSuite) TestMintToken() {
 
 	suite.True(suite.keeper.HasToken(suite.ctx, msg.Symbol))
 
-	balance := suite.bk.GetCoins(suite.ctx, owner)
-	amt := balance.AmountOf(msg.MinUnit)
-	suite.Equal("1000000000000000000000", amt.String())
+	amt := suite.bk.GetBalance(suite.ctx, owner, msg.MinUnit)
+	suite.Equal("1000000000000000000000satoshi", amt.String())
 
 	msgMintToken := types.NewMsgMintToken(msg.Symbol, owner, nil, 1000)
 	err = suite.keeper.MintToken(suite.ctx, msgMintToken)
 	require.NoError(suite.T(), err)
 
-	balance = suite.bk.GetCoins(suite.ctx, owner)
-	amt = balance.AmountOf(msg.MinUnit)
-	suite.Equal("2000000000000000000000", amt.String())
+	amt = suite.bk.GetBalance(suite.ctx, owner, msg.MinUnit)
+	suite.Equal("2000000000000000000000satoshi", amt.String())
 }
 
 func (suite *KeeperSuite) TestTransferToken() {

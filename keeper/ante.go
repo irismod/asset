@@ -10,12 +10,14 @@ import (
 type ValidateTokenFeeDecorator struct {
 	k  Keeper
 	ak types.AccountKeeper
+	bk types.BankKeeper
 }
 
-func NewValidateTokenFeeDecorator(k Keeper, ak types.AccountKeeper) ValidateTokenFeeDecorator {
+func NewValidateTokenFeeDecorator(k Keeper, ak types.AccountKeeper, bk types.BankKeeper) ValidateTokenFeeDecorator {
 	return ValidateTokenFeeDecorator{
 		k:  k,
 		ak: ak,
+		bk: bk,
 	}
 }
 
@@ -53,9 +55,8 @@ func (dtf ValidateTokenFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simu
 
 	for addr, fee := range feeMap {
 		owner, _ := sdk.AccAddressFromBech32(addr)
-		account := dtf.ak.GetAccount(ctx, owner)
-		balance := account.GetCoins()
-		if balance.IsAllLT(sdk.NewCoins(fee)) {
+		balance := dtf.bk.GetBalance(ctx, owner, fee.Denom)
+		if balance.IsLT(fee) {
 			return ctx, sdkerrors.Wrapf(
 				sdkerrors.ErrInsufficientFunds, "insufficient coins for token fee; %s < %s", balance, fee)
 		}

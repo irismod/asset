@@ -15,9 +15,11 @@ import (
 
 type Keeper struct {
 	storeKey sdk.StoreKey
-	cdc      *codec.Codec
-	// The supplyKeeper to reduce the supply of the network
-	supplyKeeper types.SupplyKeeper
+	cdc      codec.Marshaler
+
+	accountKeeper types.AccountKeeper
+	// The bankKeeper to reduce the supply of the network
+	bankKeeper types.BankKeeper
 
 	feeCollectorName string
 
@@ -25,10 +27,10 @@ type Keeper struct {
 	paramSpace params.Subspace
 }
 
-func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace,
-	supplyKeeper types.SupplyKeeper, feeCollectorName string) Keeper {
+func NewKeeper(cdc codec.Marshaler, key sdk.StoreKey, paramSpace params.Subspace,
+	accountKeeper types.AccountKeeper, bankKeeper types.BankKeeper, feeCollectorName string) Keeper {
 	// ensure token module account is set
-	if addr := supplyKeeper.GetModuleAddress(types.ModuleName); addr == nil {
+	if addr := accountKeeper.GetModuleAddress(types.ModuleName); addr == nil {
 		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
 	}
 
@@ -36,7 +38,7 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace,
 		storeKey:         key,
 		cdc:              cdc,
 		paramSpace:       paramSpace.WithKeyTable(types.ParamKeyTable()),
-		supplyKeeper:     supplyKeeper,
+		bankKeeper:       bankKeeper,
 		feeCollectorName: feeCollectorName,
 	}
 
@@ -67,12 +69,12 @@ func (k Keeper) IssueToken(ctx sdk.Context, msg types.MsgIssueToken) error {
 	mintCoins := sdk.NewCoins(initialSupply)
 
 	// mint coins into module account
-	if err := k.supplyKeeper.MintCoins(ctx, types.ModuleName, mintCoins); err != nil {
+	if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, mintCoins); err != nil {
 		return err
 	}
 
 	// sent coins to owner's account
-	if err := k.supplyKeeper.SendCoinsFromModuleToAccount(
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(
 		ctx, types.ModuleName, token.Owner, mintCoins,
 	); err != nil {
 		return err
@@ -175,7 +177,7 @@ func (k Keeper) MintToken(ctx sdk.Context, msg types.MsgMintToken) error {
 	mintCoins := sdk.NewCoins(mintCoin)
 
 	// mint coins
-	if err := k.supplyKeeper.MintCoins(ctx, types.ModuleName, mintCoins); err != nil {
+	if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, mintCoins); err != nil {
 		return err
 	}
 
@@ -185,7 +187,7 @@ func (k Keeper) MintToken(ctx sdk.Context, msg types.MsgMintToken) error {
 	}
 
 	// sent coins to owner's account
-	if err := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, mintAcc, mintCoins); err != nil {
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, mintAcc, mintCoins); err != nil {
 		return err
 	}
 

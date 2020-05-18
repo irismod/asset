@@ -79,19 +79,19 @@ func feeHandler(ctx sdk.Context, k Keeper, feeAcc sdk.AccAddress, fee sdk.Coin) 
 	burnedCoins := sdk.NewCoins(fee.Sub(communityTaxCoin))
 
 	// send all fees to module account
-	if err := k.supplyKeeper.SendCoinsFromAccountToModule(
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(
 		ctx, feeAcc, types.ModuleName, sdk.NewCoins(fee),
 	); err != nil {
 		return err
 	}
 
 	// send community tax to collectedFees
-	if err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, k.feeCollectorName, sdk.NewCoins(communityTaxCoin)); err != nil {
+	if err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, k.feeCollectorName, sdk.NewCoins(communityTaxCoin)); err != nil {
 		return err
 	}
 
 	// burn burnedCoin
-	return k.supplyKeeper.BurnCoins(ctx, types.ModuleName, burnedCoins)
+	return k.bankKeeper.BurnCoins(ctx, types.ModuleName, burnedCoins)
 }
 
 // calcFeeByBase computes the actual fee according to the given base fee

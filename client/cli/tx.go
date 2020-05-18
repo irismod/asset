@@ -18,7 +18,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	authclient "github.com/cosmos/cosmos-sdk/x/auth/client"
 
 	"github.com/irismod/token/types"
 )
@@ -56,7 +56,7 @@ $ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --s
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			inBuf := bufio.NewReader(cmd.InOrStdin())
-			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContextWithInput(inBuf).WithCodec(cdc)
 
 			owner := cliCtx.GetFromAddress()
@@ -65,7 +65,7 @@ $ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --s
 				Symbol:        viper.GetString(FlagSymbol),
 				Name:          viper.GetString(FlagName),
 				MinUnit:       viper.GetString(FlagMinUnit),
-				Scale:         uint8(viper.GetInt(FlagScale)),
+				Scale:         uint32(viper.GetInt(FlagScale)),
 				InitialSupply: uint64(viper.GetInt(FlagInitialSupply)),
 				MaxSupply:     uint64(viper.GetInt(FlagMaxSupply)),
 				Mintable:      viper.GetBool(FlagMintable),
@@ -92,7 +92,7 @@ $ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --s
 
 			// a confirmation is needed
 			prompt += "\nAre you sure to proceed?"
-			confirmed, err := input.GetConfirmation(prompt, bufio.NewReader(os.Stdin))
+			confirmed, err := input.GetConfirmation(prompt, bufio.NewReader(os.Stdin), cmd.ErrOrStderr())
 			if err != nil {
 				return err
 			}
@@ -101,7 +101,7 @@ $ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --s
 				return fmt.Errorf("operation aborted")
 			}
 
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return authclient.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -128,7 +128,7 @@ $ %s tx token edit <symbol> --name="Cat Token" --max-supply=100000000000 --minta
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			inBuf := bufio.NewReader(cmd.InOrStdin())
-			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContextWithInput(inBuf).WithCodec(cdc)
 
 			owner := cliCtx.GetFromAddress()
@@ -146,7 +146,7 @@ $ %s tx token edit <symbol> --name="Cat Token" --max-supply=100000000000 --minta
 				return err
 			}
 
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return authclient.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -167,7 +167,7 @@ $ %s tx token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chai
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			inBuf := bufio.NewReader(cmd.InOrStdin())
-			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContextWithInput(inBuf).WithCodec(cdc)
 
 			owner := cliCtx.GetFromAddress()
@@ -208,7 +208,7 @@ $ %s tx token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chai
 
 			// a confirmation is needed
 			prompt += "\nAre you sure to proceed?"
-			confirmed, err := input.GetConfirmation(prompt, bufio.NewReader(os.Stdin))
+			confirmed, err := input.GetConfirmation(prompt, bufio.NewReader(os.Stdin), cmd.ErrOrStderr())
 			if err != nil {
 				return err
 			}
@@ -217,7 +217,7 @@ $ %s tx token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chai
 				return fmt.Errorf("operation aborted")
 			}
 
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return authclient.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -241,7 +241,7 @@ $ %s tx token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			inBuf := bufio.NewReader(cmd.InOrStdin())
-			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContextWithInput(inBuf).WithCodec(cdc)
 
 			owner := cliCtx.GetFromAddress()
@@ -257,7 +257,7 @@ $ %s tx token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id
 				return err
 			}
 
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return authclient.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 

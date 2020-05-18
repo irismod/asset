@@ -7,7 +7,7 @@ import (
 type TokenI interface {
 	GetSymbol() string
 	GetName() string
-	GetScale() uint8
+	GetScale() uint32
 	GetMinUnit() string
 	GetInitialSupply() uint64
 	GetMaxSupply() uint64

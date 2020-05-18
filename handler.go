@@ -51,7 +51,7 @@ func handleIssueToken(ctx sdk.Context, k Keeper, msg MsgIssueToken) (*sdk.Result
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Owner.String()),
 		),
 	})
-	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
+	return &sdk.Result{Events: ctx.EventManager().ABCIEvents()}, nil
 }
 
 // handleMsgEditToken handles MsgEditToken
@@ -71,7 +71,7 @@ func handleMsgEditToken(ctx sdk.Context, k Keeper, msg MsgEditToken) (*sdk.Resul
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Owner.String()),
 		),
 	})
-	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
+	return &sdk.Result{Events: ctx.EventManager().ABCIEvents()}, nil
 }
 
 // handleMsgTransferTokenOwner handles MsgTransferTokenOwner
@@ -92,7 +92,7 @@ func handleMsgTransferTokenOwner(ctx sdk.Context, k Keeper, msg MsgTransferToken
 		),
 	})
 
-	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
+	return &sdk.Result{Events: ctx.EventManager().ABCIEvents()}, nil
 }
 
 // handleMsgMintToken handles MsgMintToken
@@ -118,5 +118,5 @@ func handleMsgMintToken(ctx sdk.Context, k Keeper, msg MsgMintToken) (*sdk.Resul
 		),
 	})
 
-	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
+	return &sdk.Result{Events: ctx.EventManager().ABCIEvents()}, nil
 }
