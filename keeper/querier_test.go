@@ -2,53 +2,53 @@ package keeper_test
 
 import (
 	"fmt"
-
 	"testing"
+
+	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/irismod/token"
 	simapp "github.com/irismod/token/app"
-	"github.com/irismod/token/exported"
+	"github.com/irismod/token/keeper"
 	"github.com/irismod/token/types"
 )
 
 func TestQueryToken(t *testing.T) {
 	app := simapp.Setup(isCheck)
 	ctx := app.BaseApp.NewContext(isCheck, abci.Header{})
-	querier := token.NewQuerier(app.TokenKeeper)
+	querier := keeper.NewQuerier(app.TokenKeeper)
 
-	params := token.QueryTokenParams{
+	params := types.QueryTokenParams{
 		Denom: types.GetNativeToken().Symbol,
 	}
 	bz := app.Codec().MustMarshalJSON(params)
 	query := abci.RequestQuery{
-		Path: fmt.Sprintf("/custom/%s/%s", token.ModuleName, token.QueryToken),
+		Path: fmt.Sprintf("/custom/%s/%s", types.QuerierRoute, types.QueryToken),
 		Data: bz,
 	}
 
-	data, err := querier(ctx, []string{token.QueryToken}, query)
+	data, err := querier(ctx, []string{types.QueryToken}, query)
 	require.Nil(t, err)
 
-	data2 := app.Codec().MustMarshalJSON(token.GetNativeToken())
+	data2 := codec.MustMarshalJSONIndent(app.Codec(), types.GetNativeToken())
 	require.EqualValues(t, data2, data)
 
 	//query by mint_unit
-	params = token.QueryTokenParams{
+	params = types.QueryTokenParams{
 		Denom: types.GetNativeToken().MinUnit,
 	}
 
 	bz = app.Codec().MustMarshalJSON(params)
 	query = abci.RequestQuery{
-		Path: fmt.Sprintf("/custom/%s/%s", token.ModuleName, token.QueryToken),
+		Path: fmt.Sprintf("/custom/%s/%s", types.QuerierRoute, types.QueryToken),
 		Data: bz,
 	}
 
-	data, err = querier(ctx, []string{token.QueryToken}, query)
+	data, err = querier(ctx, []string{types.QueryToken}, query)
 	require.Nil(t, err)
 
-	data2 = app.Codec().MustMarshalJSON(token.GetNativeToken())
+	data2 = codec.MustMarshalJSONIndent(app.Codec(), types.GetNativeToken())
 	require.EqualValues(t, data2, data)
 
 }
@@ -56,42 +56,42 @@ func TestQueryToken(t *testing.T) {
 func TestQueryTokens(t *testing.T) {
 	app := simapp.Setup(isCheck)
 	ctx := app.BaseApp.NewContext(isCheck, abci.Header{})
-	querier := token.NewQuerier(app.TokenKeeper)
+	querier := keeper.NewQuerier(app.TokenKeeper)
 
-	params := token.QueryTokensParams{
+	params := types.QueryTokensParams{
 		Owner: nil,
 	}
 	bz := app.Codec().MustMarshalJSON(params)
 	query := abci.RequestQuery{
-		Path: fmt.Sprintf("/custom/%s/%s", token.ModuleName, token.QueryTokens),
+		Path: fmt.Sprintf("/custom/%s/%s", types.QuerierRoute, types.QueryTokens),
 		Data: bz,
 	}
 
-	data, err := querier(ctx, []string{token.QueryTokens}, query)
+	data, err := querier(ctx, []string{types.QueryTokens}, query)
 	require.Nil(t, err)
 
-	data2 := app.Codec().MustMarshalJSON([]exported.TokenI{token.GetNativeToken()})
+	data2 := codec.MustMarshalJSONIndent(app.Codec(), []types.TokenI{types.GetNativeToken()})
 	require.EqualValues(t, data2, data)
 }
 
 func TestQueryFees(t *testing.T) {
 	app := simapp.Setup(isCheck)
 	ctx := app.BaseApp.NewContext(isCheck, abci.Header{})
-	querier := token.NewQuerier(app.TokenKeeper)
+	querier := keeper.NewQuerier(app.TokenKeeper)
 
-	params := token.QueryTokenFeesParams{
+	params := types.QueryTokenFeesParams{
 		Symbol: "btc",
 	}
 	bz := app.Codec().MustMarshalJSON(params)
 	query := abci.RequestQuery{
-		Path: fmt.Sprintf("/custom/%s/%s", token.ModuleName, token.QueryFees),
+		Path: fmt.Sprintf("/custom/%s/%s", types.QuerierRoute, types.QueryFees),
 		Data: bz,
 	}
 
-	data, err := querier(ctx, []string{token.QueryFees}, query)
+	data, err := querier(ctx, []string{types.QueryFees}, query)
 	require.Nil(t, err)
 
-	var fee token.TokenFees
+	var fee types.TokenFees
 	app.Codec().MustUnmarshalJSON(data, &fee)
 	require.Equal(t, false, fee.Exist)
 	require.Equal(t, fmt.Sprintf("60000%s", types.GetNativeToken().MinUnit), fee.IssueFee.String())

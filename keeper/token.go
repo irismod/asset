@@ -8,12 +8,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/irismod/token/exported"
 	"github.com/irismod/token/types"
 )
 
 // GetTokens returns all existing tokens
-func (k Keeper) GetTokens(ctx sdk.Context, owner sdk.AccAddress) (tokens []exported.TokenI) {
+func (k Keeper) GetTokens(ctx sdk.Context, owner sdk.AccAddress) (tokens []types.TokenI) {
 	store := ctx.KVStore(k.storeKey)
 
 	var it sdk.Iterator
@@ -47,7 +46,7 @@ func (k Keeper) GetTokens(ctx sdk.Context, owner sdk.AccAddress) (tokens []expor
 }
 
 // GetToken returns the token of the specified symbol or minUint
-func (k Keeper) GetToken(ctx sdk.Context, denom string) (token exported.TokenI, err error) {
+func (k Keeper) GetToken(ctx sdk.Context, denom string) (token types.TokenI, err error) {
 	store := ctx.KVStore(k.storeKey)
 
 	if token, err := k.getToken(ctx, denom); err == nil {

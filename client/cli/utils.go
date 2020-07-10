@@ -3,20 +3,20 @@ package cli
 import (
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/client"
 
 	"github.com/irismod/token/types"
 )
 
 // queryTokenFees retrieves the fees of issuance and minting for the specified symbol
-func queryTokenFees(cliCtx context.CLIContext, queryRoute string, symbol string) (types.TokenFees, error) {
+func queryTokenFees(cliCtx client.Context, symbol string) (types.TokenFees, error) {
 	params := types.QueryTokenFeesParams{
 		Symbol: symbol,
 	}
 
 	bz := cliCtx.Codec.MustMarshalJSON(params)
 
-	route := fmt.Sprintf("custom/%s/fees/tokens", queryRoute)
+	route := fmt.Sprintf("custom/%s/fees/tokens", types.QuerierRoute)
 	res, _, err := cliCtx.QueryWithData(route, bz)
 	if err != nil {
 		return types.TokenFees{}, err

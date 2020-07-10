@@ -3,32 +3,35 @@ package types
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/types"
-
-	"github.com/irismod/token/exported"
+	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
-
-// Codec defines the interface needed to serialize x/bank state. It must
-// be aware of all concrete supply types.
-type Codec interface {
-	codec.Marshaler
-
-	MarshalSupply(supply exported.TokenI) ([]byte, error)
-	UnmarshalSupply(bz []byte) (exported.TokenI, error)
-
-	MarshalSupplyJSON(supply exported.TokenI) ([]byte, error)
-	UnmarshalSupplyJSON(bz []byte) (exported.TokenI, error)
-}
 
 // RegisterCodec registers the necessary x/bank interfaces and concrete types
 // on the provided Amino codec. These types are used for Amino JSON serialization.
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterInterface((*exported.TokenI)(nil), nil)
+	cdc.RegisterInterface((*TokenI)(nil), nil)
+
 	cdc.RegisterConcrete(Token{}, "irismod/token/Token", nil)
 
 	cdc.RegisterConcrete(MsgIssueToken{}, "irismod/token/MsgIssueToken", nil)
 	cdc.RegisterConcrete(MsgEditToken{}, "irismod/token/MsgEditToken", nil)
 	cdc.RegisterConcrete(MsgMintToken{}, "irismod/token/MsgMintToken", nil)
 	cdc.RegisterConcrete(MsgTransferTokenOwner{}, "irismod/token/MsgTransferTokenOwner", nil)
+}
+
+func RegisterInterfaces(registry types.InterfaceRegistry) {
+	registry.RegisterImplementations((*sdk.Msg)(nil),
+		&MsgIssueToken{},
+		&MsgEditToken{},
+		&MsgMintToken{},
+		&MsgTransferTokenOwner{},
+	)
+	registry.RegisterInterface(
+		"irismod.token.TokenI",
+		(*TokenI)(nil),
+		&Token{},
+	)
 }
 
 var (
@@ -45,6 +48,5 @@ var (
 
 func init() {
 	RegisterCodec(amino)
-	codec.RegisterCrypto(amino)
-	amino.Seal()
+	cryptocodec.RegisterCrypto(amino)
 }

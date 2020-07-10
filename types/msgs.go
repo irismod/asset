@@ -39,8 +39,8 @@ var (
 var _, _, _, _ sdk.Msg = &MsgIssueToken{}, &MsgEditToken{}, &MsgMintToken{}, &MsgTransferTokenOwner{}
 
 // NewMsgIssueToken - construct token issue msg.
-func NewMsgIssueToken(symbol string, minUnit string, name string, scale uint32, initialSupply, maxSupply uint64, mintable bool, owner sdk.AccAddress) MsgIssueToken {
-	return MsgIssueToken{
+func NewMsgIssueToken(symbol string, minUnit string, name string, scale uint32, initialSupply, maxSupply uint64, mintable bool, owner sdk.AccAddress) *MsgIssueToken {
+	return &MsgIssueToken{
 		Symbol:        symbol,
 		Name:          name,
 		Scale:         scale,
@@ -85,10 +85,10 @@ func (msg MsgIssueToken) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Owner}
 }
 
-func NewMsgTransferTokenOwner(srcOwner, dstOwner sdk.AccAddress, symbol string) MsgTransferTokenOwner {
+func NewMsgTransferTokenOwner(srcOwner, dstOwner sdk.AccAddress, symbol string) *MsgTransferTokenOwner {
 	symbol = strings.TrimSpace(symbol)
 
-	return MsgTransferTokenOwner{
+	return &MsgTransferTokenOwner{
 		SrcOwner: srcOwner,
 		DstOwner: dstOwner,
 		Symbol:   symbol,
@@ -141,10 +141,10 @@ func (msg MsgTransferTokenOwner) Route() string { return MsgRoute }
 func (msg MsgTransferTokenOwner) Type() string { return TypeMsgTransferTokenOwner }
 
 // NewMsgEditToken creates a MsgEditToken
-func NewMsgEditToken(name, symbol string, maxSupply uint64, mintable Bool, owner sdk.AccAddress) MsgEditToken {
+func NewMsgEditToken(name, symbol string, maxSupply uint64, mintable Bool, owner sdk.AccAddress) *MsgEditToken {
 	name = strings.TrimSpace(name)
 
-	return MsgEditToken{
+	return &MsgEditToken{
 		Name:      name,
 		Symbol:    symbol,
 		MaxSupply: maxSupply,
@@ -200,10 +200,10 @@ func (msg MsgEditToken) GetSigners() []sdk.AccAddress {
 }
 
 // NewMsgMintToken creates a MsgMintToken
-func NewMsgMintToken(symbol string, owner, to sdk.AccAddress, amount uint64) MsgMintToken {
+func NewMsgMintToken(symbol string, owner, to sdk.AccAddress, amount uint64) *MsgMintToken {
 	symbol = strings.TrimSpace(symbol)
 
-	return MsgMintToken{
+	return &MsgMintToken{
 		Symbol: symbol,
 		Owner:  owner,
 		To:     to,

@@ -3,6 +3,8 @@ package keeper
 import (
 	"strings"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/irismod/token/types"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -41,7 +43,7 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, 
 		return nil, err
 	}
 
-	bz, err := keeper.cdc.MarshalJSON(token)
+	bz, err := codec.MarshalJSONIndent(keeper.cdc, token)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +57,7 @@ func queryTokens(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte,
 		return nil, err
 	}
 	tokens := keeper.GetTokens(ctx, params.Owner)
-	return keeper.cdc.MarshalJSON(tokens)
+	return codec.MarshalJSONIndent(keeper.cdc, tokens)
 }
 
 func queryFees(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, error) {
@@ -79,7 +81,7 @@ func queryFees(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, e
 		MintFee:  mintFee,
 	}
 
-	bz, err := keeper.cdc.MarshalJSON(fees)
+	bz, err := codec.MarshalJSONIndent(keeper.cdc, fees)
 	if err != nil {
 		return nil, err
 	}
@@ -87,9 +89,9 @@ func queryFees(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, e
 	return bz, nil
 }
 
-func queryParams(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, error) {
+func queryParams(ctx sdk.Context, _ abci.RequestQuery, keeper Keeper) ([]byte, error) {
 	params := keeper.GetParamSet(ctx)
-	bz, err := keeper.cdc.MarshalJSON(params)
+	bz, err := codec.MarshalJSONIndent(keeper.cdc, params)
 	if err != nil {
 		return nil, err
 	}

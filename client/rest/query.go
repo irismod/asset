@@ -6,41 +6,41 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 
 	"github.com/irismod/token/types"
 )
 
-func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, queryRoute string) {
+func registerQueryRoutes(cliCtx client.Context, r *mux.Router) {
 	// Query token by symbol or minUnit
 	r.HandleFunc(
 		fmt.Sprintf("/%s/tokens/{%s}", types.ModuleName, RestParamDenom),
-		queryTokenHandlerFn(cliCtx, queryRoute),
+		queryTokenHandlerFn(cliCtx),
 	).Methods("GET")
 
 	// Query tokens by owner
 	r.HandleFunc(
 		fmt.Sprintf("/%s/tokens", types.ModuleName),
-		queryTokensHandlerFn(cliCtx, queryRoute),
+		queryTokensHandlerFn(cliCtx),
 	).Methods("GET")
 
 	// Query token fees
 	r.HandleFunc(
 		fmt.Sprintf("/%s/tokens/{%s}/fee", types.ModuleName, RestParamSymbol),
-		queryTokenFeesHandlerFn(cliCtx, queryRoute),
+		queryTokenFeesHandlerFn(cliCtx),
 	).Methods("GET")
 
 	// Query token params
 	r.HandleFunc(
 		fmt.Sprintf("/%s/tokens/params", types.ModuleName),
-		queryTokenParamsHandlerFn(cliCtx, queryRoute),
+		queryTokenParamsHandlerFn(cliCtx),
 	).Methods("GET")
 }
 
 // queryTokenHandlerFn is the HTTP request handler to query token
-func queryTokenHandlerFn(cliCtx context.CLIContext, queryRoute string) http.HandlerFunc {
+func queryTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		params := types.QueryTokenParams{
@@ -59,7 +59,7 @@ func queryTokenHandlerFn(cliCtx context.CLIContext, queryRoute string) http.Hand
 		}
 
 		res, height, err := cliCtx.QueryWithData(
-			fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryToken), bz)
+			fmt.Sprintf("custom/%s/%s", types.QuerierRoute, types.QueryToken), bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
@@ -71,7 +71,7 @@ func queryTokenHandlerFn(cliCtx context.CLIContext, queryRoute string) http.Hand
 }
 
 // queryTokensHandlerFn is the HTTP request handler to query tokens
-func queryTokensHandlerFn(cliCtx context.CLIContext, queryRoute string) http.HandlerFunc {
+func queryTokensHandlerFn(cliCtx client.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ownerStr := r.FormValue(RestParamOwner)
 
@@ -102,7 +102,7 @@ func queryTokensHandlerFn(cliCtx context.CLIContext, queryRoute string) http.Han
 		}
 
 		res, height, err := cliCtx.QueryWithData(
-			fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryTokens), bz)
+			fmt.Sprintf("custom/%s/%s", types.QuerierRoute, types.QueryTokens), bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
@@ -114,7 +114,7 @@ func queryTokensHandlerFn(cliCtx context.CLIContext, queryRoute string) http.Han
 }
 
 // queryTokenFeesHandlerFn is the HTTP request handler to query token fees
-func queryTokenFeesHandlerFn(cliCtx context.CLIContext, queryRoute string) http.HandlerFunc {
+func queryTokenFeesHandlerFn(cliCtx client.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		symbol := vars[RestParamSymbol]
@@ -140,7 +140,7 @@ func queryTokenFeesHandlerFn(cliCtx context.CLIContext, queryRoute string) http.
 		}
 
 		res, height, err := cliCtx.QueryWithData(
-			fmt.Sprintf("custom/%s/%s/tokens", queryRoute, types.QueryFees), bz)
+			fmt.Sprintf("custom/%s/%s/tokens", types.QuerierRoute, types.QueryFees), bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
@@ -152,7 +152,7 @@ func queryTokenFeesHandlerFn(cliCtx context.CLIContext, queryRoute string) http.
 }
 
 // queryTokenParamsHandlerFn is the HTTP request handler to query token params
-func queryTokenParamsHandlerFn(cliCtx context.CLIContext, queryRoute string) http.HandlerFunc {
+func queryTokenParamsHandlerFn(cliCtx client.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
 		if !ok {
@@ -160,7 +160,7 @@ func queryTokenParamsHandlerFn(cliCtx context.CLIContext, queryRoute string) htt
 		}
 
 		res, height, err := cliCtx.QueryWithData(
-			fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryParams), nil)
+			fmt.Sprintf("custom/%s/%s", types.QuerierRoute, types.QueryParams), nil)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return

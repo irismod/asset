@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	authclient "github.com/cosmos/cosmos-sdk/x/auth/client"
@@ -14,7 +14,7 @@ import (
 	"github.com/irismod/token/types"
 )
 
-func registerTxRoutes(cliCtx context.CLIContext, r *mux.Router) {
+func registerTxRoutes(cliCtx client.Context, r *mux.Router) {
 	// issue a token
 	r.HandleFunc(
 		fmt.Sprintf("/%s/tokens", types.ModuleName),
@@ -40,7 +40,7 @@ func registerTxRoutes(cliCtx context.CLIContext, r *mux.Router) {
 	).Methods("POST")
 }
 
-func issueTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
+func issueTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req issueTokenReq
 		if !rest.ReadRESTReq(w, r, cliCtx.Codec, &req) {
@@ -53,7 +53,7 @@ func issueTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 		}
 
 		// create the MsgIssueToken message
-		msg := types.MsgIssueToken{
+		msg := &types.MsgIssueToken{
 			Symbol:        req.Symbol,
 			Name:          req.Name,
 			Scale:         req.Scale,
@@ -72,7 +72,7 @@ func issueTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 	}
 }
 
-func editTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
+func editTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		symbol := vars[RestParamSymbol]
@@ -104,7 +104,7 @@ func editTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 	}
 }
 
-func transferOwnerHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
+func transferOwnerHandlerFn(cliCtx client.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		symbol := vars[RestParamSymbol]
@@ -130,7 +130,7 @@ func transferOwnerHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 	}
 }
 
-func mintTokenHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
+func mintTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		symbol := vars[RestParamSymbol]

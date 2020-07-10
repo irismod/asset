@@ -10,6 +10,20 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
+type TokenI interface {
+	GetSymbol() string
+	GetName() string
+	GetScale() uint32
+	GetMinUnit() string
+	GetInitialSupply() uint64
+	GetMaxSupply() uint64
+	GetMintable() bool
+	GetOwner() sdk.AccAddress
+
+	ToMainCoin(coin sdk.Coin) (sdk.DecCoin, error)
+	ToMinCoin(coin sdk.DecCoin) (sdk.Coin, error)
+}
+
 // NewToken constructs a new Token instance
 func NewToken(
 	symbol,

@@ -3,28 +3,23 @@ package cli
 import (
 	"bufio"
 	"fmt"
-
 	"os"
 	"strings"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/input"
-	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	authclient "github.com/cosmos/cosmos-sdk/x/auth/client"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/irismod/token/types"
 )
 
 // GetTxCmd returns the transaction commands for the token module.
-func GetTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func GetTxCmd(ctx client.Context) *cobra.Command {
 	txCmd := &cobra.Command{
 		Use:                        types.ModuleName,
 		Short:                      "Asset transaction subcommands",
@@ -34,34 +29,32 @@ func GetTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	}
 
 	txCmd.AddCommand(flags.PostCommands(
-		getCmdIssueToken(queryRoute, cdc),
-		getCmdEditToken(cdc),
-		getCmdMintToken(queryRoute, cdc),
-		getCmdTransferTokenOwner(cdc),
+		getCmdIssueToken(ctx),
+		getCmdEditToken(ctx),
+		getCmdMintToken(ctx),
+		getCmdTransferTokenOwner(ctx),
 	)...)
 
 	return txCmd
 }
 
 // getCmdIssueToken implements the issue token command
-func getCmdIssueToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func getCmdIssueToken(clientCtx client.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "issue",
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Issue a new token.
 Example:
 $ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --scale=0 --initial-supply=100000000000 --max-supply=1000000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fees=<fee>`,
-				version.ClientName,
+				version.AppName,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			inBuf := bufio.NewReader(cmd.InOrStdin())
-			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContextWithInput(inBuf).WithCodec(cdc)
+			clientCtx := clientCtx.InitWithInput(cmd.InOrStdin())
 
-			owner := cliCtx.GetFromAddress()
+			owner := clientCtx.GetFromAddress()
 
-			msg := types.MsgIssueToken{
+			msg := &types.MsgIssueToken{
 				Symbol:        viper.GetString(FlagSymbol),
 				Name:          viper.GetString(FlagName),
 				MinUnit:       viper.GetString(FlagMinUnit),
@@ -80,7 +73,7 @@ $ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --s
 
 			if !viper.GetBool(flags.FlagGenerateOnly) {
 				// query fee
-				fee, err1 := queryTokenFees(cliCtx, queryRoute, msg.Symbol)
+				fee, err1 := queryTokenFees(clientCtx, msg.Symbol)
 				if err1 != nil {
 					return fmt.Errorf("failed to query token issue fee: %s", err1.Error())
 				}
@@ -101,7 +94,7 @@ $ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --s
 				return fmt.Errorf("operation aborted")
 			}
 
-			return authclient.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return tx.GenerateOrBroadcastTx(clientCtx, msg)
 		},
 	}
 
@@ -115,23 +108,21 @@ $ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --s
 }
 
 // getCmdEditToken implements the edit token command
-func getCmdEditToken(cdc *codec.Codec) *cobra.Command {
+func getCmdEditToken(clientCtx client.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "edit [symbol]",
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Edit an existing token.
 Example:
 $ %s tx token edit <symbol> --name="Cat Token" --max-supply=100000000000 --mintable=true --from=<key-name> --chain-id=<chain-id> --fees=<fee>`,
-				version.ClientName,
+				version.AppName,
 			),
 		),
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			inBuf := bufio.NewReader(cmd.InOrStdin())
-			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContextWithInput(inBuf).WithCodec(cdc)
+			clientCtx := clientCtx.InitWithInput(cmd.InOrStdin())
 
-			owner := cliCtx.GetFromAddress()
+			owner := clientCtx.GetFromAddress()
 
 			name := viper.GetString(FlagName)
 			maxSupply := uint64(viper.GetInt(FlagMaxSupply))
@@ -146,7 +137,7 @@ $ %s tx token edit <symbol> --name="Cat Token" --max-supply=100000000000 --minta
 				return err
 			}
 
-			return authclient.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return tx.GenerateOrBroadcastTx(clientCtx, msg)
 		},
 	}
 
@@ -154,23 +145,21 @@ $ %s tx token edit <symbol> --name="Cat Token" --max-supply=100000000000 --minta
 	return cmd
 }
 
-func getCmdMintToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func getCmdMintToken(clientCtx client.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "mint [symbol]",
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Mint tokens to a specified address.
 Example:
 $ %s tx token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chain-id=<chain-id> --fees=<fee>`,
-				version.ClientName,
+				version.AppName,
 			),
 		),
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			inBuf := bufio.NewReader(cmd.InOrStdin())
-			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContextWithInput(inBuf).WithCodec(cdc)
+			clientCtx := clientCtx.InitWithInput(cmd.InOrStdin())
 
-			owner := cliCtx.GetFromAddress()
+			owner := clientCtx.GetFromAddress()
 
 			amount := uint64(viper.GetInt64(FlagAmount))
 
@@ -196,7 +185,7 @@ $ %s tx token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chai
 
 			if !viper.GetBool(flags.FlagGenerateOnly) {
 				// query fee
-				fee, err1 := queryTokenFees(cliCtx, queryRoute, args[0])
+				fee, err1 := queryTokenFees(clientCtx, args[0])
 				if err1 != nil {
 					return fmt.Errorf("failed to query token mint fee: %s", err1.Error())
 				}
@@ -217,7 +206,7 @@ $ %s tx token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chai
 				return fmt.Errorf("operation aborted")
 			}
 
-			return authclient.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return tx.GenerateOrBroadcastTx(clientCtx, msg)
 		},
 	}
 
@@ -228,23 +217,21 @@ $ %s tx token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chai
 }
 
 // getCmdTransferTokenOwner implements the transfer token owner command
-func getCmdTransferTokenOwner(cdc *codec.Codec) *cobra.Command {
+func getCmdTransferTokenOwner(clientCtx client.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "transfer [symbol]",
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Transfer the owner of a token to a new owner.
 Example:
 $ %s tx token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id> --fees=<fee>`,
-				version.ClientName,
+				version.AppName,
 			),
 		),
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			inBuf := bufio.NewReader(cmd.InOrStdin())
-			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContextWithInput(inBuf).WithCodec(cdc)
+			clientCtx := clientCtx.InitWithInput(cmd.InOrStdin())
 
-			owner := cliCtx.GetFromAddress()
+			owner := clientCtx.GetFromAddress()
 
 			to, err := sdk.AccAddressFromBech32(viper.GetString(FlagTo))
 			if err != nil {
@@ -257,7 +244,7 @@ $ %s tx token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id
 				return err
 			}
 
-			return authclient.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return tx.GenerateOrBroadcastTx(clientCtx, msg)
 		},
 	}
 

@@ -5,12 +5,13 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/stretchr/testify/suite"
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/irismod/token"
 	simapp "github.com/irismod/token/app"
+	tokenkeeper "github.com/irismod/token/keeper"
 	"github.com/irismod/token/types"
 )
 
@@ -35,8 +36,8 @@ type HandlerSuite struct {
 
 	cdc    *codec.Codec
 	ctx    sdk.Context
-	keeper token.Keeper
-	bk     bank.Keeper
+	keeper tokenkeeper.Keeper
+	bk     bankkeeper.Keeper
 }
 
 func (suite *HandlerSuite) SetupTest() {
@@ -81,7 +82,7 @@ func (suite *HandlerSuite) TestIssueToken() {
 func (suite *HandlerSuite) TestMintToken() {
 	msg := types.NewMsgIssueToken("btc", "satoshi", "Bitcoin Network", 18, 1000, 2000, true, owner)
 
-	err := suite.keeper.IssueToken(suite.ctx, msg)
+	err := suite.keeper.IssueToken(suite.ctx, *msg)
 	suite.NoError(err)
 
 	suite.True(suite.keeper.HasToken(suite.ctx, msg.Symbol))

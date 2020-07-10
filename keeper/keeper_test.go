@@ -6,15 +6,14 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	abci "github.com/tendermint/tendermint/abci/types"
 
 	simapp "github.com/irismod/token/app"
 	"github.com/irismod/token/keeper"
 	"github.com/irismod/token/types"
-
-	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 const (
@@ -34,7 +33,7 @@ type KeeperSuite struct {
 	cdc    *codec.Codec
 	ctx    sdk.Context
 	keeper keeper.Keeper
-	bk     bank.Keeper
+	bk     bankkeeper.Keeper
 }
 
 func (suite *KeeperSuite) SetupTest() {
@@ -63,7 +62,7 @@ func TestKeeperSuite(t *testing.T) {
 func (suite *KeeperSuite) TestIssueToken() {
 	msg := types.NewMsgIssueToken("btc", "satoshi", "Bitcoin Network", 18, 21000000, 21000000, false, owner)
 
-	err := suite.keeper.IssueToken(suite.ctx, msg)
+	err := suite.keeper.IssueToken(suite.ctx, *msg)
 	require.NoError(suite.T(), err)
 
 	suite.True(suite.keeper.HasToken(suite.ctx, msg.Symbol))
@@ -85,7 +84,7 @@ func (suite *KeeperSuite) TestEditToken() {
 
 	mintable := types.True
 	msgEditToken := types.NewMsgEditToken("Bitcoin Token", "btc", 22000000, mintable, owner)
-	err := suite.keeper.EditToken(suite.ctx, msgEditToken)
+	err := suite.keeper.EditToken(suite.ctx, *msgEditToken)
 	require.NoError(suite.T(), err)
 
 	token2, err := suite.keeper.GetToken(suite.ctx, msgEditToken.Symbol)
@@ -103,7 +102,7 @@ func (suite *KeeperSuite) TestMintToken() {
 
 	msg := types.NewMsgIssueToken("btc", "satoshi", "Bitcoin Network", 18, 1000, 2000, true, owner)
 
-	err := suite.keeper.IssueToken(suite.ctx, msg)
+	err := suite.keeper.IssueToken(suite.ctx, *msg)
 	require.NoError(suite.T(), err)
 
 	suite.True(suite.keeper.HasToken(suite.ctx, msg.Symbol))
@@ -112,7 +111,7 @@ func (suite *KeeperSuite) TestMintToken() {
 	suite.Equal("1000000000000000000000satoshi", amt.String())
 
 	msgMintToken := types.NewMsgMintToken(msg.Symbol, owner, nil, 1000)
-	err = suite.keeper.MintToken(suite.ctx, msgMintToken)
+	err = suite.keeper.MintToken(suite.ctx, *msgMintToken)
 	require.NoError(suite.T(), err)
 
 	amt = suite.bk.GetBalance(suite.ctx, owner, msg.MinUnit)

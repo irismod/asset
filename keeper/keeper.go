@@ -7,7 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/cosmos-sdk/x/params"
+	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/irismod/token/types"
@@ -24,20 +24,25 @@ type Keeper struct {
 	feeCollectorName string
 
 	// params subspace
-	paramSpace params.Subspace
+	paramSpace paramstypes.Subspace
 }
 
-func NewKeeper(cdc codec.Marshaler, key sdk.StoreKey, paramSpace params.Subspace,
+func NewKeeper(cdc codec.Marshaler, key sdk.StoreKey, paramSpace paramstypes.Subspace,
 	accountKeeper types.AccountKeeper, bankKeeper types.BankKeeper, feeCollectorName string) Keeper {
 	// ensure token module account is set
 	if addr := accountKeeper.GetModuleAddress(types.ModuleName); addr == nil {
 		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
 	}
 
+	// set KeyTable if it has not already been set
+	if !paramSpace.HasKeyTable() {
+		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
+	}
+
 	keeper := Keeper{
 		storeKey:         key,
 		cdc:              cdc,
-		paramSpace:       paramSpace.WithKeyTable(types.ParamKeyTable()),
+		paramSpace:       paramSpace,
 		bankKeeper:       bankKeeper,
 		feeCollectorName: feeCollectorName,
 	}
