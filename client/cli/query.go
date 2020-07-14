@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
@@ -22,12 +21,12 @@ func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 		DisableFlagParsing: true,
 	}
 
-	queryCmd.AddCommand(flags.GetCommands(
+	queryCmd.AddCommand(
 		getCmdQueryToken(cdc),
 		getCmdQueryTokens(cdc),
 		getCmdQueryFee(cdc),
 		getCmdQueryParams(cdc),
-	)...)
+	)
 
 	return queryCmd
 }

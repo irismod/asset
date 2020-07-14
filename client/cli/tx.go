@@ -28,12 +28,12 @@ func GetTxCmd(ctx client.Context) *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	txCmd.AddCommand(flags.PostCommands(
+	txCmd.AddCommand(
 		getCmdIssueToken(ctx),
 		getCmdEditToken(ctx),
 		getCmdMintToken(ctx),
 		getCmdTransferTokenOwner(ctx),
-	)...)
+	)
 
 	return txCmd
 }
