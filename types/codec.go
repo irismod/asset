@@ -12,12 +12,12 @@ import (
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterInterface((*TokenI)(nil), nil)
 
-	cdc.RegisterConcrete(Token{}, "irismod/token/Token", nil)
+	cdc.RegisterConcrete(&Token{}, "irismod/token/Token", nil)
 
-	cdc.RegisterConcrete(MsgIssueToken{}, "irismod/token/MsgIssueToken", nil)
-	cdc.RegisterConcrete(MsgEditToken{}, "irismod/token/MsgEditToken", nil)
-	cdc.RegisterConcrete(MsgMintToken{}, "irismod/token/MsgMintToken", nil)
-	cdc.RegisterConcrete(MsgTransferTokenOwner{}, "irismod/token/MsgTransferTokenOwner", nil)
+	cdc.RegisterConcrete(&MsgIssueToken{}, "irismod/token/MsgIssueToken", nil)
+	cdc.RegisterConcrete(&MsgEditToken{}, "irismod/token/MsgEditToken", nil)
+	cdc.RegisterConcrete(&MsgMintToken{}, "irismod/token/MsgMintToken", nil)
+	cdc.RegisterConcrete(&MsgTransferTokenOwner{}, "irismod/token/MsgTransferTokenOwner", nil)
 }
 
 func RegisterInterfaces(registry types.InterfaceRegistry) {

@@ -103,6 +103,7 @@ $ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --s
 	_ = cmd.MarkFlagRequired(FlagName)
 	_ = cmd.MarkFlagRequired(FlagInitialSupply)
 	_ = cmd.MarkFlagRequired(FlagScale)
+	flags.AddTxFlagsToCmd(cmd)
 
 	return cmd
 }
@@ -142,6 +143,8 @@ $ %s tx token edit <symbol> --name="Cat Token" --max-supply=100000000000 --minta
 	}
 
 	cmd.Flags().AddFlagSet(FsEditToken)
+	flags.AddTxFlagsToCmd(cmd)
+
 	return cmd
 }
 
@@ -212,6 +215,7 @@ $ %s tx token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chai
 
 	cmd.Flags().AddFlagSet(FsMintToken)
 	_ = cmd.MarkFlagRequired(FlagAmount)
+	flags.AddTxFlagsToCmd(cmd)
 
 	return cmd
 }
@@ -250,6 +254,7 @@ $ %s tx token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id
 
 	cmd.Flags().AddFlagSet(FsTransferTokenOwner)
 	_ = cmd.MarkFlagRequired(FlagTo)
+	flags.AddTxFlagsToCmd(cmd)
 
 	return cmd
 }

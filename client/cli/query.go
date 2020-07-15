@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
@@ -73,6 +74,7 @@ $ %s query token token <denom>
 			return clientCtx.PrintOutput(tokens)
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }
@@ -120,6 +122,7 @@ $ %s query token tokens <owner>
 			return clientCtx.PrintOutput(tokens)
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }
@@ -154,6 +157,7 @@ $ %s query token fee <symbol>
 			return clientCtx.PrintOutput(fees)
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }
@@ -186,6 +190,7 @@ $ %s query token params
 			return clientCtx.PrintOutput(params)
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }
