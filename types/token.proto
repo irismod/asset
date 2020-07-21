@@ -2,7 +2,8 @@ syntax = "proto3";
 package irismod.token;
 
 import "third_party/proto/gogoproto/gogo.proto";
-import "third_party/proto/cosmos-proto/types.proto";
+import "third_party/proto/cosmos_proto/cosmos.proto";
+import "third_party/proto/cosmos_proto/types.proto";
 
 option go_package = "github.com/irismod/token/types";
 option (gogoproto.goproto_getters_all)  = false;
@@ -51,7 +52,8 @@ message MsgMintToken {
 
 // Token defines a standard for the fungible token
 message Token {
-  option (gogoproto.equal) = true;
+  option (gogoproto.goproto_stringer) = false;
+  option (gogoproto.goproto_getters)  = false;
 
   string symbol         = 1;
   string name           = 2;

@@ -27,7 +27,8 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, data types.GenesisState) {
 func ExportGenesis(ctx sdk.Context, k keeper.Keeper) types.GenesisState {
 	var tokens types.Tokens
 	for _, token := range k.GetTokens(ctx, nil) {
-		tokens = append(tokens, token.(types.Token))
+		t := token.(*types.Token)
+		tokens = append(tokens, *t)
 	}
 	return types.GenesisState{
 		Params: k.GetParamSet(ctx),

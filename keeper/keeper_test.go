@@ -27,23 +27,24 @@ var (
 	initCoin = sdk.Coins{sdk.NewCoin(denom, initAmt)}
 )
 
-type KeeperSuite struct {
+type KeeperTestSuite struct {
 	suite.Suite
 
 	cdc    *codec.Codec
 	ctx    sdk.Context
 	keeper keeper.Keeper
 	bk     bankkeeper.Keeper
+	app    *simapp.SimApp
 }
 
-func (suite *KeeperSuite) SetupTest() {
-
+func (suite *KeeperTestSuite) SetupTest() {
 	app := simapp.Setup(isCheck)
 
 	suite.cdc = app.Codec()
 	suite.ctx = app.BaseApp.NewContext(isCheck, abci.Header{})
 	suite.keeper = app.TokenKeeper
 	suite.bk = app.BankKeeper
+	suite.app = app
 
 	// set params
 	suite.keeper.SetParamSet(suite.ctx, types.DefaultParams())
@@ -56,10 +57,10 @@ func (suite *KeeperSuite) SetupTest() {
 }
 
 func TestKeeperSuite(t *testing.T) {
-	suite.Run(t, new(KeeperSuite))
+	suite.Run(t, new(KeeperTestSuite))
 }
 
-func (suite *KeeperSuite) TestIssueToken() {
+func (suite *KeeperTestSuite) TestIssueToken() {
 	msg := types.NewMsgIssueToken("btc", "satoshi", "Bitcoin Network", 18, 21000000, 21000000, false, owner)
 
 	err := suite.keeper.IssueToken(suite.ctx, *msg)
@@ -78,7 +79,7 @@ func (suite *KeeperSuite) TestIssueToken() {
 	suite.Equal(ftJson, tokenJson)
 }
 
-func (suite *KeeperSuite) TestEditToken() {
+func (suite *KeeperTestSuite) TestEditToken() {
 
 	suite.TestIssueToken()
 
@@ -98,7 +99,7 @@ func (suite *KeeperSuite) TestEditToken() {
 
 }
 
-func (suite *KeeperSuite) TestMintToken() {
+func (suite *KeeperTestSuite) TestMintToken() {
 
 	msg := types.NewMsgIssueToken("btc", "satoshi", "Bitcoin Network", 18, 1000, 2000, true, owner)
 
@@ -118,7 +119,7 @@ func (suite *KeeperSuite) TestMintToken() {
 	suite.Equal("2000000000000000000000satoshi", amt.String())
 }
 
-func (suite *KeeperSuite) TestTransferToken() {
+func (suite *KeeperTestSuite) TestTransferToken() {
 
 	suite.TestIssueToken()
 

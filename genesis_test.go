@@ -47,5 +47,5 @@ func TestInitGenesis(t *testing.T) {
 	// query all tokens
 	var tokens = app.TokenKeeper.GetTokens(ctx, nil)
 	require.Equal(t, len(tokens), 2)
-	require.Equal(t, tokens[0], ft)
+	require.Equal(t, tokens[0], &ft)
 }

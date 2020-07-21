@@ -24,7 +24,7 @@ func (k Keeper) GetTokens(ctx sdk.Context, owner sdk.AccAddress) (tokens []types
 			var token types.Token
 			k.cdc.MustUnmarshalBinaryBare(it.Value(), &token)
 
-			tokens = append(tokens, token)
+			tokens = append(tokens, &token)
 		}
 		return
 	}
@@ -46,21 +46,25 @@ func (k Keeper) GetTokens(ctx sdk.Context, owner sdk.AccAddress) (tokens []types
 }
 
 // GetToken returns the token of the specified symbol or minUint
-func (k Keeper) GetToken(ctx sdk.Context, denom string) (token types.TokenI, err error) {
+func (k Keeper) GetToken(ctx sdk.Context, denom string) (types.TokenI, error) {
 	store := ctx.KVStore(k.storeKey)
 
 	if token, err := k.getToken(ctx, denom); err == nil {
-		return token, nil
+		return &token, nil
 	}
 
 	bz := store.Get(types.KeyMinUint(denom))
 	if bz == nil {
-		return token, sdkerrors.Wrap(types.ErrTokenNotExists, fmt.Sprintf("token %s does not exist", denom))
+		return nil, sdkerrors.Wrap(types.ErrTokenNotExists, fmt.Sprintf("token %s does not exist", denom))
 	}
 
 	var symbol gogotypes.StringValue
 	k.cdc.MustUnmarshalBinaryBare(bz, &symbol)
-	return k.getToken(ctx, symbol.Value)
+	token, err := k.getToken(ctx, symbol.Value)
+	if err != nil {
+		return nil, err
+	}
+	return &token, nil
 }
 
 // AddToken saves a new token

@@ -91,7 +91,7 @@ func TestQueryFees(t *testing.T) {
 	data, err := querier(ctx, []string{types.QueryFees}, query)
 	require.Nil(t, err)
 
-	var fee types.TokenFees
+	var fee types.QueryFeesResponse
 	app.Codec().MustUnmarshalJSON(data, &fee)
 	require.Equal(t, false, fee.Exist)
 	require.Equal(t, fmt.Sprintf("60000%s", types.GetNativeToken().MinUnit), fee.IssueFee.String())

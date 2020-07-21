@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -52,26 +53,23 @@ $ %s query token token <denom>
 				return err
 			}
 
-			params := types.QueryTokenParams{
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.Token(context.Background(), &types.QueryTokenRequest{
 				Denom: args[0],
-			}
+			})
 
-			bz, err := cdc.MarshalJSON(params)
 			if err != nil {
 				return err
 			}
 
-			res, _, err := clientCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", types.QuerierRoute, types.QueryToken), bz)
+			var token types.TokenI
+			err = clientCtx.InterfaceRegistry.UnpackAny(res.Token, &token)
 			if err != nil {
 				return err
 			}
 
-			var tokens types.Token
-			if err := cdc.UnmarshalJSON(res, &tokens); err != nil {
-				return err
-			}
-
-			return clientCtx.PrintOutput(tokens)
+			return clientCtx.PrintOutput(token)
 		},
 	}
 	flags.AddQueryFlagsToCmd(cmd)
@@ -104,19 +102,24 @@ $ %s query token tokens <owner>
 				}
 			}
 
-			params := types.QueryTokensParams{
-				Owner: owner,
-			}
+			queryClient := types.NewQueryClient(clientCtx)
 
-			bz := cdc.MustMarshalJSON(params)
-			res, _, err := clientCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", types.QuerierRoute, types.QueryTokens), bz)
+			res, err := queryClient.Tokens(context.Background(), &types.QueryTokensRequest{
+				Owner: owner,
+			})
+
 			if err != nil {
 				return err
 			}
 
-			var tokens []types.TokenI
-			if err := cdc.UnmarshalJSON(res, &tokens); err != nil {
-				return err
+			tokens := make([]types.TokenI, 0, len(res.Tokens))
+			for _, eviAny := range res.Tokens {
+				var evi types.TokenI
+				err = clientCtx.InterfaceRegistry.UnpackAny(eviAny, &evi)
+				if err != nil {
+					return err
+				}
+				tokens = append(tokens, evi)
 			}
 
 			return clientCtx.PrintOutput(tokens)
@@ -149,12 +152,17 @@ $ %s query token fee <symbol>
 			}
 
 			// query token fees
-			fees, err := queryTokenFees(clientCtx, symbol)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.Fees(context.Background(), &types.QueryFeesRequest{
+				Symbol: symbol,
+			})
+
 			if err != nil {
 				return err
 			}
 
-			return clientCtx.PrintOutput(fees)
+			return clientCtx.PrintOutput(res)
 		},
 	}
 	flags.AddQueryFlagsToCmd(cmd)
@@ -177,17 +185,15 @@ $ %s query token params
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.NewContext().WithCodec(cdc).WithJSONMarshaler(cdc)
 
-			res, _, err := clientCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", types.QuerierRoute, types.QueryParams), nil)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.Params(context.Background(), &types.QueryParamsRequest{})
+
 			if err != nil {
 				return err
 			}
 
-			var params types.Params
-			if err := cdc.UnmarshalJSON(res, &params); err != nil {
-				return err
-			}
-
-			return clientCtx.PrintOutput(params)
+			return clientCtx.PrintOutput(res.Params)
 		},
 	}
 	flags.AddQueryFlagsToCmd(cmd)

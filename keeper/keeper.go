@@ -95,7 +95,7 @@ func (k Keeper) EditToken(ctx sdk.Context, msg types.MsgEditToken) error {
 		return err
 	}
 
-	token := tokenI.(types.Token)
+	token := tokenI.(*types.Token)
 
 	if !msg.Owner.Equals(token.Owner) {
 		return sdkerrors.Wrapf(types.ErrInvalidOwner, "the address %d is not the owner of the token %s", msg.Owner, msg.Symbol)
@@ -119,7 +119,7 @@ func (k Keeper) EditToken(ctx sdk.Context, msg types.MsgEditToken) error {
 		token.Mintable = msg.Mintable.ToBool()
 	}
 
-	if err := k.setToken(ctx, token); err != nil {
+	if err := k.setToken(ctx, *token); err != nil {
 		return err
 	}
 
@@ -133,7 +133,7 @@ func (k Keeper) TransferTokenOwner(ctx sdk.Context, msg types.MsgTransferTokenOw
 		return err
 	}
 
-	token := tokenI.(types.Token)
+	token := tokenI.(*types.Token)
 
 	if !msg.SrcOwner.Equals(token.Owner) {
 		return sdkerrors.Wrapf(types.ErrInvalidOwner, "the address %s is not the owner of the token %s", msg.SrcOwner.String(), msg.Symbol)
@@ -141,12 +141,12 @@ func (k Keeper) TransferTokenOwner(ctx sdk.Context, msg types.MsgTransferTokenOw
 
 	token.Owner = msg.DstOwner
 	// update token information
-	if err := k.setToken(ctx, token); err != nil {
+	if err := k.setToken(ctx, *token); err != nil {
 		return err
 	}
 
 	// reset all index for query-token
-	if err := k.resetStoreKeyForQueryToken(ctx, msg, token); err != nil {
+	if err := k.resetStoreKeyForQueryToken(ctx, msg, *token); err != nil {
 		return err
 	}
 
@@ -160,7 +160,7 @@ func (k Keeper) MintToken(ctx sdk.Context, msg types.MsgMintToken) error {
 		return err
 	}
 
-	token := tokenI.(types.Token)
+	token := tokenI.(*types.Token)
 
 	if !msg.Owner.Equals(token.Owner) {
 		return sdkerrors.Wrapf(types.ErrInvalidOwner, "the address %s is not the owner of the token %s", msg.Owner.String(), msg.Symbol)

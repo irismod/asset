@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/cosmos/cosmos-sdk/client"
 
@@ -9,20 +9,13 @@ import (
 )
 
 // queryTokenFees retrieves the fees of issuance and minting for the specified symbol
-func queryTokenFees(cliCtx client.Context, symbol string) (types.TokenFees, error) {
-	params := types.QueryTokenFeesParams{
-		Symbol: symbol,
-	}
+func queryTokenFees(cliCtx client.Context, symbol string) (types.QueryFeesResponse, error) {
+	queryClient := types.NewQueryClient(cliCtx)
 
-	bz := cliCtx.Codec.MustMarshalJSON(params)
-
-	route := fmt.Sprintf("custom/%s/fees/tokens", types.QuerierRoute)
-	res, _, err := cliCtx.QueryWithData(route, bz)
+	resp, err := queryClient.Fees(context.Background(), &types.QueryFeesRequest{Symbol: symbol})
 	if err != nil {
-		return types.TokenFees{}, err
+		return types.QueryFeesResponse{}, err
 	}
 
-	var out types.TokenFees
-	err = cliCtx.Codec.UnmarshalJSON(res, &out)
-	return out, err
+	return *resp, err
 }
