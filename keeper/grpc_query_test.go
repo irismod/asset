@@ -4,14 +4,14 @@ import (
 	gocontext "context"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 
 	"github.com/irismod/token/types"
 )
 
 func (suite *KeeperTestSuite) TestGRPCQueryToken() {
 	app, ctx := suite.app, suite.ctx
-	_, _, addr := authtypes.KeyTestPubAddr()
+	_, _, addr := testdata.KeyTestPubAddr()
 	token := types.NewToken("btc", "Bitcoin Token", "satoshi", 18, 21000000, 22000000, true, addr)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())

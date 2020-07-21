@@ -19,7 +19,7 @@ import (
 )
 
 // GetTxCmd returns the transaction commands for the token module.
-func GetTxCmd(ctx client.Context) *cobra.Command {
+func GetTxCmd() *cobra.Command {
 	txCmd := &cobra.Command{
 		Use:                        types.ModuleName,
 		Short:                      "Asset transaction subcommands",
@@ -29,17 +29,17 @@ func GetTxCmd(ctx client.Context) *cobra.Command {
 	}
 
 	txCmd.AddCommand(
-		getCmdIssueToken(ctx),
-		getCmdEditToken(ctx),
-		getCmdMintToken(ctx),
-		getCmdTransferTokenOwner(ctx),
+		getCmdIssueToken(),
+		getCmdEditToken(),
+		getCmdMintToken(),
+		getCmdTransferTokenOwner(),
 	)
 
 	return txCmd
 }
 
 // getCmdIssueToken implements the issue token command
-func getCmdIssueToken(clientCtx client.Context) *cobra.Command {
+func getCmdIssueToken() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "issue",
 		Long: strings.TrimSpace(
@@ -50,7 +50,11 @@ $ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --s
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx := clientCtx.InitWithInput(cmd.InOrStdin())
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			clientCtx, err := client.ReadTxCommandFlags(clientCtx, cmd.Flags())
+			if err != nil {
+				return err
+			}
 
 			owner := clientCtx.GetFromAddress()
 
@@ -109,7 +113,7 @@ $ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --s
 }
 
 // getCmdEditToken implements the edit token command
-func getCmdEditToken(clientCtx client.Context) *cobra.Command {
+func getCmdEditToken() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "edit [symbol]",
 		Long: strings.TrimSpace(
@@ -121,7 +125,11 @@ $ %s tx token edit <symbol> --name="Cat Token" --max-supply=100000000000 --minta
 		),
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx := clientCtx.InitWithInput(cmd.InOrStdin())
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			clientCtx, err := client.ReadTxCommandFlags(clientCtx, cmd.Flags())
+			if err != nil {
+				return err
+			}
 
 			owner := clientCtx.GetFromAddress()
 
@@ -148,7 +156,7 @@ $ %s tx token edit <symbol> --name="Cat Token" --max-supply=100000000000 --minta
 	return cmd
 }
 
-func getCmdMintToken(clientCtx client.Context) *cobra.Command {
+func getCmdMintToken() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "mint [symbol]",
 		Long: strings.TrimSpace(
@@ -160,14 +168,17 @@ $ %s tx token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chai
 		),
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx := clientCtx.InitWithInput(cmd.InOrStdin())
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			clientCtx, err := client.ReadTxCommandFlags(clientCtx, cmd.Flags())
+			if err != nil {
+				return err
+			}
 
 			owner := clientCtx.GetFromAddress()
 
 			amount := uint64(viper.GetInt64(FlagAmount))
 
 			var to sdk.AccAddress
-			var err error
 			addr := viper.GetString(FlagTo)
 			if len(strings.TrimSpace(addr)) > 0 {
 				to, err = sdk.AccAddressFromBech32(addr)
@@ -221,7 +232,7 @@ $ %s tx token mint <symbol> --amount=<amount> --to=<to> --from=<key-name> --chai
 }
 
 // getCmdTransferTokenOwner implements the transfer token owner command
-func getCmdTransferTokenOwner(clientCtx client.Context) *cobra.Command {
+func getCmdTransferTokenOwner() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "transfer [symbol]",
 		Long: strings.TrimSpace(
@@ -233,7 +244,11 @@ $ %s tx token transfer <symbol> --to=<to> --from=<key-name> --chain-id=<chain-id
 		),
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx := clientCtx.InitWithInput(cmd.InOrStdin())
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			clientCtx, err := client.ReadTxCommandFlags(clientCtx, cmd.Flags())
+			if err != nil {
+				return err
+			}
 
 			owner := clientCtx.GetFromAddress()
 

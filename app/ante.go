@@ -6,8 +6,6 @@ import (
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	ibcante "github.com/cosmos/cosmos-sdk/x/ibc/ante"
-	ibckeeper "github.com/cosmos/cosmos-sdk/x/ibc/keeper"
 
 	tokenkeeper "github.com/irismod/token/keeper"
 )
@@ -16,7 +14,7 @@ import (
 // numbers, checks signatures & account numbers, and deducts fees from the first
 // signer.
 func NewAnteHandler(
-	ak authkeeper.AccountKeeper, bankKeeper bankkeeper.Keeper, ibcKeeper ibckeeper.Keeper, tk tokenkeeper.Keeper,
+	ak authkeeper.AccountKeeper, bankKeeper bankkeeper.Keeper, tk tokenkeeper.Keeper,
 	sigGasConsumer ante.SignatureVerificationGasConsumer,
 	signModeHandler signing.SignModeHandler,
 ) sdk.AnteHandler {
@@ -32,7 +30,6 @@ func NewAnteHandler(
 		ante.NewSigGasConsumeDecorator(ak, sigGasConsumer),
 		ante.NewSigVerificationDecorator(ak, signModeHandler),
 		ante.NewIncrementSequenceDecorator(ak),
-		ibcante.NewProofVerificationDecorator(ibcKeeper.ClientKeeper, ibcKeeper.ChannelKeeper), // innermost AnteDecorator
 		tokenkeeper.NewValidateTokenFeeDecorator(tk, ak, bankKeeper),
 	)
 }
