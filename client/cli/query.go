@@ -110,10 +110,6 @@ $ %s query token tokens <owner>
 				Owner: owner,
 			})
 
-			if err != nil {
-				return err
-			}
-
 			tokens := make([]types.TokenI, 0, len(res.Tokens))
 			for _, eviAny := range res.Tokens {
 				var evi types.TokenI
@@ -124,13 +120,7 @@ $ %s query token tokens <owner>
 				tokens = append(tokens, evi)
 			}
 
-			output, err := clientCtx.JSONMarshaler.MarshalJSON(tokens)
-			if err != nil {
-				return err
-			}
-
-			_, err = fmt.Println(string(output))
-			return err
+			return clientCtx.PrintOutputLegacy(tokens)
 		},
 	}
 	flags.AddQueryFlagsToCmd(cmd)
