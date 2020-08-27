@@ -9,7 +9,7 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	abci "github.com/tendermint/tendermint/abci/types"
+	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	simapp "github.com/irismod/token/app"
 	"github.com/irismod/token/keeper"
@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	isCheck = false
+	isCheckTx = false
 )
 
 var (
@@ -30,7 +30,7 @@ var (
 type KeeperTestSuite struct {
 	suite.Suite
 
-	cdc    *codec.Codec
+	cdc    codec.JSONMarshaler
 	ctx    sdk.Context
 	keeper keeper.Keeper
 	bk     bankkeeper.Keeper
@@ -38,10 +38,10 @@ type KeeperTestSuite struct {
 }
 
 func (suite *KeeperTestSuite) SetupTest() {
-	app := simapp.Setup(isCheck)
+	app := simapp.Setup(isCheckTx)
 
-	suite.cdc = app.Codec()
-	suite.ctx = app.BaseApp.NewContext(isCheck, abci.Header{})
+	suite.cdc = codec.NewAminoCodec(app.LegacyAmino())
+	suite.ctx = app.BaseApp.NewContext(isCheckTx, tmproto.Header{})
 	suite.keeper = app.TokenKeeper
 	suite.bk = app.BankKeeper
 	suite.app = app

@@ -37,7 +37,7 @@ func RandomizedGenState(simState *module.SimulationState) {
 	var tokenTaxRate sdk.Dec
 	var issueTokenBaseFee sdk.Int
 	var mintTokenFeeRatio sdk.Dec
-	var tokens types.Tokens
+	var tokens []types.Token
 
 	simState.AppParams.GetOrGenerate(
 		simState.Cdc, TokenTaxRate, &tokenTaxRate, simState.Rand,

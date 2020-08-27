@@ -67,13 +67,7 @@ $ %s query token token <denom>
 				return err
 			}
 
-			var token types.TokenI
-			err = clientCtx.InterfaceRegistry.UnpackAny(res.Token, &token)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintOutput(token)
+			return clientCtx.PrintOutput(res.Token)
 		},
 	}
 	flags.AddQueryFlagsToCmd(cmd)
@@ -130,7 +124,13 @@ $ %s query token tokens <owner>
 				tokens = append(tokens, evi)
 			}
 
-			return clientCtx.PrintOutput(tokens)
+			output, err := clientCtx.JSONMarshaler.MarshalJSON(tokens)
+			if err != nil {
+				return err
+			}
+
+			_, err = fmt.Println(string(output))
+			return err
 		},
 	}
 	flags.AddQueryFlagsToCmd(cmd)
@@ -211,7 +211,7 @@ $ %s query token params
 				return err
 			}
 
-			return clientCtx.PrintOutput(res.Params)
+			return clientCtx.PrintOutput(&res.Params)
 		},
 	}
 	flags.AddQueryFlagsToCmd(cmd)

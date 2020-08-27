@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/mux"
-
 	"github.com/cosmos/cosmos-sdk/client"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	authclient "github.com/cosmos/cosmos-sdk/x/auth/client"
+	"github.com/gorilla/mux"
 
 	"github.com/irismod/token/types"
 )
@@ -43,7 +41,7 @@ func registerTxRoutes(cliCtx client.Context, r *mux.Router) {
 func issueTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req issueTokenReq
-		if !rest.ReadRESTReq(w, r, cliCtx.Codec, &req) {
+		if !rest.ReadRESTReq(w, r, cliCtx.JSONMarshaler, &req) {
 			return
 		}
 
@@ -68,7 +66,7 @@ func issueTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 			return
 		}
 
-		authclient.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		tx.WriteGeneratedTxResponse(cliCtx, w, req.BaseReq, msg)
 	}
 }
 
@@ -78,7 +76,7 @@ func editTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 		symbol := vars[RestParamSymbol]
 
 		var req editTokenReq
-		if !rest.ReadRESTReq(w, r, cliCtx.Codec, &req) {
+		if !rest.ReadRESTReq(w, r, cliCtx.JSONMarshaler, &req) {
 			return
 		}
 
@@ -100,7 +98,7 @@ func editTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 			return
 		}
 
-		authclient.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		tx.WriteGeneratedTxResponse(cliCtx, w, req.BaseReq, msg)
 	}
 }
 
@@ -110,7 +108,7 @@ func transferOwnerHandlerFn(cliCtx client.Context) http.HandlerFunc {
 		symbol := vars[RestParamSymbol]
 
 		var req transferTokenOwnerReq
-		if !rest.ReadRESTReq(w, r, cliCtx.Codec, &req) {
+		if !rest.ReadRESTReq(w, r, cliCtx.JSONMarshaler, &req) {
 			return
 		}
 
@@ -126,7 +124,7 @@ func transferOwnerHandlerFn(cliCtx client.Context) http.HandlerFunc {
 			return
 		}
 
-		authclient.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		tx.WriteGeneratedTxResponse(cliCtx, w, req.BaseReq, msg)
 	}
 }
 
@@ -136,7 +134,7 @@ func mintTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 		symbol := vars[RestParamSymbol]
 
 		var req mintTokenReq
-		if !rest.ReadRESTReq(w, r, cliCtx.Codec, &req) {
+		if !rest.ReadRESTReq(w, r, cliCtx.JSONMarshaler, &req) {
 			return
 		}
 
@@ -152,6 +150,6 @@ func mintTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 			return
 		}
 
-		authclient.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		tx.WriteGeneratedTxResponse(cliCtx, w, req.BaseReq, msg)
 	}
 }

@@ -143,15 +143,6 @@ func (t Token) ToMinCoin(coin sdk.DecCoin) (newCoin sdk.Coin, err error) {
 	return sdk.NewCoin(t.MinUnit, amt.TruncateInt()), nil
 }
 
-// Tokens is a set of tokens
-type Tokens []Token
-
-// String implements Stringer
-func (tokens Tokens) String() string {
-	bz, _ := yaml.Marshal(tokens)
-	return string(bz)
-}
-
 func ValidateToken(token Token) error {
 	if token.Owner.Empty() {
 		return ErrNilOwner

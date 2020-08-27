@@ -3,10 +3,9 @@ package token_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/stretchr/testify/require"
+	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	"github.com/irismod/token"
 	simapp "github.com/irismod/token/app"
@@ -16,7 +15,7 @@ import (
 func TestExportGenesis(t *testing.T) {
 	app := simapp.Setup(false)
 
-	ctx := app.BaseApp.NewContext(false, abci.Header{})
+	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	// export genesis
 	genesisState := token.ExportGenesis(ctx, app.TokenKeeper)
@@ -30,7 +29,7 @@ func TestExportGenesis(t *testing.T) {
 func TestInitGenesis(t *testing.T) {
 	app := simapp.Setup(false)
 
-	ctx := app.BaseApp.NewContext(false, abci.Header{})
+	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	// add token
 	addr := sdk.AccAddress([]byte("addr1"))
@@ -38,7 +37,7 @@ func TestInitGenesis(t *testing.T) {
 
 	genesis := types.GenesisState{
 		Params: types.DefaultParams(),
-		Tokens: types.Tokens{ft},
+		Tokens: []types.Token{ft},
 	}
 
 	// initialize genesis

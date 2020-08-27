@@ -14,26 +14,26 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func NewQuerier(k Keeper) sdk.Querier {
+func NewQuerier(k Keeper, legacyQuerierCdc codec.JSONMarshaler) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, error) {
 		switch path[0] {
 		case types.QueryToken:
-			return queryToken(ctx, req, k)
+			return queryToken(ctx, req, k, legacyQuerierCdc)
 		case types.QueryTokens:
-			return queryTokens(ctx, req, k)
+			return queryTokens(ctx, req, k, legacyQuerierCdc)
 		case types.QueryFees:
-			return queryFees(ctx, req, k)
+			return queryFees(ctx, req, k, legacyQuerierCdc)
 		case types.QueryParams:
-			return queryParams(ctx, req, k)
+			return queryParams(ctx, req, k, legacyQuerierCdc)
 		default:
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "unknown token query endpoint")
 		}
 	}
 }
 
-func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, error) {
+func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper Keeper, legacyQuerierCdc codec.JSONMarshaler) ([]byte, error) {
 	var params types.QueryTokenParams
-	err := keeper.cdc.UnmarshalJSON(req.Data, &params)
+	err := legacyQuerierCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, 
 		return nil, err
 	}
 
-	bz, err := codec.MarshalJSONIndent(keeper.cdc, token)
+	bz, err := codec.MarshalJSONIndent(legacyQuerierCdc, token)
 	if err != nil {
 		return nil, err
 	}
@@ -51,18 +51,18 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, 
 	return bz, nil
 }
 
-func queryTokens(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, error) {
+func queryTokens(ctx sdk.Context, req abci.RequestQuery, keeper Keeper, legacyQuerierCdc codec.JSONMarshaler) ([]byte, error) {
 	var params types.QueryTokensParams
-	if err := keeper.cdc.UnmarshalJSON(req.Data, &params); err != nil {
+	if err := legacyQuerierCdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, err
 	}
 	tokens := keeper.GetTokens(ctx, params.Owner)
-	return codec.MarshalJSONIndent(keeper.cdc, tokens)
+	return codec.MarshalJSONIndent(legacyQuerierCdc, tokens)
 }
 
-func queryFees(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, error) {
+func queryFees(ctx sdk.Context, req abci.RequestQuery, keeper Keeper, legacyQuerierCdc codec.JSONMarshaler) ([]byte, error) {
 	var params types.QueryTokenFeesParams
-	err := keeper.cdc.UnmarshalJSON(req.Data, &params)
+	err := legacyQuerierCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func queryFees(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, e
 		MintFee:  mintFee,
 	}
 
-	bz, err := codec.MarshalJSONIndent(keeper.cdc, fees)
+	bz, err := codec.MarshalJSONIndent(legacyQuerierCdc, fees)
 	if err != nil {
 		return nil, err
 	}
@@ -89,9 +89,9 @@ func queryFees(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, e
 	return bz, nil
 }
 
-func queryParams(ctx sdk.Context, _ abci.RequestQuery, keeper Keeper) ([]byte, error) {
+func queryParams(ctx sdk.Context, _ abci.RequestQuery, keeper Keeper, legacyQuerierCdc codec.JSONMarshaler) ([]byte, error) {
 	params := keeper.GetParamSet(ctx)
-	bz, err := codec.MarshalJSONIndent(keeper.cdc, params)
+	bz, err := codec.MarshalJSONIndent(legacyQuerierCdc, params)
 	if err != nil {
 		return nil, err
 	}

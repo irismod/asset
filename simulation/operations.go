@@ -33,7 +33,7 @@ var (
 // WeightedOperations returns all the operations from the module with their respective weights
 func WeightedOperations(
 	appParams simtypes.AppParams,
-	cdc *codec.Codec,
+	cdc codec.JSONMarshaler,
 	k keeper.Keeper,
 	ak types.AccountKeeper,
 	bk types.BankKeeper) simulation.WeightedOperations {

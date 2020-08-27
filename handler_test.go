@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/stretchr/testify/suite"
-	abci "github.com/tendermint/tendermint/abci/types"
+	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	"github.com/irismod/token"
 	simapp "github.com/irismod/token/app"
@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	isCheck = false
+	isCheckTx = false
 )
 
 var (
@@ -34,17 +34,17 @@ func TestHandlerSuite(t *testing.T) {
 type HandlerSuite struct {
 	suite.Suite
 
-	cdc    *codec.Codec
+	cdc    codec.JSONMarshaler
 	ctx    sdk.Context
 	keeper tokenkeeper.Keeper
 	bk     bankkeeper.Keeper
 }
 
 func (suite *HandlerSuite) SetupTest() {
-	app := simapp.Setup(isCheck)
+	app := simapp.Setup(isCheckTx)
 
-	suite.cdc = app.Codec()
-	suite.ctx = app.BaseApp.NewContext(isCheck, abci.Header{})
+	suite.cdc = codec.NewAminoCodec(app.LegacyAmino())
+	suite.ctx = app.BaseApp.NewContext(isCheckTx, tmproto.Header{})
 	suite.keeper = app.TokenKeeper
 	suite.bk = app.BankKeeper
 

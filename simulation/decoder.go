@@ -6,17 +6,16 @@ import (
 	"bytes"
 	"fmt"
 
-	gogotypes "github.com/gogo/protobuf/types"
-
 	"github.com/cosmos/cosmos-sdk/codec"
-	tmkv "github.com/tendermint/tendermint/libs/kv"
+	"github.com/cosmos/cosmos-sdk/types/kv"
+	gogotypes "github.com/gogo/protobuf/types"
 
 	"github.com/irismod/token/types"
 )
 
 // NewDecodeStore unmarshals the KVPair's Value to the corresponding token type
-func NewDecodeStore(cdc codec.Marshaler) func(kvA, kvB tmkv.Pair) string {
-	return func(kvA, kvB tmkv.Pair) string {
+func NewDecodeStore(cdc codec.Marshaler) func(kvA, kvB kv.Pair) string {
+	return func(kvA, kvB kv.Pair) string {
 		switch {
 		case bytes.Equal(kvA.Key[:1], types.PrefixTokenForSymbol):
 			var tokenA, tokenB types.Token

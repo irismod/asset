@@ -5,14 +5,8 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 )
 
-// GenesisState - all token state that must be provided at genesis
-type GenesisState struct {
-	Params Params `json:"params"` // token params
-	Tokens Tokens `json:"tokens"` // issued tokens
-}
-
 // NewGenesisState creates a new genesis state.
-func NewGenesisState(params Params, tokens Tokens) GenesisState {
+func NewGenesisState(params Params, tokens []Token) GenesisState {
 	return GenesisState{
 		Params: params,
 		Tokens: tokens,
