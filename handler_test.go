@@ -5,17 +5,18 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/stretchr/testify/suite"
-	abci "github.com/tendermint/tendermint/abci/types"
+	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	"github.com/irismod/token"
 	simapp "github.com/irismod/token/app"
+	tokenkeeper "github.com/irismod/token/keeper"
 	"github.com/irismod/token/types"
 )
 
 const (
-	isCheck = false
+	isCheckTx = false
 )
 
 var (
@@ -33,17 +34,17 @@ func TestHandlerSuite(t *testing.T) {
 type HandlerSuite struct {
 	suite.Suite
 
-	cdc    *codec.Codec
+	cdc    codec.JSONMarshaler
 	ctx    sdk.Context
-	keeper token.Keeper
-	bk     bank.Keeper
+	keeper tokenkeeper.Keeper
+	bk     bankkeeper.Keeper
 }
 
 func (suite *HandlerSuite) SetupTest() {
-	app := simapp.Setup(isCheck)
+	app := simapp.Setup(isCheckTx)
 
-	suite.cdc = app.Codec()
-	suite.ctx = app.BaseApp.NewContext(isCheck, abci.Header{})
+	suite.cdc = codec.NewAminoCodec(app.LegacyAmino())
+	suite.ctx = app.BaseApp.NewContext(isCheckTx, tmproto.Header{})
 	suite.keeper = app.TokenKeeper
 	suite.bk = app.BankKeeper
 
@@ -81,7 +82,7 @@ func (suite *HandlerSuite) TestIssueToken() {
 func (suite *HandlerSuite) TestMintToken() {
 	msg := types.NewMsgIssueToken("btc", "satoshi", "Bitcoin Network", 18, 1000, 2000, true, owner)
 
-	err := suite.keeper.IssueToken(suite.ctx, msg)
+	err := suite.keeper.IssueToken(suite.ctx, *msg)
 	suite.NoError(err)
 
 	suite.True(suite.keeper.HasToken(suite.ctx, msg.Symbol))

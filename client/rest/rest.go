@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/gorilla/mux"
@@ -15,9 +15,9 @@ const (
 	RestParamOwner  = "owner"
 )
 
-// RegisterRoutes registers token-related REST handlers to a router
-func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, queryRoute string) {
-	registerQueryRoutes(cliCtx, r, queryRoute)
+// RegisterHandlers registers token-related REST handlers to a router
+func RegisterHandlers(cliCtx client.Context, r *mux.Router) {
+	registerQueryRoutes(cliCtx, r)
 	registerTxRoutes(cliCtx, r)
 }
 

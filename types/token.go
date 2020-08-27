@@ -2,13 +2,30 @@ package types
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/gogo/protobuf/proto"
+	"gopkg.in/yaml.v2"
 )
+
+type TokenI interface {
+	GetSymbol() string
+	GetName() string
+	GetScale() uint32
+	GetMinUnit() string
+	GetInitialSupply() uint64
+	GetMaxSupply() uint64
+	GetMintable() bool
+	GetOwner() sdk.AccAddress
+
+	ToMainCoin(coin sdk.Coin) (sdk.DecCoin, error)
+	ToMinCoin(coin sdk.DecCoin) (sdk.Coin, error)
+}
+
+var _ proto.Message = &Token{}
 
 // NewToken constructs a new Token instance
 func NewToken(
@@ -85,6 +102,11 @@ func (t Token) GetOwner() sdk.AccAddress {
 	return t.Owner
 }
 
+func (t Token) String() string {
+	bz, _ := yaml.Marshal(t)
+	return string(bz)
+}
+
 //ToMainCoin return the main denom coin from args
 func (t Token) ToMainCoin(coin sdk.Coin) (sdk.DecCoin, error) {
 	if t.Symbol != coin.Denom && t.MinUnit != coin.Denom {
@@ -119,23 +141,6 @@ func (t Token) ToMinCoin(coin sdk.DecCoin) (newCoin sdk.Coin, err error) {
 
 	amt := amount.Mul(precision)
 	return sdk.NewCoin(t.MinUnit, amt.TruncateInt()), nil
-}
-
-// Tokens is a set of tokens
-type Tokens []Token
-
-// String implements Stringer
-func (tokens Tokens) String() string {
-	if len(tokens) == 0 {
-		return "[]"
-	}
-
-	out := ""
-	for _, token := range tokens {
-		out += fmt.Sprintf("%s \n", token.String())
-	}
-
-	return out[:len(out)-1]
 }
 
 func ValidateToken(token Token) error {

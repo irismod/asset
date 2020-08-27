@@ -3,6 +3,8 @@ package token
 import (
 	"strconv"
 
+	"github.com/irismod/token/keeper"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -10,18 +12,18 @@ import (
 )
 
 // handle all "token" type messages.
-func NewHandler(k Keeper) sdk.Handler {
+func NewHandler(k keeper.Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 
 		switch msg := msg.(type) {
-		case MsgIssueToken:
+		case *types.MsgIssueToken:
 			return handleIssueToken(ctx, k, msg)
-		case MsgEditToken:
+		case *types.MsgEditToken:
 			return handleMsgEditToken(ctx, k, msg)
-		case MsgMintToken:
+		case *types.MsgMintToken:
 			return handleMsgMintToken(ctx, k, msg)
-		case MsgTransferTokenOwner:
+		case *types.MsgTransferTokenOwner:
 			return handleMsgTransferTokenOwner(ctx, k, msg)
 		default:
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized nft message type: %T", msg)
@@ -30,13 +32,13 @@ func NewHandler(k Keeper) sdk.Handler {
 }
 
 // handleIssueToken handles MsgIssueToken
-func handleIssueToken(ctx sdk.Context, k Keeper, msg MsgIssueToken) (*sdk.Result, error) {
+func handleIssueToken(ctx sdk.Context, k keeper.Keeper, msg *types.MsgIssueToken) (*sdk.Result, error) {
 	// handle fee for token
 	if err := k.DeductIssueTokenFee(ctx, msg.Owner, msg.Symbol); err != nil {
 		return nil, err
 	}
 
-	if err := k.IssueToken(ctx, msg); err != nil {
+	if err := k.IssueToken(ctx, *msg); err != nil {
 		return nil, err
 	}
 
@@ -55,8 +57,8 @@ func handleIssueToken(ctx sdk.Context, k Keeper, msg MsgIssueToken) (*sdk.Result
 }
 
 // handleMsgEditToken handles MsgEditToken
-func handleMsgEditToken(ctx sdk.Context, k Keeper, msg MsgEditToken) (*sdk.Result, error) {
-	if err := k.EditToken(ctx, msg); err != nil {
+func handleMsgEditToken(ctx sdk.Context, k keeper.Keeper, msg *types.MsgEditToken) (*sdk.Result, error) {
+	if err := k.EditToken(ctx, *msg); err != nil {
 		return nil, err
 	}
 
@@ -75,8 +77,8 @@ func handleMsgEditToken(ctx sdk.Context, k Keeper, msg MsgEditToken) (*sdk.Resul
 }
 
 // handleMsgTransferTokenOwner handles MsgTransferTokenOwner
-func handleMsgTransferTokenOwner(ctx sdk.Context, k Keeper, msg MsgTransferTokenOwner) (*sdk.Result, error) {
-	if err := k.TransferTokenOwner(ctx, msg); err != nil {
+func handleMsgTransferTokenOwner(ctx sdk.Context, k keeper.Keeper, msg *types.MsgTransferTokenOwner) (*sdk.Result, error) {
+	if err := k.TransferTokenOwner(ctx, *msg); err != nil {
 		return nil, err
 	}
 
@@ -96,12 +98,12 @@ func handleMsgTransferTokenOwner(ctx sdk.Context, k Keeper, msg MsgTransferToken
 }
 
 // handleMsgMintToken handles MsgMintToken
-func handleMsgMintToken(ctx sdk.Context, k Keeper, msg MsgMintToken) (*sdk.Result, error) {
+func handleMsgMintToken(ctx sdk.Context, k keeper.Keeper, msg *types.MsgMintToken) (*sdk.Result, error) {
 	if err := k.DeductMintTokenFee(ctx, msg.Owner, msg.Symbol); err != nil {
 		return nil, err
 	}
 
-	if err := k.MintToken(ctx, msg); err != nil {
+	if err := k.MintToken(ctx, *msg); err != nil {
 		return nil, err
 	}
 

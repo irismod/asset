@@ -3,97 +3,89 @@ package keeper_test
 import (
 	"fmt"
 
-	"testing"
-
-	"github.com/stretchr/testify/require"
+	"github.com/cosmos/cosmos-sdk/codec"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/irismod/token"
-	simapp "github.com/irismod/token/app"
-	"github.com/irismod/token/exported"
+	"github.com/irismod/token/keeper"
 	"github.com/irismod/token/types"
 )
 
-func TestQueryToken(t *testing.T) {
-	app := simapp.Setup(isCheck)
-	ctx := app.BaseApp.NewContext(isCheck, abci.Header{})
-	querier := token.NewQuerier(app.TokenKeeper)
+func (suite *KeeperTestSuite) TestQueryToken() {
+	ctx := suite.ctx
+	querier := keeper.NewQuerier(suite.keeper, suite.cdc)
 
-	params := token.QueryTokenParams{
+	params := types.QueryTokenParams{
 		Denom: types.GetNativeToken().Symbol,
 	}
-	bz := app.Codec().MustMarshalJSON(params)
+	bz := suite.cdc.MustMarshalJSON(params)
 	query := abci.RequestQuery{
-		Path: fmt.Sprintf("/custom/%s/%s", token.ModuleName, token.QueryToken),
+		Path: fmt.Sprintf("/custom/%s/%s", types.QuerierRoute, types.QueryToken),
 		Data: bz,
 	}
 
-	data, err := querier(ctx, []string{token.QueryToken}, query)
-	require.Nil(t, err)
+	data, err := querier(ctx, []string{types.QueryToken}, query)
+	suite.Nil(err)
 
-	data2 := app.Codec().MustMarshalJSON(token.GetNativeToken())
-	require.EqualValues(t, data2, data)
+	data2 := codec.MustMarshalJSONIndent(suite.cdc, types.GetNativeToken())
+	suite.Equal(data2, data)
 
 	//query by mint_unit
-	params = token.QueryTokenParams{
+	params = types.QueryTokenParams{
 		Denom: types.GetNativeToken().MinUnit,
 	}
 
-	bz = app.Codec().MustMarshalJSON(params)
+	bz = suite.cdc.MustMarshalJSON(params)
 	query = abci.RequestQuery{
-		Path: fmt.Sprintf("/custom/%s/%s", token.ModuleName, token.QueryToken),
+		Path: fmt.Sprintf("/custom/%s/%s", types.QuerierRoute, types.QueryToken),
 		Data: bz,
 	}
 
-	data, err = querier(ctx, []string{token.QueryToken}, query)
-	require.Nil(t, err)
+	data, err = querier(ctx, []string{types.QueryToken}, query)
+	suite.Nil(err)
 
-	data2 = app.Codec().MustMarshalJSON(token.GetNativeToken())
-	require.EqualValues(t, data2, data)
-
+	data2 = codec.MustMarshalJSONIndent(suite.cdc, types.GetNativeToken())
+	suite.Equal(data2, data)
 }
 
-func TestQueryTokens(t *testing.T) {
-	app := simapp.Setup(isCheck)
-	ctx := app.BaseApp.NewContext(isCheck, abci.Header{})
-	querier := token.NewQuerier(app.TokenKeeper)
+func (suite *KeeperTestSuite) TestQueryTokens() {
+	ctx := suite.ctx
+	querier := keeper.NewQuerier(suite.keeper, suite.cdc)
 
-	params := token.QueryTokensParams{
+	params := types.QueryTokensParams{
 		Owner: nil,
 	}
-	bz := app.Codec().MustMarshalJSON(params)
+	bz := suite.cdc.MustMarshalJSON(params)
 	query := abci.RequestQuery{
-		Path: fmt.Sprintf("/custom/%s/%s", token.ModuleName, token.QueryTokens),
+		Path: fmt.Sprintf("/custom/%s/%s", types.QuerierRoute, types.QueryTokens),
 		Data: bz,
 	}
 
-	data, err := querier(ctx, []string{token.QueryTokens}, query)
-	require.Nil(t, err)
+	data, err := querier(ctx, []string{types.QueryTokens}, query)
+	suite.Nil(err)
 
-	data2 := app.Codec().MustMarshalJSON([]exported.TokenI{token.GetNativeToken()})
-	require.EqualValues(t, data2, data)
+	data2 := codec.MustMarshalJSONIndent(suite.cdc, []types.TokenI{types.GetNativeToken()})
+	suite.Equal(data2, data)
 }
 
-func TestQueryFees(t *testing.T) {
-	app := simapp.Setup(isCheck)
-	ctx := app.BaseApp.NewContext(isCheck, abci.Header{})
-	querier := token.NewQuerier(app.TokenKeeper)
+func (suite *KeeperTestSuite) TestQueryFees() {
+	ctx := suite.ctx
+	querier := keeper.NewQuerier(suite.keeper, suite.cdc)
 
-	params := token.QueryTokenFeesParams{
+	params := types.QueryTokenFeesParams{
 		Symbol: "btc",
 	}
-	bz := app.Codec().MustMarshalJSON(params)
+	bz := suite.cdc.MustMarshalJSON(params)
 	query := abci.RequestQuery{
-		Path: fmt.Sprintf("/custom/%s/%s", token.ModuleName, token.QueryFees),
+		Path: fmt.Sprintf("/custom/%s/%s", types.QuerierRoute, types.QueryFees),
 		Data: bz,
 	}
 
-	data, err := querier(ctx, []string{token.QueryFees}, query)
-	require.Nil(t, err)
+	data, err := querier(ctx, []string{types.QueryFees}, query)
+	suite.Nil(err)
 
-	var fee token.TokenFees
-	app.Codec().MustUnmarshalJSON(data, &fee)
-	require.Equal(t, false, fee.Exist)
-	require.Equal(t, fmt.Sprintf("60000%s", types.GetNativeToken().MinUnit), fee.IssueFee.String())
-	require.Equal(t, fmt.Sprintf("6000%s", types.GetNativeToken().MinUnit), fee.MintFee.String())
+	var fee types.QueryFeesResponse
+	suite.cdc.MustUnmarshalJSON(data, &fee)
+	suite.Equal(false, fee.Exist)
+	suite.Equal(fmt.Sprintf("60000%s", types.GetNativeToken().MinUnit), fee.IssueFee.String())
+	suite.Equal(fmt.Sprintf("6000%s", types.GetNativeToken().MinUnit), fee.MintFee.String())
 }

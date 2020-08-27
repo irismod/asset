@@ -21,7 +21,7 @@ func TestMsgIssueAsset(t *testing.T) {
 
 	tests := []struct {
 		testCase string
-		MsgIssueToken
+		*MsgIssueToken
 		expectPass bool
 	}{
 		{"basic good", NewMsgIssueToken("btc", "satoshi", "Bitcoin Network", 18, 1, 1, true, addr), true},
@@ -55,7 +55,7 @@ func TestMsgEditToken(t *testing.T) {
 
 	tests := []struct {
 		testCase string
-		MsgEditToken
+		*MsgEditToken
 		expectPass bool
 	}{
 		{"native basic good", NewMsgEditToken("BTC Token", "btc", 10000, mintable, owner), true},

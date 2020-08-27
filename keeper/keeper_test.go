@@ -6,19 +6,18 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	simapp "github.com/irismod/token/app"
 	"github.com/irismod/token/keeper"
 	"github.com/irismod/token/types"
-
-	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 const (
-	isCheck = false
+	isCheckTx = false
 )
 
 var (
@@ -28,23 +27,24 @@ var (
 	initCoin = sdk.Coins{sdk.NewCoin(denom, initAmt)}
 )
 
-type KeeperSuite struct {
+type KeeperTestSuite struct {
 	suite.Suite
 
-	cdc    *codec.Codec
+	cdc    codec.JSONMarshaler
 	ctx    sdk.Context
 	keeper keeper.Keeper
-	bk     bank.Keeper
+	bk     bankkeeper.Keeper
+	app    *simapp.SimApp
 }
 
-func (suite *KeeperSuite) SetupTest() {
+func (suite *KeeperTestSuite) SetupTest() {
+	app := simapp.Setup(isCheckTx)
 
-	app := simapp.Setup(isCheck)
-
-	suite.cdc = app.Codec()
-	suite.ctx = app.BaseApp.NewContext(isCheck, abci.Header{})
+	suite.cdc = codec.NewAminoCodec(app.LegacyAmino())
+	suite.ctx = app.BaseApp.NewContext(isCheckTx, tmproto.Header{})
 	suite.keeper = app.TokenKeeper
 	suite.bk = app.BankKeeper
+	suite.app = app
 
 	// set params
 	suite.keeper.SetParamSet(suite.ctx, types.DefaultParams())
@@ -57,13 +57,13 @@ func (suite *KeeperSuite) SetupTest() {
 }
 
 func TestKeeperSuite(t *testing.T) {
-	suite.Run(t, new(KeeperSuite))
+	suite.Run(t, new(KeeperTestSuite))
 }
 
-func (suite *KeeperSuite) TestIssueToken() {
+func (suite *KeeperTestSuite) TestIssueToken() {
 	msg := types.NewMsgIssueToken("btc", "satoshi", "Bitcoin Network", 18, 21000000, 21000000, false, owner)
 
-	err := suite.keeper.IssueToken(suite.ctx, msg)
+	err := suite.keeper.IssueToken(suite.ctx, *msg)
 	require.NoError(suite.T(), err)
 
 	suite.True(suite.keeper.HasToken(suite.ctx, msg.Symbol))
@@ -79,13 +79,13 @@ func (suite *KeeperSuite) TestIssueToken() {
 	suite.Equal(ftJson, tokenJson)
 }
 
-func (suite *KeeperSuite) TestEditToken() {
+func (suite *KeeperTestSuite) TestEditToken() {
 
 	suite.TestIssueToken()
 
 	mintable := types.True
 	msgEditToken := types.NewMsgEditToken("Bitcoin Token", "btc", 22000000, mintable, owner)
-	err := suite.keeper.EditToken(suite.ctx, msgEditToken)
+	err := suite.keeper.EditToken(suite.ctx, *msgEditToken)
 	require.NoError(suite.T(), err)
 
 	token2, err := suite.keeper.GetToken(suite.ctx, msgEditToken.Symbol)
@@ -99,11 +99,11 @@ func (suite *KeeperSuite) TestEditToken() {
 
 }
 
-func (suite *KeeperSuite) TestMintToken() {
+func (suite *KeeperTestSuite) TestMintToken() {
 
 	msg := types.NewMsgIssueToken("btc", "satoshi", "Bitcoin Network", 18, 1000, 2000, true, owner)
 
-	err := suite.keeper.IssueToken(suite.ctx, msg)
+	err := suite.keeper.IssueToken(suite.ctx, *msg)
 	require.NoError(suite.T(), err)
 
 	suite.True(suite.keeper.HasToken(suite.ctx, msg.Symbol))
@@ -112,14 +112,14 @@ func (suite *KeeperSuite) TestMintToken() {
 	suite.Equal("1000000000000000000000satoshi", amt.String())
 
 	msgMintToken := types.NewMsgMintToken(msg.Symbol, owner, nil, 1000)
-	err = suite.keeper.MintToken(suite.ctx, msgMintToken)
+	err = suite.keeper.MintToken(suite.ctx, *msgMintToken)
 	require.NoError(suite.T(), err)
 
 	amt = suite.bk.GetBalance(suite.ctx, owner, msg.MinUnit)
 	suite.Equal("2000000000000000000000satoshi", amt.String())
 }
 
-func (suite *KeeperSuite) TestTransferToken() {
+func (suite *KeeperTestSuite) TestTransferToken() {
 
 	suite.TestIssueToken()
 

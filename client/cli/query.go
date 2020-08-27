@@ -1,42 +1,39 @@
 package cli
 
 import (
+	"context"
 	"fmt"
-
 	"strings"
 
-	"github.com/spf13/cobra"
-
-	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
+	"github.com/spf13/cobra"
 
-	"github.com/irismod/token/exported"
 	"github.com/irismod/token/types"
 )
 
 // GetQueryCmd returns the query commands for the token module.
-func GetQueryCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func GetQueryCmd() *cobra.Command {
 	queryCmd := &cobra.Command{
 		Use:                types.ModuleName,
 		Short:              "Querying commands for the token module",
 		DisableFlagParsing: true,
 	}
 
-	queryCmd.AddCommand(flags.GetCommands(
-		getCmdQueryToken(queryRoute, cdc),
-		getCmdQueryTokens(queryRoute, cdc),
-		getCmdQueryFee(queryRoute, cdc),
-		getCmdQueryParams(queryRoute, cdc),
-	)...)
+	queryCmd.AddCommand(
+		getCmdQueryToken(),
+		getCmdQueryTokens(),
+		getCmdQueryFee(),
+		getCmdQueryParams(),
+	)
 
 	return queryCmd
 }
 
 // getCmdQueryToken implements the query token command.
-func getCmdQueryToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func getCmdQueryToken() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "token [denom]",
 		Long: strings.TrimSpace(
@@ -44,45 +41,42 @@ func getCmdQueryToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 Example:
 $ %s query token token <denom>
 `,
-				version.ClientName,
+				version.AppName,
 			),
 		),
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			clientCtx, err := client.ReadQueryCommandFlags(clientCtx, cmd.Flags())
+
+			if err != nil {
+				return err
+			}
 
 			if err := types.CheckSymbol(args[0]); err != nil {
 				return err
 			}
 
-			params := types.QueryTokenParams{
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.Token(context.Background(), &types.QueryTokenRequest{
 				Denom: args[0],
-			}
+			})
 
-			bz, err := cdc.MarshalJSON(params)
 			if err != nil {
 				return err
 			}
 
-			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryToken), bz)
-			if err != nil {
-				return err
-			}
-
-			var tokens types.Token
-			if err := cdc.UnmarshalJSON(res, &tokens); err != nil {
-				return err
-			}
-
-			return cliCtx.PrintOutput(tokens)
+			return clientCtx.PrintOutput(res.Token)
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }
 
 // getCmdQueryTokens implements the query tokens command.
-func getCmdQueryTokens(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func getCmdQueryTokens() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "tokens [owner]",
 		Long: strings.TrimSpace(
@@ -90,13 +84,17 @@ func getCmdQueryTokens(queryRoute string, cdc *codec.Codec) *cobra.Command {
 Example:
 $ %s query token tokens <owner>
 `,
-				version.ClientName,
+				version.AppName,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			clientCtx, err := client.ReadQueryCommandFlags(clientCtx, cmd.Flags())
 
-			var err error
+			if err != nil {
+				return err
+			}
+
 			var owner sdk.AccAddress
 
 			if len(args) > 0 {
@@ -106,30 +104,42 @@ $ %s query token tokens <owner>
 				}
 			}
 
-			params := types.QueryTokensParams{
-				Owner: owner,
-			}
+			queryClient := types.NewQueryClient(clientCtx)
 
-			bz := cdc.MustMarshalJSON(params)
-			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryTokens), bz)
+			res, err := queryClient.Tokens(context.Background(), &types.QueryTokensRequest{
+				Owner: owner,
+			})
+
 			if err != nil {
 				return err
 			}
 
-			var tokens []exported.TokenI
-			if err := cdc.UnmarshalJSON(res, &tokens); err != nil {
+			tokens := make([]types.TokenI, 0, len(res.Tokens))
+			for _, eviAny := range res.Tokens {
+				var evi types.TokenI
+				err = clientCtx.InterfaceRegistry.UnpackAny(eviAny, &evi)
+				if err != nil {
+					return err
+				}
+				tokens = append(tokens, evi)
+			}
+
+			output, err := clientCtx.JSONMarshaler.MarshalJSON(tokens)
+			if err != nil {
 				return err
 			}
 
-			return cliCtx.PrintOutput(tokens)
+			_, err = fmt.Println(string(output))
+			return err
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }
 
 // getCmdQueryFee implements the query token related fees command.
-func getCmdQueryFee(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func getCmdQueryFee() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "fee [symbol]",
 		Args: cobra.ExactArgs(1),
@@ -138,11 +148,16 @@ func getCmdQueryFee(queryRoute string, cdc *codec.Codec) *cobra.Command {
 Example:
 $ %s query token fee <symbol>
 `,
-				version.ClientName,
+				version.AppName,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			clientCtx, err := client.ReadQueryCommandFlags(clientCtx, cmd.Flags())
+
+			if err != nil {
+				return err
+			}
 
 			symbol := args[0]
 			if err := types.CheckSymbol(symbol); err != nil {
@@ -150,20 +165,26 @@ $ %s query token fee <symbol>
 			}
 
 			// query token fees
-			fees, err := queryTokenFees(cliCtx, queryRoute, symbol)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.Fees(context.Background(), &types.QueryFeesRequest{
+				Symbol: symbol,
+			})
+
 			if err != nil {
 				return err
 			}
 
-			return cliCtx.PrintOutput(fees)
+			return clientCtx.PrintOutput(res)
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }
 
 // getCmdQueryParams implements the query token related param command.
-func getCmdQueryParams(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func getCmdQueryParams() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "params",
 		Long: strings.TrimSpace(
@@ -171,25 +192,29 @@ func getCmdQueryParams(queryRoute string, cdc *codec.Codec) *cobra.Command {
 Example:
 $ %s query token params
 `,
-				version.ClientName,
+				version.AppName,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			clientCtx, err := client.ReadQueryCommandFlags(clientCtx, cmd.Flags())
 
-			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryParams), nil)
 			if err != nil {
 				return err
 			}
 
-			var params types.Params
-			if err := cdc.UnmarshalJSON(res, &params); err != nil {
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.Params(context.Background(), &types.QueryParamsRequest{})
+
+			if err != nil {
 				return err
 			}
 
-			return cliCtx.PrintOutput(params)
+			return clientCtx.PrintOutput(&res.Params)
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }
