@@ -119,10 +119,10 @@ func (t Token) ToMainCoin(coin sdk.Coin) (sdk.DecCoin, error) {
 	}
 
 	precision := math.Pow10(int(t.Scale))
-	precisionStr := strconv.FormatFloat(precision,'f',0,64)
-	precisionDec,err := sdk.NewDecFromStr(precisionStr)
+	precisionStr := strconv.FormatFloat(precision, 'f', 0, 64)
+	precisionDec, err := sdk.NewDecFromStr(precisionStr)
 	if err != nil {
-		return sdk.DecCoin{},err
+		return sdk.DecCoin{}, err
 	}
 
 	// dest amount = src amount / 10^(scale)
@@ -141,10 +141,10 @@ func (t Token) ToMinCoin(coin sdk.DecCoin) (newCoin sdk.Coin, err error) {
 	}
 
 	precision := math.Pow10(int(t.Scale))
-	precisionStr := strconv.FormatFloat(precision,'f',0,64)
-	precisionDec,err := sdk.NewDecFromStr(precisionStr)
+	precisionStr := strconv.FormatFloat(precision, 'f', 0, 64)
+	precisionDec, err := sdk.NewDecFromStr(precisionStr)
 	if err != nil {
-		return sdk.Coin{},err
+		return sdk.Coin{}, err
 	}
 
 	// dest amount = src amount * 10^(dest scale)
