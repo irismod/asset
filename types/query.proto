@@ -4,7 +4,7 @@ package irismod.token;
 import "third_party/proto/gogoproto/gogo.proto";
 import "types/token.proto";
 import "third_party/proto/cosmos_proto/cosmos.proto";
-import "third_party/proto/cosmos_proto/types.proto";
+import "third_party/proto/cosmos_proto/coin.proto";
 import "third_party/proto/cosmos_proto/pagination.proto";
 import "google/protobuf/any.proto";
 
@@ -54,8 +54,8 @@ message QueryFeesRequest {
 // QueryFeesResponse is response type for the Query/Fees RPC method
 message QueryFeesResponse {
     bool exist = 1;
-    cosmos_sdk.v1.Coin issue_fee = 2 [(gogoproto.nullable) = false, (gogoproto.moretags) = "yaml:\"issue_fee\"", (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.Coin"];
-    cosmos_sdk.v1.Coin mint_fee = 3 [(gogoproto.nullable) = false, (gogoproto.moretags) = "yaml:\"mint_fee\"", (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.Coin"];
+    cosmos.base.v1beta1.Coin issue_fee = 2 [(gogoproto.nullable) = false, (gogoproto.moretags) = "yaml:\"issue_fee\"", (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.Coin"];
+    cosmos.base.v1beta1.Coin mint_fee = 3 [(gogoproto.nullable) = false, (gogoproto.moretags) = "yaml:\"mint_fee\"", (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.Coin"];
 }
 
 // QueryParametersRequest is request type for the Query/Parameters RPC method

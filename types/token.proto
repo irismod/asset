@@ -3,7 +3,7 @@ package irismod.token;
 
 import "third_party/proto/gogoproto/gogo.proto";
 import "third_party/proto/cosmos_proto/cosmos.proto";
-import "third_party/proto/cosmos_proto/types.proto";
+import "third_party/proto/cosmos_proto/coin.proto";
 
 option go_package = "github.com/irismod/token/types";
 option (gogoproto.goproto_getters_all)  = false;
@@ -76,7 +76,7 @@ message Params {
     (gogoproto.nullable)   = false
   ];
 
-  cosmos_sdk.v1.Coin issue_token_base_fee = 2 [
+  cosmos.base.v1beta1.Coin issue_token_base_fee = 2 [
     (gogoproto.moretags)   = "yaml:\"issue_token_base_fee\"",
     (gogoproto.nullable)   = false
   ];
