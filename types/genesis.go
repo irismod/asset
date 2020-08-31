@@ -1,6 +1,8 @@
 package types
 
 import (
+	"strings"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/crypto"
 )
@@ -30,8 +32,8 @@ func GetNativeToken() Token {
 }
 
 var nativeToken = Token{
-	Symbol:        sdk.DefaultBondDenom,
-	Name:          "Network staking token ",
+	Symbol:        strings.Split(sdk.DefaultBondDenom, "-")[0],
+	Name:          "Network staking token",
 	Scale:         0,
 	MinUnit:       sdk.DefaultBondDenom,
 	InitialSupply: 2000000000,

@@ -28,7 +28,7 @@ func TestMsgIssueAsset(t *testing.T) {
 		{"symbol empty", NewMsgIssueToken("", "satoshi", "Bitcoin Network", 18, 1, 1, true, addr), false},
 		{"symbol error", NewMsgIssueToken("b&tc", "satoshi", "Bitcoin Network", 18, 1, 1, true, addr), false},
 		{"symbol first letter is num", NewMsgIssueToken("4btc", "satoshi", "Bitcoin Network", 18, 1, 1, true, addr), false},
-		{"symbol too long", NewMsgIssueToken("btc1111111111", "satoshi", "Bitcoin Network", 18, 1, 1, true, addr), false},
+		{"symbol too long", NewMsgIssueToken("btc111111111111111111", "satoshi", "Bitcoin Network", 18, 1, 1, true, addr), false},
 		{"symbol too short", NewMsgIssueToken("ht", "satoshi", "Bitcoin Network", 18, 1, 1, true, addr), false},
 		{"name empty", NewMsgIssueToken("btc", "satoshi", "", 18, 1, 1, true, addr), false},
 		{"name blank", NewMsgIssueToken("btc", "satoshi", " ", 18, 1, 1, true, addr), false},
@@ -144,7 +144,7 @@ func TestMsgTransferTokenOwnerValidation(t *testing.T) {
 		{"empty srcOwner", emptyAddr, "btc", addr1, false},
 		{"empty symbol", addr1, "", addr2, false},
 		{"empty dstOwner", addr1, "btc", emptyAddr, false},
-		{"invalid symbol", addr1, "btc-min", addr2, false},
+		{"invalid symbol", addr1, "btc_min", addr2, false},
 		{"basic good", addr1, "btc", addr2, true},
 	}
 
