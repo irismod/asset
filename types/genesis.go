@@ -34,7 +34,7 @@ func GetNativeToken() Token {
 var nativeToken = Token{
 	Symbol:        strings.Split(sdk.DefaultBondDenom, "-")[0],
 	Name:          "Network staking token",
-	Scale:         0,
+	Scale:         uint32(len(sdk.PowerReduction.String()) - 1),
 	MinUnit:       sdk.DefaultBondDenom,
 	InitialSupply: 2000000000,
 	MaxSupply:     10000000000,
