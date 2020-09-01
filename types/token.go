@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	"math"
 	"strconv"
 	"strings"
 
@@ -117,12 +118,16 @@ func (t Token) ToMainCoin(coin sdk.Coin) (sdk.DecCoin, error) {
 		return sdk.NewDecCoin(coin.Denom, coin.Amount), nil
 	}
 
-	// dest amount = src amount / 10^(scale)
-	precision := sdk.NewDecFromIntWithPrec(sdk.NewInt(1), int64(t.Scale))
-	amount := sdk.NewDecFromInt(coin.Amount)
+	precision := math.Pow10(int(t.Scale))
+	precisionStr := strconv.FormatFloat(precision, 'f', 0, 64)
+	precisionDec, err := sdk.NewDecFromStr(precisionStr)
+	if err != nil {
+		return sdk.DecCoin{}, err
+	}
 
-	amt := amount.Quo(precision)
-	return sdk.NewDecCoinFromDec(t.Symbol, amt), nil
+	// dest amount = src amount / 10^(scale)
+	amount := sdk.NewDecFromInt(coin.Amount).Quo(precisionDec)
+	return sdk.NewDecCoinFromDec(t.Symbol, amount), nil
 }
 
 //ToMinCoin return the min denom coin from args
@@ -135,12 +140,16 @@ func (t Token) ToMinCoin(coin sdk.DecCoin) (newCoin sdk.Coin, err error) {
 		return sdk.NewCoin(coin.Denom, coin.Amount.TruncateInt()), nil
 	}
 
-	// dest amount = src amount * 10^(dest scale)
-	precision := sdk.NewDecFromIntWithPrec(sdk.NewInt(1), int64(t.Scale))
-	amount := coin.Amount
+	precision := math.Pow10(int(t.Scale))
+	precisionStr := strconv.FormatFloat(precision, 'f', 0, 64)
+	precisionDec, err := sdk.NewDecFromStr(precisionStr)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
 
-	amt := amount.Mul(precision)
-	return sdk.NewCoin(t.MinUnit, amt.TruncateInt()), nil
+	// dest amount = src amount * 10^(dest scale)
+	amount := coin.Amount.Mul(precisionDec)
+	return sdk.NewCoin(t.MinUnit, amount.TruncateInt()), nil
 }
 
 func ValidateToken(token Token) error {
@@ -158,7 +167,7 @@ func ValidateToken(token Token) error {
 	}
 
 	minUnitLen := len(strings.TrimSpace(token.MinUnit))
-	if minUnitLen < MinimumMinUnitLen || minUnitLen > MaximumMinUnitLen || !IsAlphaNumeric(token.MinUnit) || !IsBeginWithAlpha(token.MinUnit) {
+	if minUnitLen < MinimumMinUnitLen || minUnitLen > MaximumMinUnitLen || !IsAlphaNumericDash(token.MinUnit) || !IsBeginWithAlpha(token.MinUnit) {
 		return sdkerrors.Wrapf(ErrInvalidMinUnit, "invalid token min_unit %s, only accepts alphanumeric characters, and begin with an english letter, length [%d, %d]", token.MinUnit, MinimumMinUnitLen, MaximumMinUnitLen)
 	}
 
@@ -183,7 +192,7 @@ func CheckSymbol(symbol string) error {
 		return sdkerrors.Wrapf(ErrInvalidSymbol, "invalid symbol: %s,  only accepts length [%d, %d]", symbol, MinimumSymbolLen, MaximumSymbolLen)
 	}
 
-	if !IsBeginWithAlpha(symbol) || !IsAlphaNumeric(symbol) {
+	if !IsBeginWithAlpha(symbol) || !IsAlphaNumericDash(symbol) {
 		return sdkerrors.Wrapf(ErrInvalidSymbol, "invalid symbol: %s, only accepts alphanumeric characters, and begin with an english letter", symbol)
 	}
 

@@ -25,15 +25,15 @@ const (
 	MaximumInitSupply = uint64(100000000000)  // maximal limitation for token initial supply，100 billion
 	MaximumScale      = uint32(18)            // maximal limitation for token decimal
 	MinimumSymbolLen  = 3                     // minimal limitation for the length of the token's symbol / canonical_symbol
-	MaximumSymbolLen  = 8                     // maximal limitation for the length of the token's symbol / canonical_symbol
+	MaximumSymbolLen  = 20                    // maximal limitation for the length of the token's symbol / canonical_symbol
 	MaximumNameLen    = 32                    // maximal limitation for the length of the token's name
 	MinimumMinUnitLen = 3                     // minimal limitation for the length of the token's min_unit
-	MaximumMinUnitLen = 10                    // maximal limitation for the length of the token's min_unit
+	MaximumMinUnitLen = 20                    // maximal limitation for the length of the token's min_unit
 )
 
 var (
-	IsAlphaNumeric   = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString // only accepts alphanumeric characters
-	IsBeginWithAlpha = regexp.MustCompile(`^[a-zA-Z].*`).MatchString
+	IsAlphaNumericDash = regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString // only accepts alphanumeric characters
+	IsBeginWithAlpha   = regexp.MustCompile(`^[a-zA-Z].*`).MatchString
 )
 
 var _, _, _, _ sdk.Msg = &MsgIssueToken{}, &MsgEditToken{}, &MsgMintToken{}, &MsgTransferTokenOwner{}

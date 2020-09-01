@@ -107,6 +107,7 @@ $ %s tx token issue --name="Kitty Token" --symbol="kitty" --min-unit="kitty" --s
 	_ = cmd.MarkFlagRequired(FlagName)
 	_ = cmd.MarkFlagRequired(FlagInitialSupply)
 	_ = cmd.MarkFlagRequired(FlagScale)
+	_ = cmd.MarkFlagRequired(FlagMinUnit)
 	flags.AddTxFlagsToCmd(cmd)
 
 	return cmd
