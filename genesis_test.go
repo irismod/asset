@@ -3,9 +3,11 @@ package token_test
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/irismod/token"
 	simapp "github.com/irismod/token/app"

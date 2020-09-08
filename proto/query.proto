@@ -1,12 +1,13 @@
 syntax = "proto3";
 package irismod.token;
 
-import "third_party/proto/gogoproto/gogo.proto";
-import "types/token.proto";
-import "third_party/proto/cosmos_proto/cosmos.proto";
-import "third_party/proto/cosmos_proto/coin.proto";
-import "third_party/proto/cosmos_proto/pagination.proto";
+import "cosmos_proto/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos_proto/pagination.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
 import "google/protobuf/any.proto";
+import "token.proto";
 
 option go_package = "github.com/irismod/token/types";
 
@@ -14,15 +15,19 @@ option go_package = "github.com/irismod/token/types";
 service Query {
     // Token returns token with token name
     rpc Token (QueryTokenRequest) returns (QueryTokenResponse) {
+      option (google.api.http).get = "/irismod/token/tokens/{denom}";
     }
     // Tokens returns the token list
     rpc Tokens (QueryTokensRequest) returns (QueryTokensResponse) {
+      option (google.api.http).get = "/irismod/token/tokens";
     }
     // Fees returns the fees to issue or mint a token
     rpc Fees (QueryFeesRequest) returns (QueryFeesResponse) {
+      option (google.api.http).get = "/irismod/token/{symbol}/fees";
     }
     // Params queries the token parameters
     rpc Params (QueryParamsRequest) returns (QueryParamsResponse) {
+      option (google.api.http).get = "/irismod/token/params";
     }
 }
 

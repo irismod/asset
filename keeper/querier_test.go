@@ -3,8 +3,9 @@ package keeper_test
 import (
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/codec"
 	abci "github.com/tendermint/tendermint/abci/types"
+
+	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/irismod/token/keeper"
 	"github.com/irismod/token/types"
