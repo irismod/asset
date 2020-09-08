@@ -3,11 +3,10 @@ package token
 import (
 	"strconv"
 
-	"github.com/irismod/token/keeper"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
+	"github.com/irismod/token/keeper"
 	"github.com/irismod/token/types"
 )
 

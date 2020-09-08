@@ -1,9 +1,10 @@
 syntax = "proto3";
 package irismod.token;
 
-import "third_party/proto/gogoproto/gogo.proto";
-import "third_party/proto/cosmos_proto/cosmos.proto";
-import "third_party/proto/cosmos_proto/coin.proto";
+import "cosmos_proto/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
 
 option go_package = "github.com/irismod/token/types";
 option (gogoproto.goproto_getters_all)  = false;

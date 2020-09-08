@@ -5,9 +5,9 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/irismod/token/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/irismod/token/types"
 )
 
 // fee factor formula: (ln(len({name}))/ln{base})^{exp}

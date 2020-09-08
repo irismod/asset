@@ -1,8 +1,8 @@
 syntax = "proto3";
 package irismod.token;
 
-import "types/token.proto";
-import "third_party/proto/gogoproto/gogo.proto";
+import "gogoproto/gogo.proto";
+import "token.proto";
 
 option go_package = "github.com/irismod/token/types";
 

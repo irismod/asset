@@ -3,15 +3,13 @@ package keeper
 import (
 	"strings"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-
-	"github.com/irismod/token/types"
-
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/irismod/token/types"
 )
 
 func NewQuerier(k Keeper, legacyQuerierCdc codec.JSONMarshaler) sdk.Querier {
