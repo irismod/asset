@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	
+
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -32,17 +32,17 @@ var (
 type KeeperTestSuite struct {
 	suite.Suite
 
-	cdc    codec.JSONMarshaler
-	ctx    sdk.Context
-	keeper keeper.Keeper
-	bk     bankkeeper.Keeper
-	app    *simapp.SimApp
+	legacyAmino *codec.LegacyAmino
+	ctx         sdk.Context
+	keeper      keeper.Keeper
+	bk          bankkeeper.Keeper
+	app         *simapp.SimApp
 }
 
 func (suite *KeeperTestSuite) SetupTest() {
 	app := simapp.Setup(isCheckTx)
 
-	suite.cdc = codec.NewAminoCodec(app.LegacyAmino())
+	suite.legacyAmino = app.LegacyAmino()
 	suite.ctx = app.BaseApp.NewContext(isCheckTx, tmproto.Header{})
 	suite.keeper = app.TokenKeeper
 	suite.bk = app.BankKeeper

@@ -42,7 +42,7 @@ func registerTxRoutes(cliCtx client.Context, r *mux.Router) {
 func issueTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req issueTokenReq
-		if !rest.ReadRESTReq(w, r, cliCtx.JSONMarshaler, &req) {
+		if !rest.ReadRESTReq(w, r, cliCtx.LegacyAmino, &req) {
 			return
 		}
 
@@ -77,7 +77,7 @@ func editTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 		symbol := vars[RestParamSymbol]
 
 		var req editTokenReq
-		if !rest.ReadRESTReq(w, r, cliCtx.JSONMarshaler, &req) {
+		if !rest.ReadRESTReq(w, r, cliCtx.LegacyAmino, &req) {
 			return
 		}
 
@@ -109,7 +109,7 @@ func transferOwnerHandlerFn(cliCtx client.Context) http.HandlerFunc {
 		symbol := vars[RestParamSymbol]
 
 		var req transferTokenOwnerReq
-		if !rest.ReadRESTReq(w, r, cliCtx.JSONMarshaler, &req) {
+		if !rest.ReadRESTReq(w, r, cliCtx.LegacyAmino, &req) {
 			return
 		}
 
@@ -135,7 +135,7 @@ func mintTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 		symbol := vars[RestParamSymbol]
 
 		var req mintTokenReq
-		if !rest.ReadRESTReq(w, r, cliCtx.JSONMarshaler, &req) {
+		if !rest.ReadRESTReq(w, r, cliCtx.LegacyAmino, &req) {
 			return
 		}
 

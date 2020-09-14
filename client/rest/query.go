@@ -47,7 +47,7 @@ func queryTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 			Denom: vars[RestParamDenom],
 		}
 
-		bz, err := cliCtx.JSONMarshaler.MarshalJSON(params)
+		bz, err := cliCtx.LegacyAmino.MarshalJSON(params)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -90,7 +90,7 @@ func queryTokensHandlerFn(cliCtx client.Context) http.HandlerFunc {
 			Owner: owner,
 		}
 
-		bz, err := cliCtx.JSONMarshaler.MarshalJSON(params)
+		bz, err := cliCtx.LegacyAmino.MarshalJSON(params)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -128,7 +128,7 @@ func queryTokenFeesHandlerFn(cliCtx client.Context) http.HandlerFunc {
 			Symbol: symbol,
 		}
 
-		bz, err := cliCtx.JSONMarshaler.MarshalJSON(params)
+		bz, err := cliCtx.LegacyAmino.MarshalJSON(params)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return

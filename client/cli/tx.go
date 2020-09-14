@@ -19,8 +19,8 @@ import (
 	"github.com/irismod/token/types"
 )
 
-// GetTxCmd returns the transaction commands for the token module.
-func GetTxCmd() *cobra.Command {
+// NewTxCmd returns the transaction commands for the token module.
+func NewTxCmd() *cobra.Command {
 	txCmd := &cobra.Command{
 		Use:                        types.ModuleName,
 		Short:                      "Asset transaction subcommands",

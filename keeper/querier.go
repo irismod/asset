@@ -6,13 +6,13 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/irismod/token/types"
 )
 
-func NewQuerier(k Keeper, legacyQuerierCdc codec.JSONMarshaler) sdk.Querier {
+func NewQuerier(k Keeper, legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, error) {
 		switch path[0] {
 		case types.QueryToken:
@@ -29,7 +29,7 @@ func NewQuerier(k Keeper, legacyQuerierCdc codec.JSONMarshaler) sdk.Querier {
 	}
 }
 
-func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper Keeper, legacyQuerierCdc codec.JSONMarshaler) ([]byte, error) {
+func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper Keeper, legacyQuerierCdc *codec.LegacyAmino) ([]byte, error) {
 	var params types.QueryTokenParams
 	err := legacyQuerierCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
@@ -49,7 +49,7 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper Keeper, legacyQue
 	return bz, nil
 }
 
-func queryTokens(ctx sdk.Context, req abci.RequestQuery, keeper Keeper, legacyQuerierCdc codec.JSONMarshaler) ([]byte, error) {
+func queryTokens(ctx sdk.Context, req abci.RequestQuery, keeper Keeper, legacyQuerierCdc *codec.LegacyAmino) ([]byte, error) {
 	var params types.QueryTokensParams
 	if err := legacyQuerierCdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func queryTokens(ctx sdk.Context, req abci.RequestQuery, keeper Keeper, legacyQu
 	return codec.MarshalJSONIndent(legacyQuerierCdc, tokens)
 }
 
-func queryFees(ctx sdk.Context, req abci.RequestQuery, keeper Keeper, legacyQuerierCdc codec.JSONMarshaler) ([]byte, error) {
+func queryFees(ctx sdk.Context, req abci.RequestQuery, keeper Keeper, legacyQuerierCdc *codec.LegacyAmino) ([]byte, error) {
 	var params types.QueryTokenFeesParams
 	err := legacyQuerierCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
@@ -87,7 +87,7 @@ func queryFees(ctx sdk.Context, req abci.RequestQuery, keeper Keeper, legacyQuer
 	return bz, nil
 }
 
-func queryParams(ctx sdk.Context, _ abci.RequestQuery, keeper Keeper, legacyQuerierCdc codec.JSONMarshaler) ([]byte, error) {
+func queryParams(ctx sdk.Context, _ abci.RequestQuery, keeper Keeper, legacyQuerierCdc *codec.LegacyAmino) ([]byte, error) {
 	params := keeper.GetParamSet(ctx)
 	bz, err := codec.MarshalJSONIndent(legacyQuerierCdc, params)
 	if err != nil {
