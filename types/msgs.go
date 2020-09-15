@@ -71,7 +71,7 @@ func (msg MsgIssueToken) ValidateBasic() error {
 
 // Implements Msg.
 func (msg MsgIssueToken) GetSignBytes() []byte {
-	b, err := ModuleCdc.MarshalJSON(msg)
+	b, err := ModuleCdc.MarshalJSON(&msg)
 	if err != nil {
 		panic(err)
 	}
@@ -96,7 +96,7 @@ func NewMsgTransferTokenOwner(srcOwner, dstOwner sdk.AccAddress, symbol string) 
 
 // GetSignBytes implements Msg
 func (msg MsgTransferTokenOwner) GetSignBytes() []byte {
-	b, err := ModuleCdc.MarshalJSON(msg)
+	b, err := ModuleCdc.MarshalJSON(&msg)
 	if err != nil {
 		panic(err)
 	}
@@ -185,7 +185,7 @@ func (msg MsgEditToken) ValidateBasic() error {
 
 // GetSignBytes implements Msg
 func (msg MsgEditToken) GetSignBytes() []byte {
-	b, err := ModuleCdc.MarshalJSON(msg)
+	b, err := ModuleCdc.MarshalJSON(&msg)
 	if err != nil {
 		panic(err)
 	}
@@ -218,7 +218,7 @@ func (msg MsgMintToken) Type() string { return TypeMsgMintToken }
 
 // GetSignBytes implements Msg
 func (msg MsgMintToken) GetSignBytes() []byte {
-	b, err := ModuleCdc.MarshalJSON(msg)
+	b, err := ModuleCdc.MarshalJSON(&msg)
 	if err != nil {
 		panic(err)
 	}
